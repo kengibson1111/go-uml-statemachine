@@ -179,7 +179,7 @@ func (v *PlantUMLValidator) validateProductReference(ref models.Reference, sm *m
 	// Check for self-reference
 	if ref.Name == sm.Name && ref.Version == sm.Version {
 		result.AddError("SELF_REFERENCE",
-			fmt.Sprintf("State machine cannot reference itself"), 1, 1)
+			"State machine cannot reference itself", 1, 1)
 		return
 	}
 

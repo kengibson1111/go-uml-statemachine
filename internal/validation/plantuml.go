@@ -595,34 +595,65 @@ func (v *PlantUMLValidator) isKnownPlantUMLConstruct(line string) bool {
 func (v *PlantUMLValidator) applyStrictnessFiltering(result *models.ValidationResult, strictness models.ValidationStrictness) {
 	switch strictness {
 	case models.StrictnessProducts:
-		// For products, convert errors to warnings (except critical structural errors)
+		// For products, convert non-critical errors to warnings
+		// This allows products to have minor issues but still be valid
 		var criticalErrors []models.ValidationError
+		var convertedWarnings []models.ValidationWarning
+
 		for _, err := range result.Errors {
 			if v.isCriticalError(err.Code) {
+				// Keep critical errors as errors
 				criticalErrors = append(criticalErrors, err)
 			} else {
-				// Convert to warning
-				result.AddWarning(err.Code, err.Message, err.Line, err.Column)
+				// Convert non-critical errors to warnings
+				warning := models.ValidationWarning{
+					Code:    err.Code,
+					Message: fmt.Sprintf("(Converted from error) %s", err.Message),
+					Line:    err.Line,
+					Column:  err.Column,
+					Context: err.Context,
+				}
+				convertedWarnings = append(convertedWarnings, warning)
 			}
 		}
+
+		// Update result with filtered errors and additional warnings
 		result.Errors = criticalErrors
+		result.Warnings = append(result.Warnings, convertedWarnings...)
 		result.IsValid = len(criticalErrors) == 0
 
 	case models.StrictnessInProgress:
-		// For in-progress, keep all errors and warnings
+		// For in-progress, keep all errors and warnings as-is
+		// This provides the strictest validation for development
+		result.IsValid = len(result.Errors) == 0
+
+	default:
+		// Default to in-progress behavior for unknown strictness levels
 		result.IsValid = len(result.Errors) == 0
 	}
 }
 
 // isCriticalError determines if an error is critical and should not be converted to warning
+// Critical errors are structural issues that make the PlantUML invalid regardless of deployment stage
 func (v *PlantUMLValidator) isCriticalError(code string) bool {
 	criticalErrors := map[string]bool{
+		// PlantUML structural errors - these make the diagram unparseable
 		"MISSING_START":   true,
 		"MISSING_END":     true,
 		"DUPLICATE_START": true,
 		"DUPLICATE_END":   true,
 		"INVALID_ORDER":   true,
 		"NO_STATES":       true,
+
+		// Reference errors that break functionality
+		"SELF_REFERENCE":            true,
+		"DIRECT_CIRCULAR_REFERENCE": true,
+		"CIRCULAR_REFERENCE":        true,
+		"REFERENCE_PARSE_ERROR":     true,
+
+		// Critical reference validation errors
+		"NESTED_SELF_REFERENCE":  true,
+		"UNKNOWN_REFERENCE_TYPE": true,
 	}
 
 	return criticalErrors[code]

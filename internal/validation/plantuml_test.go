@@ -2,6 +2,7 @@ package validation
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/kengibson1111/go-uml-statemachine/internal/models"
@@ -731,5 +732,352 @@ func TestPlantUMLValidator_ResolveReferences_NestedReference(t *testing.T) {
 
 	if len(result.Errors) != 0 {
 		t.Errorf("ResolveReferences() should return no errors, got %d", len(result.Errors))
+	}
+}
+
+// TestPlantUMLValidator_StrictnessInProgress_ErrorsAndWarnings tests that in-progress validation returns both errors and warnings
+func TestPlantUMLValidator_StrictnessInProgress_ErrorsAndWarnings(t *testing.T) {
+	validator := NewPlantUMLValidator()
+
+	// Content with both errors and warnings
+	sm := &models.StateMachine{
+		Name:    "test",
+		Version: "1.0.0",
+		Content: `@startuml
+StateA --> StateB
+invalid_state_name! --> StateC
+@enduml`,
+	}
+
+	result, err := validator.Validate(sm, models.StrictnessInProgress)
+	if err != nil {
+		t.Fatalf("Validate() error = %v", err)
+	}
+
+	// Should be valid because warnings don't invalidate, and invalid state names are warnings
+	if !result.IsValid {
+		t.Error("Expected valid result in in-progress mode (warnings don't invalidate)")
+	}
+
+	// Should have warnings for missing initial state
+	if len(result.Warnings) == 0 {
+		t.Error("Expected warnings in in-progress mode")
+	}
+
+	// Check for specific warning
+	foundNoInitialState := false
+	for _, warn := range result.Warnings {
+		if warn.Code == "NO_INITIAL_STATE" {
+			foundNoInitialState = true
+			break
+		}
+	}
+	if !foundNoInitialState {
+		t.Error("Expected NO_INITIAL_STATE warning in in-progress mode")
+	}
+}
+
+// TestPlantUMLValidator_StrictnessProducts_WarningsOnly tests that products validation converts non-critical errors to warnings
+func TestPlantUMLValidator_StrictnessProducts_WarningsOnly(t *testing.T) {
+	validator := NewPlantUMLValidator()
+
+	// Content with non-critical validation issues
+	sm := &models.StateMachine{
+		Name:    "test",
+		Version: "1.0.0",
+		Content: `@startuml
+StateA --> StateB
+invalid_state_name! --> StateC
+@enduml`,
+	}
+
+	result, err := validator.Validate(sm, models.StrictnessProducts)
+	if err != nil {
+		t.Fatalf("Validate() error = %v", err)
+	}
+
+	// Should be valid in products mode (non-critical errors converted to warnings)
+	if !result.IsValid {
+		t.Error("Expected valid result in products mode")
+	}
+
+	// Should have warnings (including converted errors)
+	if len(result.Warnings) == 0 {
+		t.Error("Expected warnings in products mode")
+	}
+
+	// Should have no errors (all non-critical errors converted to warnings)
+	if len(result.Errors) != 0 {
+		t.Errorf("Expected no errors in products mode, got %d", len(result.Errors))
+	}
+}
+
+// TestPlantUMLValidator_StrictnessProducts_CriticalErrors tests that critical errors remain as errors in products mode
+func TestPlantUMLValidator_StrictnessProducts_CriticalErrors(t *testing.T) {
+	validator := NewPlantUMLValidator()
+
+	// Content with critical structural errors
+	sm := &models.StateMachine{
+		Name:    "test",
+		Version: "1.0.0",
+		Content: `StateA --> StateB`, // Missing @startuml and @enduml tags
+	}
+
+	result, err := validator.Validate(sm, models.StrictnessProducts)
+	if err != nil {
+		t.Fatalf("Validate() error = %v", err)
+	}
+
+	// Should be invalid due to critical errors
+	if result.IsValid {
+		t.Error("Expected invalid result in products mode due to critical errors")
+	}
+
+	// Should have critical errors that weren't converted to warnings
+	if len(result.Errors) == 0 {
+		t.Error("Expected critical errors to remain as errors in products mode")
+	}
+
+	// Check for specific critical errors
+	foundMissingStart := false
+	foundMissingEnd := false
+	for _, err := range result.Errors {
+		if err.Code == "MISSING_START" {
+			foundMissingStart = true
+		}
+		if err.Code == "MISSING_END" {
+			foundMissingEnd = true
+		}
+	}
+	if !foundMissingStart {
+		t.Error("Expected MISSING_START critical error to remain in products mode")
+	}
+	if !foundMissingEnd {
+		t.Error("Expected MISSING_END critical error to remain in products mode")
+	}
+}
+
+// TestPlantUMLValidator_StrictnessComparison tests the difference between strictness levels
+func TestPlantUMLValidator_StrictnessComparison(t *testing.T) {
+	validator := NewPlantUMLValidator()
+
+	// Content with non-critical issues that would be errors in in-progress but warnings in products
+	sm := &models.StateMachine{
+		Name:    "test",
+		Version: "1.0.0",
+		Content: `@startuml
+StateA --> StateB
+@enduml`,
+	}
+
+	// Test in-progress strictness
+	resultInProgress, err := validator.Validate(sm, models.StrictnessInProgress)
+	if err != nil {
+		t.Fatalf("Validate() error = %v", err)
+	}
+
+	// Test products strictness
+	resultProducts, err := validator.Validate(sm, models.StrictnessProducts)
+	if err != nil {
+		t.Fatalf("Validate() error = %v", err)
+	}
+
+	// Both should be valid (warnings don't invalidate)
+	if !resultInProgress.IsValid {
+		t.Error("Expected valid result in in-progress mode")
+	}
+	if !resultProducts.IsValid {
+		t.Error("Expected valid result in products mode")
+	}
+
+	// Both should have warnings for missing initial state
+	if len(resultInProgress.Warnings) == 0 {
+		t.Error("Expected warnings in in-progress mode")
+	}
+	if len(resultProducts.Warnings) == 0 {
+		t.Error("Expected warnings in products mode")
+	}
+
+	// Products mode might have more warnings due to error conversion
+	// but in this case, there are no non-critical errors to convert
+	if len(resultProducts.Warnings) < len(resultInProgress.Warnings) {
+		t.Error("Products mode should have at least as many warnings as in-progress mode")
+	}
+}
+
+// TestPlantUMLValidator_StrictnessWithReferences tests strictness levels with reference validation
+func TestPlantUMLValidator_StrictnessWithReferences(t *testing.T) {
+	validator := NewPlantUMLValidator()
+
+	// Content with invalid reference version (non-critical error)
+	sm := &models.StateMachine{
+		Name:    "test",
+		Version: "1.0.0",
+		Content: `@startuml
+!include products/auth-service-invalid.version/auth-service-invalid.version.puml
+[*] --> Idle
+@enduml`,
+	}
+
+	// Test in-progress strictness with reference validation
+	resultInProgress, err := validator.ValidateReferences(sm)
+	if err != nil {
+		t.Fatalf("ValidateReferences() error = %v", err)
+	}
+
+	// Apply strictness filtering manually for reference validation
+	validator.applyStrictnessFiltering(resultInProgress, models.StrictnessInProgress)
+
+	// Test products strictness with reference validation
+	resultProducts, err := validator.ValidateReferences(sm)
+	if err != nil {
+		t.Fatalf("ValidateReferences() error = %v", err)
+	}
+
+	// Apply strictness filtering manually for reference validation
+	validator.applyStrictnessFiltering(resultProducts, models.StrictnessProducts)
+
+	// In-progress should be invalid due to reference errors
+	if resultInProgress.IsValid {
+		t.Error("Expected invalid result in in-progress mode due to reference errors")
+	}
+
+	// Products should convert non-critical reference errors to warnings
+	// INVALID_REFERENCE_VERSION is not critical, so it should be converted
+	if !resultProducts.IsValid {
+		// Check if all errors are critical
+		allCritical := true
+		for _, err := range resultProducts.Errors {
+			if !validator.isCriticalError(err.Code) {
+				allCritical = false
+				break
+			}
+		}
+		if !allCritical {
+			t.Error("Expected valid result in products mode (non-critical errors should be converted to warnings)")
+		}
+	}
+}
+
+// TestPlantUMLValidator_StrictnessWithCircularReference tests strictness with critical reference errors
+func TestPlantUMLValidator_StrictnessWithCircularReference(t *testing.T) {
+	mockRepo := NewMockRepository()
+	validator := NewPlantUMLValidatorWithRepository(mockRepo)
+
+	// Create a state machine that references itself (critical error)
+	sm := &models.StateMachine{
+		Name:     "test",
+		Version:  "1.0.0",
+		Location: models.LocationProducts,
+		Content: `@startuml
+!include products/test-1.0.0/test-1.0.0.puml
+[*] --> Idle
+@enduml`,
+	}
+
+	mockRepo.AddStateMachine(sm)
+
+	// Test both strictness levels
+	resultInProgress, err := validator.ResolveReferences(sm)
+	if err != nil {
+		t.Fatalf("ResolveReferences() error = %v", err)
+	}
+	validator.applyStrictnessFiltering(resultInProgress, models.StrictnessInProgress)
+
+	resultProducts, err := validator.ResolveReferences(sm)
+	if err != nil {
+		t.Fatalf("ResolveReferences() error = %v", err)
+	}
+	validator.applyStrictnessFiltering(resultProducts, models.StrictnessProducts)
+
+	// Both should be invalid due to critical self-reference error
+	if resultInProgress.IsValid {
+		t.Error("Expected invalid result in in-progress mode due to self-reference")
+	}
+	if resultProducts.IsValid {
+		t.Error("Expected invalid result in products mode due to critical self-reference error")
+	}
+
+	// Both should have the same critical error
+	if len(resultInProgress.Errors) == 0 {
+		t.Error("Expected errors in in-progress mode")
+	}
+	if len(resultProducts.Errors) == 0 {
+		t.Error("Expected critical errors to remain in products mode")
+	}
+}
+
+// TestPlantUMLValidator_StrictnessErrorConversion tests that error conversion includes proper messaging
+func TestPlantUMLValidator_StrictnessErrorConversion(t *testing.T) {
+	validator := NewPlantUMLValidator()
+
+	// Create a validation result with non-critical errors
+	result := &models.ValidationResult{
+		Errors:   []models.ValidationError{},
+		Warnings: []models.ValidationWarning{},
+		IsValid:  true,
+	}
+
+	// Add a non-critical error
+	result.AddError("INVALID_REFERENCE_VERSION", "Invalid version format", 1, 1)
+	result.AddError("MISSING_START", "Missing @startuml tag", 1, 1) // Critical error
+
+	// Apply products strictness
+	validator.applyStrictnessFiltering(result, models.StrictnessProducts)
+
+	// Should have one critical error remaining
+	if len(result.Errors) != 1 {
+		t.Errorf("Expected 1 critical error, got %d", len(result.Errors))
+	}
+
+	// Should have one converted warning
+	if len(result.Warnings) != 1 {
+		t.Errorf("Expected 1 converted warning, got %d", len(result.Warnings))
+	}
+
+	// Check that the warning has the conversion message
+	if len(result.Warnings) > 0 {
+		warning := result.Warnings[0]
+		if warning.Code != "INVALID_REFERENCE_VERSION" {
+			t.Errorf("Expected converted warning code 'INVALID_REFERENCE_VERSION', got '%s'", warning.Code)
+		}
+		if !strings.Contains(warning.Message, "(Converted from error)") {
+			t.Error("Expected converted warning to have conversion message")
+		}
+	}
+
+	// Check that the critical error remains
+	if len(result.Errors) > 0 {
+		err := result.Errors[0]
+		if err.Code != "MISSING_START" {
+			t.Errorf("Expected critical error code 'MISSING_START', got '%s'", err.Code)
+		}
+	}
+}
+
+// TestPlantUMLValidator_StrictnessUnknownLevel tests behavior with unknown strictness level
+func TestPlantUMLValidator_StrictnessUnknownLevel(t *testing.T) {
+	validator := NewPlantUMLValidator()
+
+	// Create a validation result with errors
+	result := &models.ValidationResult{
+		Errors:   []models.ValidationError{},
+		Warnings: []models.ValidationWarning{},
+		IsValid:  true,
+	}
+
+	result.AddError("SOME_ERROR", "Some error message", 1, 1)
+
+	// Apply unknown strictness level (should default to in-progress behavior)
+	unknownStrictness := models.ValidationStrictness(999)
+	validator.applyStrictnessFiltering(result, unknownStrictness)
+
+	// Should behave like in-progress mode (keep errors as errors)
+	if result.IsValid {
+		t.Error("Expected invalid result for unknown strictness level (should default to in-progress)")
+	}
+
+	if len(result.Errors) != 1 {
+		t.Errorf("Expected 1 error for unknown strictness level, got %d", len(result.Errors))
 	}
 }

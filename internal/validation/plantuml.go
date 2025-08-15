@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -8,11 +9,20 @@ import (
 )
 
 // PlantUMLValidator implements the Validator interface for PlantUML syntax validation
-type PlantUMLValidator struct{}
+type PlantUMLValidator struct {
+	repository models.Repository // Optional repository for reference resolution
+}
 
 // NewPlantUMLValidator creates a new PlantUML validator instance
 func NewPlantUMLValidator() *PlantUMLValidator {
 	return &PlantUMLValidator{}
+}
+
+// NewPlantUMLValidatorWithRepository creates a new PlantUML validator instance with repository for reference resolution
+func NewPlantUMLValidatorWithRepository(repo models.Repository) *PlantUMLValidator {
+	return &PlantUMLValidator{
+		repository: repo,
+	}
 }
 
 // Validate validates a state machine according to the specified strictness level
@@ -35,14 +45,329 @@ func (v *PlantUMLValidator) Validate(sm *models.StateMachine, strictness models.
 	return result, nil
 }
 
-// ValidateReferences validates references in a state machine (placeholder for now)
+// ValidateReferences validates references in a state machine
 func (v *PlantUMLValidator) ValidateReferences(sm *models.StateMachine) (*models.ValidationResult, error) {
-	// This will be implemented in task 6.2
-	return &models.ValidationResult{
+	result := &models.ValidationResult{
 		Errors:   []models.ValidationError{},
 		Warnings: []models.ValidationWarning{},
 		IsValid:  true,
-	}, nil
+	}
+
+	// Parse references from PlantUML content
+	references, err := v.parseReferences(sm.Content)
+	if err != nil {
+		result.AddError("REFERENCE_PARSE_ERROR", "Failed to parse references from content", 1, 1)
+		return result, nil
+	}
+
+	// Update the state machine with parsed references
+	sm.References = references
+
+	// Validate each reference
+	for _, ref := range references {
+		v.validateReference(ref, sm, result)
+	}
+
+	return result, nil
+}
+
+// parseReferences extracts references from PlantUML content
+func (v *PlantUMLValidator) parseReferences(content string) ([]models.Reference, error) {
+	var references []models.Reference
+	lines := strings.Split(content, "\n")
+
+	// Regular expressions for different reference patterns
+	// Product references: !include products/{name}-{version}/{name}-{version}.puml
+	productRefRegex := regexp.MustCompile(`!include\s+products/([a-zA-Z_][a-zA-Z0-9_-]*)-([a-zA-Z0-9_.-]+)/([a-zA-Z_][a-zA-Z0-9_-]*)-([a-zA-Z0-9_.-]+)\.puml`)
+
+	// Nested references: !include nested/{name}/{name}.puml
+	nestedRefRegex := regexp.MustCompile(`!include\s+nested/([a-zA-Z_][a-zA-Z0-9_-]*)/([a-zA-Z_][a-zA-Z0-9_-]*)\.puml`)
+
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+
+		// Check for product references
+		if matches := productRefRegex.FindStringSubmatch(trimmedLine); matches != nil {
+			if len(matches) >= 5 {
+				dirName := matches[1]
+				dirVersion := matches[2]
+				fileName := matches[3]
+				fileVersion := matches[4]
+
+				// Validate that directory name matches file name and versions match
+				if dirName == fileName && dirVersion == fileVersion {
+					reference := models.Reference{
+						Name:    dirName,
+						Version: dirVersion,
+						Type:    models.ReferenceTypeProduct,
+						Path:    fmt.Sprintf("products/%s-%s/%s-%s.puml", dirName, dirVersion, fileName, fileVersion),
+					}
+					references = append(references, reference)
+				}
+			}
+		}
+
+		// Check for nested references
+		if matches := nestedRefRegex.FindStringSubmatch(trimmedLine); matches != nil {
+			if len(matches) >= 3 {
+				dirName := matches[1]
+				fileName := matches[2]
+
+				// Validate that directory name matches file name
+				if dirName == fileName {
+					reference := models.Reference{
+						Name:    dirName,
+						Version: "", // Nested references don't have versions
+						Type:    models.ReferenceTypeNested,
+						Path:    fmt.Sprintf("nested/%s/%s.puml", dirName, fileName),
+					}
+					references = append(references, reference)
+				}
+			}
+		}
+
+		// Check for invalid reference patterns and warn
+		if strings.Contains(trimmedLine, "!include") && !productRefRegex.MatchString(trimmedLine) && !nestedRefRegex.MatchString(trimmedLine) {
+			// This might be an invalid reference pattern
+			if strings.Contains(trimmedLine, ".puml") {
+				// Log this as a potential issue but don't fail validation
+				continue
+			}
+		}
+	}
+
+	return references, nil
+}
+
+// validateReference validates a single reference
+func (v *PlantUMLValidator) validateReference(ref models.Reference, sm *models.StateMachine, result *models.ValidationResult) {
+	// Validate reference name
+	if !v.isValidStateName(ref.Name) {
+		result.AddError("INVALID_REFERENCE_NAME",
+			fmt.Sprintf("Reference name '%s' is invalid", ref.Name), 1, 1)
+		return
+	}
+
+	// Validate reference type and structure
+	switch ref.Type {
+	case models.ReferenceTypeProduct:
+		v.validateProductReference(ref, sm, result)
+	case models.ReferenceTypeNested:
+		v.validateNestedReference(ref, sm, result)
+	default:
+		result.AddError("UNKNOWN_REFERENCE_TYPE",
+			fmt.Sprintf("Unknown reference type for '%s'", ref.Name), 1, 1)
+	}
+}
+
+// validateProductReference validates a product reference
+func (v *PlantUMLValidator) validateProductReference(ref models.Reference, sm *models.StateMachine, result *models.ValidationResult) {
+	// Product references must have a version
+	if ref.Version == "" {
+		result.AddError("MISSING_REFERENCE_VERSION",
+			fmt.Sprintf("Product reference '%s' must have a version", ref.Name), 1, 1)
+		return
+	}
+
+	// Validate version format (basic semantic versioning check)
+	if !v.isValidVersion(ref.Version) {
+		result.AddError("INVALID_REFERENCE_VERSION",
+			fmt.Sprintf("Product reference '%s' has invalid version '%s'", ref.Name, ref.Version), 1, 1)
+		return
+	}
+
+	// Check for self-reference
+	if ref.Name == sm.Name && ref.Version == sm.Version {
+		result.AddError("SELF_REFERENCE",
+			fmt.Sprintf("State machine cannot reference itself"), 1, 1)
+		return
+	}
+
+	// Validate path format
+	expectedPath := fmt.Sprintf("products/%s-%s/%s-%s.puml", ref.Name, ref.Version, ref.Name, ref.Version)
+	if ref.Path != expectedPath {
+		result.AddWarning("INCORRECT_REFERENCE_PATH",
+			fmt.Sprintf("Reference path '%s' should be '%s'", ref.Path, expectedPath), 1, 1)
+	}
+}
+
+// validateNestedReference validates a nested reference
+func (v *PlantUMLValidator) validateNestedReference(ref models.Reference, sm *models.StateMachine, result *models.ValidationResult) {
+	// Nested references should not have a version
+	if ref.Version != "" {
+		result.AddWarning("UNEXPECTED_NESTED_VERSION",
+			fmt.Sprintf("Nested reference '%s' should not have a version", ref.Name), 1, 1)
+	}
+
+	// Check for self-reference (nested can't reference the parent)
+	if ref.Name == sm.Name {
+		result.AddError("NESTED_SELF_REFERENCE",
+			fmt.Sprintf("Nested state machine cannot reference parent '%s'", ref.Name), 1, 1)
+		return
+	}
+
+	// Validate path format
+	expectedPath := fmt.Sprintf("nested/%s/%s.puml", ref.Name, ref.Name)
+	if ref.Path != expectedPath {
+		result.AddWarning("INCORRECT_NESTED_PATH",
+			fmt.Sprintf("Nested reference path '%s' should be '%s'", ref.Path, expectedPath), 1, 1)
+	}
+}
+
+// isValidVersion checks if a version string follows semantic versioning
+func (v *PlantUMLValidator) isValidVersion(version string) bool {
+	// Basic semantic versioning pattern: major.minor.patch[-prerelease]
+	versionRegex := regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9_.-]+)?$`)
+	return versionRegex.MatchString(version)
+}
+
+// ResolveReferences resolves and validates reference accessibility
+func (v *PlantUMLValidator) ResolveReferences(sm *models.StateMachine) (*models.ValidationResult, error) {
+	result := &models.ValidationResult{
+		Errors:   []models.ValidationError{},
+		Warnings: []models.ValidationWarning{},
+		IsValid:  true,
+	}
+
+	// If no repository is available, we can't resolve references
+	if v.repository == nil {
+		result.AddWarning("NO_REPOSITORY", "Cannot resolve references without repository", 1, 1)
+		return result, nil
+	}
+
+	// First parse references if not already done
+	if len(sm.References) == 0 {
+		references, err := v.parseReferences(sm.Content)
+		if err != nil {
+			result.AddError("REFERENCE_PARSE_ERROR", "Failed to parse references from content", 1, 1)
+			return result, nil
+		}
+		sm.References = references
+	}
+
+	// Resolve each reference
+	for _, ref := range sm.References {
+		v.resolveReference(ref, sm, result)
+	}
+
+	return result, nil
+}
+
+// resolveReference resolves a single reference and checks its accessibility
+func (v *PlantUMLValidator) resolveReference(ref models.Reference, sm *models.StateMachine, result *models.ValidationResult) {
+	var targetLocation models.Location
+	var checkVersion string
+
+	// Determine target location and version based on reference type
+	switch ref.Type {
+	case models.ReferenceTypeProduct:
+		targetLocation = models.LocationProducts
+		checkVersion = ref.Version
+	case models.ReferenceTypeNested:
+		// For nested references, we need to check within the same parent directory
+		// This is more complex as nested references are relative to the current state machine
+		targetLocation = models.LocationNested
+		checkVersion = "" // Nested references don't have versions
+	default:
+		result.AddError("UNKNOWN_REFERENCE_TYPE",
+			fmt.Sprintf("Cannot resolve unknown reference type for '%s'", ref.Name), 1, 1)
+		return
+	}
+
+	// Check if the referenced state machine exists
+	exists, err := v.repository.Exists(ref.Name, checkVersion, targetLocation)
+	if err != nil {
+		result.AddWarning("REFERENCE_CHECK_ERROR",
+			fmt.Sprintf("Failed to check existence of reference '%s': %v", ref.Name, err), 1, 1)
+		return
+	}
+
+	if !exists {
+		// For nested references, the error is more critical since they should be in the same directory structure
+		if ref.Type == models.ReferenceTypeNested {
+			result.AddError("NESTED_REFERENCE_NOT_FOUND",
+				fmt.Sprintf("Nested reference '%s' not found", ref.Name), 1, 1)
+		} else {
+			result.AddError("PRODUCT_REFERENCE_NOT_FOUND",
+				fmt.Sprintf("Product reference '%s-%s' not found", ref.Name, ref.Version), 1, 1)
+		}
+		return
+	}
+
+	// Try to read the referenced state machine to ensure it's accessible
+	referencedSM, err := v.repository.ReadStateMachine(ref.Name, checkVersion, targetLocation)
+	if err != nil {
+		result.AddWarning("REFERENCE_READ_ERROR",
+			fmt.Sprintf("Referenced state machine '%s' exists but cannot be read: %v", ref.Name, err), 1, 1)
+		return
+	}
+
+	// Additional validation: check for circular references
+	v.checkCircularReference(ref, referencedSM, sm, result, make(map[string]bool))
+}
+
+// checkCircularReference detects circular references between state machines
+func (v *PlantUMLValidator) checkCircularReference(ref models.Reference, referencedSM *models.StateMachine, originalSM *models.StateMachine, result *models.ValidationResult, visited map[string]bool) {
+	// Create a unique key for the referenced state machine
+	refKey := fmt.Sprintf("%s-%s-%s", referencedSM.Name, referencedSM.Version, referencedSM.Location.String())
+	originalKey := fmt.Sprintf("%s-%s-%s", originalSM.Name, originalSM.Version, originalSM.Location.String())
+
+	// Check if we've already visited this reference (circular reference detected)
+	if visited[refKey] {
+		result.AddError("CIRCULAR_REFERENCE",
+			fmt.Sprintf("Circular reference detected: '%s' references '%s'", originalSM.Name, ref.Name), 1, 1)
+		return
+	}
+
+	// Check if the referenced state machine references back to the original
+	if refKey == originalKey {
+		result.AddError("DIRECT_CIRCULAR_REFERENCE",
+			fmt.Sprintf("Direct circular reference: '%s' references itself", ref.Name), 1, 1)
+		return
+	}
+
+	// Mark this reference as visited
+	visited[refKey] = true
+
+	// Parse references from the referenced state machine if not already done
+	if len(referencedSM.References) == 0 {
+		references, err := v.parseReferences(referencedSM.Content)
+		if err != nil {
+			// Can't check further, but don't fail validation for this
+			return
+		}
+		referencedSM.References = references
+	}
+
+	// Check each reference in the referenced state machine
+	for _, nestedRef := range referencedSM.References {
+		// Only check if we can resolve the nested reference
+		var targetLocation models.Location
+		var checkVersion string
+
+		switch nestedRef.Type {
+		case models.ReferenceTypeProduct:
+			targetLocation = models.LocationProducts
+			checkVersion = nestedRef.Version
+		case models.ReferenceTypeNested:
+			targetLocation = models.LocationNested
+			checkVersion = ""
+		default:
+			continue // Skip unknown reference types
+		}
+
+		// Try to read the nested referenced state machine
+		nestedReferencedSM, err := v.repository.ReadStateMachine(nestedRef.Name, checkVersion, targetLocation)
+		if err != nil {
+			continue // Skip if we can't read it
+		}
+
+		// Recursively check for circular references
+		v.checkCircularReference(nestedRef, nestedReferencedSM, originalSM, result, visited)
+	}
+
+	// Remove from visited when we're done with this branch
+	delete(visited, refKey)
 }
 
 // validatePlantUMLStructure validates the basic PlantUML start/end tags

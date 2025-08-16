@@ -26,6 +26,7 @@ go.work.sum
 
 # env file
 .env
+.go-uml-statemachine/
 
 # Editor/IDE
 # .idea/

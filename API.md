@@ -1,0 +1,592 @@
+# Go UML State Machine API Documentation
+
+This document provides comprehensive API documentation for the Go UML State Machine module.
+
+## Package Overview
+
+The `statemachine` package provides functionality for managing UML state machine diagrams in PlantUML format with structured file organization, versioning, validation, and cross-references.
+
+```go
+import "github.com/kengibson1111/go-uml-statemachine"
+```
+
+## Core Types
+
+### StateMachine
+
+Represents a UML state machine with its metadata and content.
+
+```go
+type StateMachine struct {
+    Name       string      // State machine name
+    Version    string      // Semantic version (e.g., "1.0.0")
+    Content    string      // PlantUML content
+    References []Reference // References to other state machines
+    Location   Location    // Storage location
+    Metadata   Metadata    // Additional metadata
+}
+```
+
+### Location
+
+Indicates where the state machine is stored.
+
+```go
+type Location int
+
+const (
+    LocationInProgress Location = iota // Development/testing phase
+    LocationProducts                   // Production-ready
+    LocationNested                     // Nested within another state machine
+)
+```
+
+### Reference
+
+Represents a reference to another state machine.
+
+```go
+type Reference struct {
+    Name    string        // Referenced state machine name
+    Version string        // Version (empty for nested references)
+    Type    ReferenceType // Type of reference
+    Path    string        // Resolved file path
+}
+```
+
+### ReferenceType
+
+Indicates the type of reference between state machines.
+
+```go
+type ReferenceType int
+
+const (
+    ReferenceTypeProduct ReferenceType = iota // Reference to products directory
+    ReferenceTypeNested                       // Reference to nested state machine
+)
+```
+
+### ValidationResult
+
+Contains the outcome of state machine validation.
+
+```go
+type ValidationResult struct {
+    Errors   []ValidationError   // Blocking validation errors
+    Warnings []ValidationWarning // Non-blocking warnings
+    IsValid  bool               // Overall validation status
+}
+
+// HasErrors returns true if there are any validation errors
+func (vr *ValidationResult) HasErrors() bool
+```
+
+### ValidationStrictness
+
+Defines the level of validation strictness.
+
+```go
+type ValidationStrictness int
+
+const (
+    StrictnessInProgress ValidationStrictness = iota // Strict validation (errors + warnings)
+    StrictnessProducts                               // Lenient validation (warnings only)
+)
+```
+
+### Config
+
+Represents the configuration for the state machine system.
+
+```go
+type Config struct {
+    RootDirectory      string               // Root directory (default: ".go-uml-statemachine")
+    ValidationLevel    ValidationStrictness // Default validation level
+    BackupEnabled      bool                 // Whether to create backups
+    MaxFileSize        int64                // Maximum file size in bytes
+    EnableDebugLogging bool                 // Whether to enable debug logging
+}
+```
+
+## Service Interface
+
+### StateMachineService
+
+The main interface for state machine operations.
+
+```go
+type StateMachineService interface {
+    // CRUD operations
+    Create(name, version string, content string, location Location) (*StateMachine, error)
+    Read(name, version string, location Location) (*StateMachine, error)
+    Update(sm *StateMachine) error
+    Delete(name, version string, location Location) error
+
+    // Business operations
+    Promote(name, version string) error
+    Validate(name, version string, location Location) (*ValidationResult, error)
+    ListAll(location Location) ([]StateMachine, error)
+
+    // Reference operations
+    ResolveReferences(sm *StateMachine) error
+}
+```
+
+## Factory Functions
+
+### NewService
+
+Creates a new StateMachineService with default configuration.
+
+```go
+func NewService() (StateMachineService, error)
+```
+
+**Example:**
+```go
+svc, err := statemachine.NewService()
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+### NewServiceWithConfig
+
+Creates a new StateMachineService with custom configuration.
+
+```go
+func NewServiceWithConfig(config *Config) (StateMachineService, error)
+```
+
+**Parameters:**
+- `config`: Configuration settings. If nil, default configuration is used.
+
+**Example:**
+```go
+config := &statemachine.Config{
+    RootDirectory:      "custom-directory",
+    EnableDebugLogging: true,
+    MaxFileSize:        2 * 1024 * 1024, // 2MB
+}
+svc, err := statemachine.NewServiceWithConfig(config)
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+### NewServiceFromEnv
+
+Creates a new StateMachineService with configuration from environment variables.
+
+```go
+func NewServiceFromEnv() (StateMachineService, error)
+```
+
+**Environment Variables:**
+- `GO_UML_ROOT_DIRECTORY`: Root directory for state machines
+- `GO_UML_VALIDATION_LEVEL`: Validation level ("in-progress" or "products")
+- `GO_UML_BACKUP_ENABLED`: Enable backups ("true" or "false")
+- `GO_UML_MAX_FILE_SIZE`: Maximum file size in bytes
+- `GO_UML_DEBUG_LOGGING`: Enable debug logging ("true" or "false")
+
+**Example:**
+```go
+os.Setenv("GO_UML_ROOT_DIRECTORY", "my-state-machines")
+os.Setenv("GO_UML_DEBUG_LOGGING", "true")
+
+svc, err := statemachine.NewServiceFromEnv()
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+## Configuration Functions
+
+### DefaultConfig
+
+Returns a configuration with default values.
+
+```go
+func DefaultConfig() *Config
+```
+
+**Default Values:**
+- RootDirectory: ".go-uml-statemachine"
+- ValidationLevel: StrictnessInProgress
+- BackupEnabled: false
+- MaxFileSize: 1MB
+- EnableDebugLogging: false
+
+### LoadConfigFromEnv
+
+Loads configuration from environment variables.
+
+```go
+func LoadConfigFromEnv() *Config
+```
+
+## Service Operations
+
+### CRUD Operations
+
+#### Create
+
+Creates a new state machine with the specified parameters.
+
+```go
+Create(name, version string, content string, location Location) (*StateMachine, error)
+```
+
+**Parameters:**
+- `name`: State machine name (must be non-empty)
+- `version`: Semantic version (must be non-empty)
+- `content`: PlantUML content (must be non-empty)
+- `location`: Storage location
+
+**Returns:**
+- `*StateMachine`: Created state machine
+- `error`: Error if creation fails
+
+**Errors:**
+- Validation error if parameters are empty
+- Directory conflict if state machine already exists
+- File system error if write operation fails
+
+**Example:**
+```go
+content := `@startuml
+[*] --> Idle
+Idle --> Active : start()
+Active --> Idle : stop()
+@enduml`
+
+sm, err := svc.Create("my-machine", "1.0.0", content, statemachine.LocationInProgress)
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+#### Read
+
+Retrieves a state machine by name, version, and location.
+
+```go
+Read(name, version string, location Location) (*StateMachine, error)
+```
+
+**Parameters:**
+- `name`: State machine name
+- `version`: State machine version
+- `location`: Storage location
+
+**Returns:**
+- `*StateMachine`: Retrieved state machine
+- `error`: Error if read fails
+
+**Errors:**
+- Validation error if parameters are empty
+- File not found error if state machine doesn't exist
+
+**Example:**
+```go
+sm, err := svc.Read("my-machine", "1.0.0", statemachine.LocationInProgress)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Content: %s\n", sm.Content)
+```
+
+#### Update
+
+Modifies an existing state machine.
+
+```go
+Update(sm *StateMachine) error
+```
+
+**Parameters:**
+- `sm`: State machine to update (must not be nil)
+
+**Returns:**
+- `error`: Error if update fails
+
+**Errors:**
+- Validation error if state machine is nil or has empty fields
+- File not found error if state machine doesn't exist
+- File system error if write operation fails
+
+**Example:**
+```go
+sm.Content = updatedPlantUMLContent
+err := svc.Update(sm)
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+#### Delete
+
+Removes a state machine by name, version, and location.
+
+```go
+Delete(name, version string, location Location) error
+```
+
+**Parameters:**
+- `name`: State machine name
+- `version`: State machine version
+- `location`: Storage location
+
+**Returns:**
+- `error`: Error if deletion fails
+
+**Errors:**
+- Validation error if parameters are empty
+- File not found error if state machine doesn't exist
+- File system error if delete operation fails
+
+**Example:**
+```go
+err := svc.Delete("my-machine", "1.0.0", statemachine.LocationInProgress)
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+### Business Operations
+
+#### Promote
+
+Moves a state machine from in-progress to products with validation.
+
+```go
+Promote(name, version string) error
+```
+
+**Parameters:**
+- `name`: State machine name
+- `version`: State machine version
+
+**Returns:**
+- `error`: Error if promotion fails
+
+**Process:**
+1. Validates state machine exists in in-progress
+2. Checks for conflicts in products directory
+3. Validates state machine content
+4. Performs atomic move operation
+5. Includes rollback capability on failure
+
+**Errors:**
+- Validation error if parameters are empty
+- File not found error if state machine doesn't exist in in-progress
+- Directory conflict error if same name exists in products
+- Validation error if state machine has validation errors
+
+**Example:**
+```go
+err := svc.Promote("my-machine", "1.0.0")
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+#### Validate
+
+Validates a state machine with the specified strictness level.
+
+```go
+Validate(name, version string, location Location) (*ValidationResult, error)
+```
+
+**Parameters:**
+- `name`: State machine name
+- `version`: State machine version
+- `location`: Storage location
+
+**Returns:**
+- `*ValidationResult`: Validation results
+- `error`: Error if validation process fails
+
+**Strictness Levels:**
+- `LocationInProgress`: Uses `StrictnessInProgress` (errors and warnings)
+- `LocationProducts`: Uses `StrictnessProducts` (warnings only)
+
+**Example:**
+```go
+result, err := svc.Validate("my-machine", "1.0.0", statemachine.LocationInProgress)
+if err != nil {
+    log.Fatal(err)
+}
+
+if result.HasErrors() {
+    fmt.Println("Validation failed:")
+    for _, err := range result.Errors {
+        fmt.Printf("  - %s: %s\n", err.Code, err.Message)
+    }
+}
+```
+
+#### ListAll
+
+Lists all state machines in the specified location.
+
+```go
+ListAll(location Location) ([]StateMachine, error)
+```
+
+**Parameters:**
+- `location`: Storage location to list
+
+**Returns:**
+- `[]StateMachine`: List of state machines
+- `error`: Error if listing fails
+
+**Example:**
+```go
+stateMachines, err := svc.ListAll(statemachine.LocationInProgress)
+if err != nil {
+    log.Fatal(err)
+}
+
+for _, sm := range stateMachines {
+    fmt.Printf("- %s-%s\n", sm.Name, sm.Version)
+}
+```
+
+### Reference Operations
+
+#### ResolveReferences
+
+Resolves all references in a state machine.
+
+```go
+ResolveReferences(sm *StateMachine) error
+```
+
+**Parameters:**
+- `sm`: State machine with references to resolve
+
+**Returns:**
+- `error`: Error if reference resolution fails
+
+**Process:**
+1. Parses references from PlantUML content if not already done
+2. Resolves each reference by checking existence
+3. Sets resolved paths for valid references
+
+**Reference Types:**
+- **Product References**: References to state machines in products directory
+- **Nested References**: References to nested state machines within same parent
+
+**Example:**
+```go
+err := svc.ResolveReferences(sm)
+if err != nil {
+    log.Fatal(err)
+}
+
+for _, ref := range sm.References {
+    fmt.Printf("Reference: %s (type: %s, path: %s)\n", 
+        ref.Name, ref.Type.String(), ref.Path)
+}
+```
+
+## Error Handling
+
+The module provides comprehensive error handling with context information.
+
+### Error Types
+
+```go
+type ErrorType int
+
+const (
+    ErrorTypeFileNotFound ErrorType = iota
+    ErrorTypeValidation
+    ErrorTypeDirectoryConflict
+    ErrorTypeReferenceResolution
+    ErrorTypeFileSystem
+    ErrorTypeVersionParsing
+)
+```
+
+### Error Context
+
+Errors include context information such as:
+- Operation being performed
+- Component that generated the error
+- Severity level
+- Additional context parameters
+
+### Example Error Handling
+
+```go
+sm, err := svc.Read("non-existent", "1.0.0", statemachine.LocationInProgress)
+if err != nil {
+    // Check if it's a specific error type
+    if smErr, ok := err.(*models.StateMachineError); ok {
+        switch smErr.Type {
+        case models.ErrorTypeFileNotFound:
+            fmt.Println("State machine not found")
+        case models.ErrorTypeValidation:
+            fmt.Println("Validation error")
+        case models.ErrorTypeDirectoryConflict:
+            fmt.Println("Directory conflict")
+        default:
+            fmt.Printf("Other error: %v\n", err)
+        }
+    }
+}
+```
+
+## Best Practices
+
+### 1. Version Management
+- Use semantic versioning (e.g., "1.0.0", "1.2.3")
+- Increment versions appropriately for changes
+- Consider backward compatibility when updating
+
+### 2. Content Validation
+- Always validate state machines before promotion
+- Handle validation errors appropriately
+- Use appropriate strictness levels for different environments
+
+### 3. Reference Management
+- Resolve references after creating state machines with dependencies
+- Ensure referenced state machines exist before creating references
+- Use product references for stable dependencies
+
+### 4. Error Handling
+- Check and handle all error conditions
+- Use appropriate error types for different scenarios
+- Provide meaningful error messages to users
+
+### 5. Configuration
+- Use environment variables for deployment-specific settings
+- Set appropriate file size limits
+- Enable debug logging for troubleshooting
+
+### 6. Resource Management
+- Clean up test data in examples and tests
+- Handle concurrent access appropriately
+- Monitor file system usage
+
+## Thread Safety
+
+The service implementation is thread-safe and uses mutex locks to protect concurrent operations. Multiple goroutines can safely use the same service instance.
+
+## Performance Considerations
+
+- State machine content is loaded on-demand
+- File system operations are optimized for common use cases
+- Validation is performed efficiently with configurable strictness
+- Reference resolution is cached where appropriate
+
+## Limitations
+
+- Maximum file size is configurable (default: 1MB)
+- Directory depth is limited by file system constraints
+- PlantUML syntax validation is basic (focused on structure)
+- Reference resolution requires referenced state machines to exist

@@ -502,6 +502,18 @@ The module includes comprehensive tests for both internal components and the pub
 
 **Windows:**
 ```cmd
+go test .\internal\... .\statemachine\... .\integration\...
+```
+
+**Linux/macOS:**
+```bash
+go test ./internal/... ./statemachine/... ./integration/...
+```
+
+**Alternative (includes informational messages for example directories):**
+
+**Windows:**
+```cmd
 go test .\...
 ```
 
@@ -514,12 +526,12 @@ go test ./...
 
 **Windows:**
 ```cmd
-go test -v .\...
+go test -v .\internal\... .\statemachine\... .\integration\...
 ```
 
 **Linux/macOS:**
 ```bash
-go test -v ./...
+go test -v ./internal/... ./statemachine/... ./integration/...
 ```
 
 ### Run Public API Tests Only

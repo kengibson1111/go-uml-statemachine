@@ -629,3 +629,525 @@ func TestService_Delete(t *testing.T) {
 		})
 	}
 }
+func TestService_Promote(t *testing.T) {
+	tests := []struct {
+		name        string
+		inputName   string
+		inputVer    string
+		setupMock   func(*mockRepository, *mockValidator)
+		wantErr     bool
+		wantErrType models.ErrorType
+	}{
+		{
+			name:      "successful promotion",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			setupMock: func(repo *mockRepository, validator *mockValidator) {
+				// State machine exists in in-progress
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					if location == models.LocationInProgress {
+						return true, nil
+					}
+					if location == models.LocationProducts {
+						return false, nil // doesn't exist in products initially
+					}
+					return false, nil
+				}
+
+				// Read state machine for validation
+				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+					return &models.StateMachine{
+						Name:     name,
+						Version:  version,
+						Content:  "@startuml\n[*] --> Idle\n@enduml",
+						Location: location,
+					}, nil
+				}
+
+				// Validation passes
+				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+					return &models.ValidationResult{
+						IsValid:  true,
+						Errors:   []models.ValidationError{},
+						Warnings: []models.ValidationWarning{},
+					}, nil
+				}
+
+				// Move operation succeeds
+				repo.moveStateMachineFunc = func(name, version string, from, to models.Location) error {
+					return nil
+				}
+
+				// After move verification - track call count to simulate state change
+				callCount := 0
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					callCount++
+					if callCount <= 2 {
+						// First two calls are the initial checks
+						if location == models.LocationInProgress {
+							return true, nil
+						}
+						return false, nil
+					}
+					// After move operation
+					if location == models.LocationProducts {
+						return true, nil // now exists in products
+					}
+					if location == models.LocationInProgress {
+						return false, nil // no longer exists in in-progress
+					}
+					return false, nil
+				}
+			},
+			wantErr: false,
+		},
+		{
+			name:        "empty name validation",
+			inputName:   "",
+			inputVer:    "1.0.0",
+			setupMock:   func(repo *mockRepository, validator *mockValidator) {},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeValidation,
+		},
+		{
+			name:        "empty version validation",
+			inputName:   "test-sm",
+			inputVer:    "",
+			setupMock:   func(repo *mockRepository, validator *mockValidator) {},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeValidation,
+		},
+		{
+			name:      "state machine does not exist in in-progress",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			setupMock: func(repo *mockRepository, validator *mockValidator) {
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					return false, nil // doesn't exist anywhere
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeFileNotFound,
+		},
+		{
+			name:      "directory conflict in products",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			setupMock: func(repo *mockRepository, validator *mockValidator) {
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					if location == models.LocationInProgress {
+						return true, nil // exists in in-progress
+					}
+					if location == models.LocationProducts {
+						return true, nil // already exists in products - conflict!
+					}
+					return false, nil
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeDirectoryConflict,
+		},
+		{
+			name:      "validation fails with errors",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			setupMock: func(repo *mockRepository, validator *mockValidator) {
+				// State machine exists in in-progress
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					if location == models.LocationInProgress {
+						return true, nil
+					}
+					return false, nil
+				}
+
+				// Read state machine for validation
+				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+					return &models.StateMachine{
+						Name:     name,
+						Version:  version,
+						Content:  "invalid plantuml",
+						Location: location,
+					}, nil
+				}
+
+				// Validation fails with errors
+				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+					result := &models.ValidationResult{
+						IsValid: false,
+						Errors: []models.ValidationError{
+							{Code: "SYNTAX_ERROR", Message: "Invalid PlantUML syntax"},
+						},
+						Warnings: []models.ValidationWarning{},
+					}
+					return result, nil
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeValidation,
+		},
+		{
+			name:      "move operation fails",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			setupMock: func(repo *mockRepository, validator *mockValidator) {
+				// State machine exists in in-progress
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					if location == models.LocationInProgress {
+						return true, nil
+					}
+					return false, nil
+				}
+
+				// Read state machine for validation
+				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+					return &models.StateMachine{
+						Name:     name,
+						Version:  version,
+						Content:  "@startuml\n[*] --> Idle\n@enduml",
+						Location: location,
+					}, nil
+				}
+
+				// Validation passes
+				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+					return &models.ValidationResult{
+						IsValid:  true,
+						Errors:   []models.ValidationError{},
+						Warnings: []models.ValidationWarning{},
+					}, nil
+				}
+
+				// Move operation fails
+				repo.moveStateMachineFunc = func(name, version string, from, to models.Location) error {
+					return errors.New("filesystem error during move")
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeFileSystem,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &mockRepository{}
+			validator := &mockValidator{}
+			tt.setupMock(repo, validator)
+
+			svc := NewService(repo, validator, nil)
+
+			err := svc.Promote(tt.inputName, tt.inputVer)
+
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("Promote() expected error but got none")
+					return
+				}
+
+				var smErr *models.StateMachineError
+				if !errors.As(err, &smErr) {
+					t.Errorf("Promote() expected StateMachineError but got %T", err)
+					return
+				}
+
+				if smErr.Type != tt.wantErrType {
+					t.Errorf("Promote() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Promote() unexpected error: %v", err)
+				}
+			}
+		})
+	}
+}
+
+func TestService_PromoteWithRollback(t *testing.T) {
+	tests := []struct {
+		name        string
+		inputName   string
+		inputVer    string
+		setupMock   func(*mockRepository, *mockValidator)
+		wantErr     bool
+		wantErrType models.ErrorType
+	}{
+		{
+			name:      "rollback on verification failure - not found in products",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			setupMock: func(repo *mockRepository, validator *mockValidator) {
+				// Initial setup - state machine exists in in-progress
+				initialCallCount := 0
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					initialCallCount++
+					if initialCallCount <= 2 {
+						// First two calls are the initial checks
+						if location == models.LocationInProgress {
+							return true, nil
+						}
+						return false, nil
+					}
+					// After move operation - simulate partial failure
+					if location == models.LocationProducts {
+						return false, nil // NOT found in products (verification failure)
+					}
+					if location == models.LocationInProgress {
+						return false, nil // not in in-progress either
+					}
+					return false, nil
+				}
+
+				// Read state machine for validation
+				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+					return &models.StateMachine{
+						Name:     name,
+						Version:  version,
+						Content:  "@startuml\n[*] --> Idle\n@enduml",
+						Location: location,
+					}, nil
+				}
+
+				// Validation passes
+				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+					return &models.ValidationResult{
+						IsValid:  true,
+						Errors:   []models.ValidationError{},
+						Warnings: []models.ValidationWarning{},
+					}, nil
+				}
+
+				// Move operation appears to succeed initially
+				moveCallCount := 0
+				repo.moveStateMachineFunc = func(name, version string, from, to models.Location) error {
+					moveCallCount++
+					if moveCallCount == 1 {
+						// First move (promotion) succeeds
+						return nil
+					}
+					// Second move (rollback) also succeeds
+					return nil
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeFileSystem,
+		},
+		{
+			name:      "rollback on verification failure - still in in-progress",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			setupMock: func(repo *mockRepository, validator *mockValidator) {
+				// Initial setup - state machine exists in in-progress
+				initialCallCount := 0
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					initialCallCount++
+					if initialCallCount <= 2 {
+						// First two calls are the initial checks
+						if location == models.LocationInProgress {
+							return true, nil
+						}
+						return false, nil
+					}
+					// After move operation - simulate partial failure
+					if location == models.LocationProducts {
+						return true, nil // found in products
+					}
+					if location == models.LocationInProgress {
+						return true, nil // STILL in in-progress (verification failure)
+					}
+					return false, nil
+				}
+
+				// Read state machine for validation
+				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+					return &models.StateMachine{
+						Name:     name,
+						Version:  version,
+						Content:  "@startuml\n[*] --> Idle\n@enduml",
+						Location: location,
+					}, nil
+				}
+
+				// Validation passes
+				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+					return &models.ValidationResult{
+						IsValid:  true,
+						Errors:   []models.ValidationError{},
+						Warnings: []models.ValidationWarning{},
+					}, nil
+				}
+
+				// Move operation appears to succeed
+				repo.moveStateMachineFunc = func(name, version string, from, to models.Location) error {
+					return nil
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeFileSystem,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &mockRepository{}
+			validator := &mockValidator{}
+			tt.setupMock(repo, validator)
+
+			svc := NewService(repo, validator, nil)
+
+			err := svc.Promote(tt.inputName, tt.inputVer)
+
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("Promote() expected error but got none")
+					return
+				}
+
+				var smErr *models.StateMachineError
+				if !errors.As(err, &smErr) {
+					t.Errorf("Promote() expected StateMachineError but got %T", err)
+					return
+				}
+
+				if smErr.Type != tt.wantErrType {
+					t.Errorf("Promote() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Promote() unexpected error: %v", err)
+				}
+			}
+		})
+	}
+}
+
+func TestService_PromoteValidationScenarios(t *testing.T) {
+	tests := []struct {
+		name           string
+		inputName      string
+		inputVer       string
+		validationFunc func(*models.StateMachine, models.ValidationStrictness) (*models.ValidationResult, error)
+		wantErr        bool
+		wantErrType    models.ErrorType
+	}{
+		{
+			name:      "validation passes with warnings only",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			validationFunc: func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				return &models.ValidationResult{
+					IsValid: true,
+					Errors:  []models.ValidationError{},
+					Warnings: []models.ValidationWarning{
+						{Code: "STYLE_WARNING", Message: "Consider using better naming"},
+					},
+				}, nil
+			},
+			wantErr: false,
+		},
+		{
+			name:      "validation fails with errors and warnings",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			validationFunc: func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				return &models.ValidationResult{
+					IsValid: false,
+					Errors: []models.ValidationError{
+						{Code: "SYNTAX_ERROR", Message: "Invalid syntax"},
+					},
+					Warnings: []models.ValidationWarning{
+						{Code: "STYLE_WARNING", Message: "Consider using better naming"},
+					},
+				}, nil
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeValidation,
+		},
+		{
+			name:      "validation error during validation process",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			validationFunc: func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				return nil, errors.New("validation process failed")
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeValidation,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &mockRepository{}
+			validator := &mockValidator{}
+
+			// Setup common mock behavior
+			repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				if location == models.LocationInProgress {
+					return true, nil
+				}
+				return false, nil
+			}
+
+			repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+				return &models.StateMachine{
+					Name:     name,
+					Version:  version,
+					Content:  "@startuml\n[*] --> Idle\n@enduml",
+					Location: location,
+				}, nil
+			}
+
+			// Set the specific validation function for this test
+			validator.validateFunc = tt.validationFunc
+
+			// Setup successful move if validation passes
+			if !tt.wantErr {
+				callCount := 0
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					callCount++
+					if callCount <= 2 {
+						if location == models.LocationInProgress {
+							return true, nil
+						}
+						return false, nil
+					}
+					// After move
+					if location == models.LocationProducts {
+						return true, nil
+					}
+					if location == models.LocationInProgress {
+						return false, nil
+					}
+					return false, nil
+				}
+
+				repo.moveStateMachineFunc = func(name, version string, from, to models.Location) error {
+					return nil
+				}
+			}
+
+			svc := NewService(repo, validator, nil)
+
+			err := svc.Promote(tt.inputName, tt.inputVer)
+
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("Promote() expected error but got none")
+					return
+				}
+
+				var smErr *models.StateMachineError
+				if !errors.As(err, &smErr) {
+					t.Errorf("Promote() expected StateMachineError but got %T", err)
+					return
+				}
+
+				if smErr.Type != tt.wantErrType {
+					t.Errorf("Promote() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Promote() unexpected error: %v", err)
+				}
+			}
+		})
+	}
+}

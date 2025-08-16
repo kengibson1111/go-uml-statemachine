@@ -370,14 +370,12 @@ Rejected --> [*]
 
 	// Create all state machines
 	fmt.Printf("Creating %d business process state machines...\n", len(processes))
-	created := []string{}
 	for _, process := range processes {
 		_, err := svc.Create(process.name, process.version, process.content, statemachine.LocationInProgress)
 		if err != nil {
 			log.Printf("Error creating %s: %v", process.name, err)
 			continue
 		}
-		created = append(created, process.name+"-"+process.version)
 		fmt.Printf("  ✓ Created: %s-%s\n", process.name, process.version)
 	}
 

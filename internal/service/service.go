@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kengibson1111/go-uml-statemachine/internal/logging"
 	"github.com/kengibson1111/go-uml-statemachine/internal/models"
 )
 
@@ -12,6 +13,7 @@ type service struct {
 	repo      models.Repository
 	validator models.Validator
 	config    *models.Config
+	logger    *logging.Logger
 	mu        sync.RWMutex
 }
 
@@ -21,11 +23,34 @@ func NewService(repo models.Repository, validator models.Validator, config *mode
 		config = models.DefaultConfig()
 	}
 
-	return &service{
+	// Create logger with service-specific configuration
+	loggerConfig := &logging.LoggerConfig{
+		Level:        logging.LogLevelInfo,
+		Prefix:       "[StateMachineService]",
+		EnableCaller: true,
+	}
+
+	// Set log level based on config if available
+	if config.EnableDebugLogging {
+		loggerConfig.Level = logging.LogLevelDebug
+	}
+
+	logger, err := logging.NewLogger(loggerConfig)
+	if err != nil {
+		// Fallback to default logger if creation fails
+		logger = logging.NewDefaultLogger()
+		logger.Warn("Failed to create service logger, using default")
+	}
+
+	svc := &service{
 		repo:      repo,
 		validator: validator,
 		config:    config,
+		logger:    logger,
 	}
+
+	svc.logger.Info("StateMachineService initialized successfully")
+	return svc
 }
 
 // NewServiceWithDefaults creates a new StateMachineService with default configuration
@@ -58,52 +83,103 @@ func (s *service) Create(name, version string, content string, location models.L
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	// Create operation logger with context
+	opLogger := s.logger.WithFields(map[string]interface{}{
+		"operation": "Create",
+		"name":      name,
+		"version":   version,
+		"location":  location.String(),
+	})
+
+	opLogger.Info("Starting state machine creation")
+
 	// Validate input parameters
 	if name == "" {
-		return nil, models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil)
+		err := models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil).
+			WithOperation("Create").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh)
+		opLogger.WithError(err).Error("Validation failed: empty name")
+		return nil, err
 	}
 	if version == "" {
-		return nil, models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil)
+		err := models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil).
+			WithOperation("Create").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh)
+		opLogger.WithError(err).Error("Validation failed: empty version")
+		return nil, err
 	}
 	if content == "" {
-		return nil, models.NewStateMachineError(models.ErrorTypeValidation, "content cannot be empty", nil)
+		err := models.NewStateMachineError(models.ErrorTypeValidation, "content cannot be empty", nil).
+			WithOperation("Create").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh)
+		opLogger.WithError(err).Error("Validation failed: empty content")
+		return nil, err
 	}
 
+	opLogger.Debug("Input validation passed")
+
 	// Check if state machine already exists
+	opLogger.Debug("Checking if state machine already exists")
 	exists, err := s.repo.Exists(name, version, location)
 	if err != nil {
-		return nil, models.NewStateMachineError(models.ErrorTypeFileSystem,
-			"failed to check if state machine exists", err).
+		wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
+			"failed to check if state machine exists").
 			WithContext("name", name).
 			WithContext("version", version).
-			WithContext("location", location.String())
+			WithContext("location", location.String()).
+			WithOperation("Create").
+			WithComponent("service")
+		opLogger.WithError(wrappedErr).Error("Failed to check state machine existence")
+		return nil, wrappedErr
 	}
 	if exists {
-		return nil, models.NewStateMachineError(models.ErrorTypeDirectoryConflict,
+		err := models.NewStateMachineError(models.ErrorTypeDirectoryConflict,
 			"state machine already exists", nil).
 			WithContext("name", name).
 			WithContext("version", version).
-			WithContext("location", location.String())
+			WithContext("location", location.String()).
+			WithOperation("Create").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityMedium)
+		opLogger.WithError(err).Warn("State machine already exists")
+		return nil, err
 	}
+
+	opLogger.Debug("State machine does not exist, proceeding with creation")
 
 	// For in-progress state machines, check if there's a conflicting directory in products
 	if location == models.LocationInProgress {
+		opLogger.Debug("Checking for conflicts in products directory")
 		productExists, err := s.repo.Exists(name, version, models.LocationProducts)
 		if err != nil {
-			return nil, models.NewStateMachineError(models.ErrorTypeFileSystem,
-				"failed to check products directory for conflicts", err).
+			wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
+				"failed to check products directory for conflicts").
 				WithContext("name", name).
-				WithContext("version", version)
+				WithContext("version", version).
+				WithOperation("Create").
+				WithComponent("service")
+			opLogger.WithError(wrappedErr).Error("Failed to check products directory")
+			return nil, wrappedErr
 		}
 		if productExists {
-			return nil, models.NewStateMachineError(models.ErrorTypeDirectoryConflict,
+			err := models.NewStateMachineError(models.ErrorTypeDirectoryConflict,
 				"cannot create in-progress state machine: directory with same name exists in products", nil).
 				WithContext("name", name).
-				WithContext("version", version)
+				WithContext("version", version).
+				WithOperation("Create").
+				WithComponent("service").
+				WithSeverity(models.ErrorSeverityMedium)
+			opLogger.WithError(err).Warn("Conflict with existing product")
+			return nil, err
 		}
+		opLogger.Debug("No conflicts found in products directory")
 	}
 
 	// Create the state machine object
+	opLogger.Debug("Creating state machine object")
 	sm := &models.StateMachine{
 		Name:     name,
 		Version:  version,
@@ -116,14 +192,21 @@ func (s *service) Create(name, version string, content string, location models.L
 	}
 
 	// Write the state machine to disk
+	opLogger.Debug("Writing state machine to disk")
 	if err := s.repo.WriteStateMachine(sm); err != nil {
-		return nil, models.NewStateMachineError(models.ErrorTypeFileSystem,
-			"failed to write state machine", err).
+		wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
+			"failed to write state machine").
 			WithContext("name", name).
 			WithContext("version", version).
-			WithContext("location", location.String())
+			WithContext("location", location.String()).
+			WithOperation("Create").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh)
+		opLogger.WithError(wrappedErr).Error("Failed to write state machine to disk")
+		return nil, wrappedErr
 	}
 
+	opLogger.Info("State machine created successfully")
 	return sm, nil
 }
 
@@ -132,24 +215,52 @@ func (s *service) Read(name, version string, location models.Location) (*models.
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
+	// Create operation logger with context
+	opLogger := s.logger.WithFields(map[string]interface{}{
+		"operation": "Read",
+		"name":      name,
+		"version":   version,
+		"location":  location.String(),
+	})
+
+	opLogger.Debug("Starting state machine read operation")
+
 	// Validate input parameters
 	if name == "" {
-		return nil, models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil)
+		err := models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil).
+			WithOperation("Read").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh)
+		opLogger.WithError(err).Error("Validation failed: empty name")
+		return nil, err
 	}
 	if version == "" {
-		return nil, models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil)
+		err := models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil).
+			WithOperation("Read").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh)
+		opLogger.WithError(err).Error("Validation failed: empty version")
+		return nil, err
 	}
+
+	opLogger.Debug("Input validation passed")
 
 	// Read the state machine from repository
+	opLogger.Debug("Reading state machine from repository")
 	sm, err := s.repo.ReadStateMachine(name, version, location)
 	if err != nil {
-		return nil, models.NewStateMachineError(models.ErrorTypeFileNotFound,
-			"failed to read state machine", err).
+		wrappedErr := models.WrapError(err, models.ErrorTypeFileNotFound,
+			"failed to read state machine").
 			WithContext("name", name).
 			WithContext("version", version).
-			WithContext("location", location.String())
+			WithContext("location", location.String()).
+			WithOperation("Read").
+			WithComponent("service")
+		opLogger.WithError(wrappedErr).Error("Failed to read state machine from repository")
+		return nil, wrappedErr
 	}
 
+	opLogger.WithField("contentLength", len(sm.Content)).Info("State machine read successfully")
 	return sm, nil
 }
 

@@ -1,0 +1,543 @@
+package service
+
+import (
+	"errors"
+	"testing"
+
+	"github.com/kengibson1111/go-uml-statemachine/internal/models"
+)
+
+// MockRepository for testing error scenarios
+type MockErrorRepository struct {
+	shouldFailExists    bool
+	shouldFailRead      bool
+	shouldFailWrite     bool
+	shouldFailMove      bool
+	shouldFailDelete    bool
+	shouldFailList      bool
+	shouldFailCreateDir bool
+	shouldFailDirExists bool
+	existsResult        bool
+	dirExistsResult     bool
+	readResult          *models.StateMachine
+	listResult          []models.StateMachine
+
+	// Function fields for custom behavior
+	ExistsFunc func(name, version string, location models.Location) (bool, error)
+}
+
+func (m *MockErrorRepository) Exists(name, version string, location models.Location) (bool, error) {
+	if m.ExistsFunc != nil {
+		return m.ExistsFunc(name, version, location)
+	}
+	if m.shouldFailExists {
+		return false, errors.New("mock exists error")
+	}
+	return m.existsResult, nil
+}
+
+func (m *MockErrorRepository) ReadStateMachine(name, version string, location models.Location) (*models.StateMachine, error) {
+	if m.shouldFailRead {
+		return nil, errors.New("mock read error")
+	}
+	return m.readResult, nil
+}
+
+func (m *MockErrorRepository) WriteStateMachine(sm *models.StateMachine) error {
+	if m.shouldFailWrite {
+		return errors.New("mock write error")
+	}
+	return nil
+}
+
+func (m *MockErrorRepository) MoveStateMachine(name, version string, from, to models.Location) error {
+	if m.shouldFailMove {
+		return errors.New("mock move error")
+	}
+	return nil
+}
+
+func (m *MockErrorRepository) DeleteStateMachine(name, version string, location models.Location) error {
+	if m.shouldFailDelete {
+		return errors.New("mock delete error")
+	}
+	return nil
+}
+
+func (m *MockErrorRepository) ListStateMachines(location models.Location) ([]models.StateMachine, error) {
+	if m.shouldFailList {
+		return nil, errors.New("mock list error")
+	}
+	return m.listResult, nil
+}
+
+func (m *MockErrorRepository) CreateDirectory(path string) error {
+	if m.shouldFailCreateDir {
+		return errors.New("mock create directory error")
+	}
+	return nil
+}
+
+func (m *MockErrorRepository) DirectoryExists(path string) (bool, error) {
+	if m.shouldFailDirExists {
+		return false, errors.New("mock directory exists error")
+	}
+	return m.dirExistsResult, nil
+}
+
+// MockValidator for testing error scenarios
+type MockErrorValidator struct {
+	shouldFailValidate           bool
+	shouldFailValidateReferences bool
+	validationResult             *models.ValidationResult
+	referencesResult             *models.ValidationResult
+}
+
+func (m *MockErrorValidator) Validate(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+	if m.shouldFailValidate {
+		return nil, errors.New("mock validation error")
+	}
+	return m.validationResult, nil
+}
+
+func (m *MockErrorValidator) ValidateReferences(sm *models.StateMachine) (*models.ValidationResult, error) {
+	if m.shouldFailValidateReferences {
+		return nil, errors.New("mock reference validation error")
+	}
+	return m.referencesResult, nil
+}
+
+func TestService_Create_ValidationErrors(t *testing.T) {
+	repo := &MockErrorRepository{}
+	validator := &MockErrorValidator{}
+	config := models.DefaultConfig()
+	svc := NewService(repo, validator, config)
+
+	tests := []struct {
+		name         string
+		inputName    string
+		inputVersion string
+		inputContent string
+		location     models.Location
+		expectedErr  string
+	}{
+		{
+			name:         "empty name",
+			inputName:    "",
+			inputVersion: "1.0.0",
+			inputContent: "content",
+			location:     models.LocationInProgress,
+			expectedErr:  "name cannot be empty",
+		},
+		{
+			name:         "empty version",
+			inputName:    "test",
+			inputVersion: "",
+			inputContent: "content",
+			location:     models.LocationInProgress,
+			expectedErr:  "version cannot be empty",
+		},
+		{
+			name:         "empty content",
+			inputName:    "test",
+			inputVersion: "1.0.0",
+			inputContent: "",
+			location:     models.LocationInProgress,
+			expectedErr:  "content cannot be empty",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := svc.Create(tt.inputName, tt.inputVersion, tt.inputContent, tt.location)
+
+			if err == nil {
+				t.Error("Expected error but got nil")
+				return
+			}
+
+			smErr, ok := err.(*models.StateMachineError)
+			if !ok {
+				t.Errorf("Expected StateMachineError, got %T", err)
+				return
+			}
+
+			if smErr.Type != models.ErrorTypeValidation {
+				t.Errorf("Expected ErrorTypeValidation, got %v", smErr.Type)
+			}
+
+			if smErr.Operation != "Create" {
+				t.Errorf("Expected operation 'Create', got %v", smErr.Operation)
+			}
+
+			if smErr.Component != "service" {
+				t.Errorf("Expected component 'service', got %v", smErr.Component)
+			}
+
+			if smErr.Severity != models.ErrorSeverityHigh {
+				t.Errorf("Expected ErrorSeverityHigh, got %v", smErr.Severity)
+			}
+		})
+	}
+}
+
+func TestService_Create_RepositoryErrors(t *testing.T) {
+	tests := []struct {
+		name            string
+		setupRepo       func(*MockErrorRepository)
+		expectedErrType models.ErrorType
+		expectedMsg     string
+	}{
+		{
+			name: "exists check fails",
+			setupRepo: func(repo *MockErrorRepository) {
+				repo.shouldFailExists = true
+			},
+			expectedErrType: models.ErrorTypeFileSystem,
+			expectedMsg:     "failed to check if state machine exists",
+		},
+		{
+			name: "state machine already exists",
+			setupRepo: func(repo *MockErrorRepository) {
+				repo.existsResult = true
+			},
+			expectedErrType: models.ErrorTypeDirectoryConflict,
+			expectedMsg:     "state machine already exists",
+		},
+		{
+			name: "write fails",
+			setupRepo: func(repo *MockErrorRepository) {
+				repo.existsResult = false
+				repo.shouldFailWrite = true
+			},
+			expectedErrType: models.ErrorTypeFileSystem,
+			expectedMsg:     "failed to write state machine",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &MockErrorRepository{}
+			tt.setupRepo(repo)
+
+			validator := &MockErrorValidator{}
+			config := models.DefaultConfig()
+			svc := NewService(repo, validator, config)
+
+			_, err := svc.Create("test", "1.0.0", "content", models.LocationInProgress)
+
+			if err == nil {
+				t.Error("Expected error but got nil")
+				return
+			}
+
+			smErr, ok := err.(*models.StateMachineError)
+			if !ok {
+				t.Errorf("Expected StateMachineError, got %T", err)
+				return
+			}
+
+			if smErr.Type != tt.expectedErrType {
+				t.Errorf("Expected error type %v, got %v", tt.expectedErrType, smErr.Type)
+			}
+
+			if smErr.Operation != "Create" {
+				t.Errorf("Expected operation 'Create', got %v", smErr.Operation)
+			}
+
+			if smErr.Component != "service" {
+				t.Errorf("Expected component 'service', got %v", smErr.Component)
+			}
+		})
+	}
+}
+
+func TestService_Create_ProductConflictCheck(t *testing.T) {
+	// Test case where checking products directory fails
+	t.Run("products check fails", func(t *testing.T) {
+		repo := &MockErrorRepository{}
+		validator := &MockErrorValidator{}
+		config := models.DefaultConfig()
+
+		// Create a custom exists function that fails on the second call
+		callCount := 0
+		repo.ExistsFunc = func(name, version string, location models.Location) (bool, error) {
+			callCount++
+			if callCount == 2 { // Second call (products check)
+				return false, errors.New("mock products check error")
+			}
+			return false, nil // First call succeeds
+		}
+
+		svc := NewService(repo, validator, config)
+
+		_, err := svc.Create("test", "1.0.0", "content", models.LocationInProgress)
+
+		if err == nil {
+			t.Error("Expected error but got nil")
+			return
+		}
+
+		smErr, ok := err.(*models.StateMachineError)
+		if !ok {
+			t.Errorf("Expected StateMachineError, got %T", err)
+			return
+		}
+
+		if smErr.Type != models.ErrorTypeFileSystem {
+			t.Errorf("Expected ErrorTypeFileSystem, got %v", smErr.Type)
+		}
+	})
+
+	// Test case where product already exists
+	t.Run("product conflict exists", func(t *testing.T) {
+		repo := &MockErrorRepository{}
+		validator := &MockErrorValidator{}
+		config := models.DefaultConfig()
+
+		// Create a custom exists function that returns conflict on second call
+		callCount := 0
+		repo.ExistsFunc = func(name, version string, location models.Location) (bool, error) {
+			callCount++
+			if callCount == 1 { // First call (in-progress check)
+				return false, nil
+			}
+			return true, nil // Second call (products check) - conflict found
+		}
+
+		svc := NewService(repo, validator, config)
+
+		_, err := svc.Create("test", "1.0.0", "content", models.LocationInProgress)
+
+		if err == nil {
+			t.Error("Expected error but got nil")
+			return
+		}
+
+		smErr, ok := err.(*models.StateMachineError)
+		if !ok {
+			t.Errorf("Expected StateMachineError, got %T", err)
+			return
+		}
+
+		if smErr.Type != models.ErrorTypeDirectoryConflict {
+			t.Errorf("Expected ErrorTypeDirectoryConflict, got %v", smErr.Type)
+		}
+	})
+}
+
+func TestService_Read_ValidationErrors(t *testing.T) {
+	repo := &MockErrorRepository{}
+	validator := &MockErrorValidator{}
+	config := models.DefaultConfig()
+	svc := NewService(repo, validator, config)
+
+	tests := []struct {
+		name         string
+		inputName    string
+		inputVersion string
+		location     models.Location
+		expectedErr  string
+	}{
+		{
+			name:         "empty name",
+			inputName:    "",
+			inputVersion: "1.0.0",
+			location:     models.LocationInProgress,
+			expectedErr:  "name cannot be empty",
+		},
+		{
+			name:         "empty version",
+			inputName:    "test",
+			inputVersion: "",
+			location:     models.LocationInProgress,
+			expectedErr:  "version cannot be empty",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := svc.Read(tt.inputName, tt.inputVersion, tt.location)
+
+			if err == nil {
+				t.Error("Expected error but got nil")
+				return
+			}
+
+			smErr, ok := err.(*models.StateMachineError)
+			if !ok {
+				t.Errorf("Expected StateMachineError, got %T", err)
+				return
+			}
+
+			if smErr.Type != models.ErrorTypeValidation {
+				t.Errorf("Expected ErrorTypeValidation, got %v", smErr.Type)
+			}
+
+			if smErr.Operation != "Read" {
+				t.Errorf("Expected operation 'Read', got %v", smErr.Operation)
+			}
+		})
+	}
+}
+
+func TestService_Read_RepositoryError(t *testing.T) {
+	repo := &MockErrorRepository{
+		shouldFailRead: true,
+	}
+	validator := &MockErrorValidator{}
+	config := models.DefaultConfig()
+	svc := NewService(repo, validator, config)
+
+	_, err := svc.Read("test", "1.0.0", models.LocationInProgress)
+
+	if err == nil {
+		t.Error("Expected error but got nil")
+		return
+	}
+
+	smErr, ok := err.(*models.StateMachineError)
+	if !ok {
+		t.Errorf("Expected StateMachineError, got %T", err)
+		return
+	}
+
+	if smErr.Type != models.ErrorTypeFileNotFound {
+		t.Errorf("Expected ErrorTypeFileNotFound, got %v", smErr.Type)
+	}
+
+	if smErr.Operation != "Read" {
+		t.Errorf("Expected operation 'Read', got %v", smErr.Operation)
+	}
+
+	if smErr.Component != "service" {
+		t.Errorf("Expected component 'service', got %v", smErr.Component)
+	}
+}
+
+func TestService_ErrorContextPropagation(t *testing.T) {
+	repo := &MockErrorRepository{
+		shouldFailExists: true,
+	}
+	validator := &MockErrorValidator{}
+	config := models.DefaultConfig()
+	svc := NewService(repo, validator, config)
+
+	_, err := svc.Create("test-name", "1.2.3", "content", models.LocationInProgress)
+
+	if err == nil {
+		t.Error("Expected error but got nil")
+		return
+	}
+
+	smErr, ok := err.(*models.StateMachineError)
+	if !ok {
+		t.Errorf("Expected StateMachineError, got %T", err)
+		return
+	}
+
+	// Check that context was properly set
+	if smErr.Context["name"] != "test-name" {
+		t.Errorf("Expected context name 'test-name', got %v", smErr.Context["name"])
+	}
+
+	if smErr.Context["version"] != "1.2.3" {
+		t.Errorf("Expected context version '1.2.3', got %v", smErr.Context["version"])
+	}
+
+	if smErr.Context["location"] != "in-progress" {
+		t.Errorf("Expected context location 'in-progress', got %v", smErr.Context["location"])
+	}
+}
+
+func TestService_ErrorWrapping(t *testing.T) {
+	originalErr := errors.New("original repository error")
+	repo := &MockErrorRepository{}
+	repo.ExistsFunc = func(name, version string, location models.Location) (bool, error) {
+		return false, originalErr
+	}
+
+	validator := &MockErrorValidator{}
+	config := models.DefaultConfig()
+	svc := NewService(repo, validator, config)
+
+	_, err := svc.Create("test", "1.0.0", "content", models.LocationInProgress)
+
+	if err == nil {
+		t.Error("Expected error but got nil")
+		return
+	}
+
+	_, ok := err.(*models.StateMachineError)
+	if !ok {
+		t.Errorf("Expected StateMachineError, got %T", err)
+		return
+	}
+
+	// Check that the original error is wrapped
+	if !errors.Is(err, originalErr) {
+		t.Error("Expected error to wrap the original error")
+	}
+
+	// Check that we can unwrap to get the original error
+	unwrapped := errors.Unwrap(err)
+	if unwrapped == nil {
+		t.Error("Expected to be able to unwrap the error")
+	}
+}
+
+func TestService_ErrorSeverityAssignment(t *testing.T) {
+	tests := []struct {
+		name             string
+		setupRepo        func(*MockErrorRepository)
+		expectedSeverity models.ErrorSeverity
+	}{
+		{
+			name: "validation error - high severity",
+			setupRepo: func(repo *MockErrorRepository) {
+				// Will trigger validation error for empty name
+			},
+			expectedSeverity: models.ErrorSeverityHigh,
+		},
+		{
+			name: "conflict error - medium severity",
+			setupRepo: func(repo *MockErrorRepository) {
+				repo.existsResult = true // State machine already exists
+			},
+			expectedSeverity: models.ErrorSeverityMedium,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &MockErrorRepository{}
+			tt.setupRepo(repo)
+
+			validator := &MockErrorValidator{}
+			config := models.DefaultConfig()
+			svc := NewService(repo, validator, config)
+
+			var err error
+			if tt.name == "validation error - high severity" {
+				_, err = svc.Create("", "1.0.0", "content", models.LocationInProgress) // Empty name
+			} else {
+				_, err = svc.Create("test", "1.0.0", "content", models.LocationInProgress)
+			}
+
+			if err == nil {
+				t.Error("Expected error but got nil")
+				return
+			}
+
+			smErr, ok := err.(*models.StateMachineError)
+			if !ok {
+				t.Errorf("Expected StateMachineError, got %T", err)
+				return
+			}
+
+			if smErr.Severity != tt.expectedSeverity {
+				t.Errorf("Expected severity %v, got %v", tt.expectedSeverity, smErr.Severity)
+			}
+		})
+	}
+}

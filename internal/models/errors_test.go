@@ -67,29 +67,32 @@ func TestStateMachineError_Error(t *testing.T) {
 		{
 			name: "error without cause",
 			error: &StateMachineError{
-				Type:    ErrorTypeFileNotFound,
-				Message: "state machine not found",
-				Cause:   nil,
+				Type:     ErrorTypeFileNotFound,
+				Message:  "state machine not found",
+				Cause:    nil,
+				Severity: ErrorSeverityMedium, // Default severity
 			},
-			expected: "file_not_found: state machine not found",
+			expected: "[file_not_found] state machine not found | severity=medium",
 		},
 		{
 			name: "error with cause",
 			error: &StateMachineError{
-				Type:    ErrorTypeFileSystem,
-				Message: "failed to read file",
-				Cause:   errors.New("permission denied"),
+				Type:     ErrorTypeFileSystem,
+				Message:  "failed to read file",
+				Cause:    errors.New("permission denied"),
+				Severity: ErrorSeverityMedium, // Default severity
 			},
-			expected: "file_system: failed to read file (caused by: permission denied)",
+			expected: "[file_system] failed to read file | severity=medium | cause=permission denied",
 		},
 		{
 			name: "validation error with cause",
 			error: &StateMachineError{
-				Type:    ErrorTypeValidation,
-				Message: "invalid PlantUML syntax",
-				Cause:   errors.New("missing @enduml tag"),
+				Type:     ErrorTypeValidation,
+				Message:  "invalid PlantUML syntax",
+				Cause:    errors.New("missing @enduml tag"),
+				Severity: ErrorSeverityMedium, // Default severity
 			},
-			expected: "validation: invalid PlantUML syntax (caused by: missing @enduml tag)",
+			expected: "[validation] invalid PlantUML syntax | severity=medium | cause=missing @enduml tag",
 		},
 	}
 

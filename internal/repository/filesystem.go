@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/kengibson1111/go-uml-statemachine/internal/logging"
 	"github.com/kengibson1111/go-uml-statemachine/internal/models"
 )
 
@@ -11,6 +12,7 @@ import (
 type FileSystemRepository struct {
 	pathManager *models.PathManager
 	config      *models.Config
+	logger      *logging.Logger
 }
 
 // NewFileSystemRepository creates a new FileSystemRepository
@@ -21,60 +23,139 @@ func NewFileSystemRepository(config *models.Config) *FileSystemRepository {
 
 	pathManager := models.NewPathManager(config.RootDirectory)
 
-	return &FileSystemRepository{
+	// Create logger with repository-specific configuration
+	loggerConfig := &logging.LoggerConfig{
+		Level:        logging.LogLevelInfo,
+		Prefix:       "[FileSystemRepository]",
+		EnableCaller: true,
+	}
+
+	// Set log level based on config if available
+	if config.EnableDebugLogging {
+		loggerConfig.Level = logging.LogLevelDebug
+	}
+
+	logger, err := logging.NewLogger(loggerConfig)
+	if err != nil {
+		// Fallback to default logger if creation fails
+		logger = logging.NewDefaultLogger()
+		logger.Warn("Failed to create repository logger, using default")
+	}
+
+	repo := &FileSystemRepository{
 		pathManager: pathManager,
 		config:      config,
+		logger:      logger,
 	}
+
+	repo.logger.WithField("rootDirectory", config.RootDirectory).Info("FileSystemRepository initialized")
+	return repo
 }
 
 // ReadStateMachine reads a state machine from the file system
 func (r *FileSystemRepository) ReadStateMachine(name, version string, location models.Location) (*models.StateMachine, error) {
+	// Create operation logger with context
+	opLogger := r.logger.WithFields(map[string]interface{}{
+		"operation": "ReadStateMachine",
+		"name":      name,
+		"version":   version,
+		"location":  location.String(),
+	})
+
+	opLogger.Debug("Starting state machine read operation")
+
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
-		return nil, err
+		wrappedErr := models.WrapError(err, models.ErrorTypeValidation, "invalid state machine name").
+			WithOperation("ReadStateMachine").
+			WithComponent("repository").
+			WithContext("name", name)
+		opLogger.WithError(wrappedErr).Error("Name validation failed")
+		return nil, wrappedErr
 	}
 
 	if location != models.LocationNested && version == "" {
-		return nil, models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state machines", nil).
+		err := models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state machines", nil).
 			WithContext("name", name).
-			WithContext("location", location.String())
+			WithContext("location", location.String()).
+			WithOperation("ReadStateMachine").
+			WithComponent("repository").
+			WithSeverity(models.ErrorSeverityHigh)
+		opLogger.WithError(err).Error("Version validation failed")
+		return nil, err
 	}
+
+	opLogger.Debug("Input validation passed")
 
 	// Get the file path
 	filePath := r.pathManager.GetStateMachineFilePath(name, version, location)
+	opLogger.WithField("filePath", filePath).Debug("Resolved file path")
 
 	// Check if file exists
+	opLogger.Debug("Checking if file exists")
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return nil, models.NewStateMachineError(models.ErrorTypeFileNotFound, "state machine file not found", err).
+		notFoundErr := models.NewStateMachineError(models.ErrorTypeFileNotFound, "state machine file not found", err).
 			WithContext("name", name).
 			WithContext("version", version).
 			WithContext("location", location.String()).
-			WithContext("filePath", filePath)
+			WithContext("filePath", filePath).
+			WithOperation("ReadStateMachine").
+			WithComponent("repository").
+			WithSeverity(models.ErrorSeverityMedium)
+		opLogger.WithError(notFoundErr).Warn("State machine file not found")
+		return nil, notFoundErr
+	} else if err != nil {
+		statErr := models.WrapError(err, models.ErrorTypeFileSystem, "failed to check file existence").
+			WithContext("filePath", filePath).
+			WithOperation("ReadStateMachine").
+			WithComponent("repository")
+		opLogger.WithError(statErr).Error("Failed to check file existence")
+		return nil, statErr
 	}
+
+	opLogger.Debug("File exists, reading content")
 
 	// Read file content
 	content, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to read state machine file", err).
-			WithContext("filePath", filePath)
+		readErr := models.WrapError(err, models.ErrorTypeFileSystem, "failed to read state machine file").
+			WithContext("filePath", filePath).
+			WithOperation("ReadStateMachine").
+			WithComponent("repository").
+			WithSeverity(models.ErrorSeverityHigh)
+		opLogger.WithError(readErr).Error("Failed to read file content")
+		return nil, readErr
 	}
+
+	opLogger.WithField("contentSize", len(content)).Debug("File content read successfully")
 
 	// Check file size
 	if int64(len(content)) > r.config.MaxFileSize {
-		return nil, models.NewStateMachineError(models.ErrorTypeFileSystem, "file size exceeds maximum allowed", nil).
+		sizeErr := models.NewStateMachineError(models.ErrorTypeFileSystem, "file size exceeds maximum allowed", nil).
 			WithContext("fileSize", len(content)).
 			WithContext("maxSize", r.config.MaxFileSize).
-			WithContext("filePath", filePath)
+			WithContext("filePath", filePath).
+			WithOperation("ReadStateMachine").
+			WithComponent("repository").
+			WithSeverity(models.ErrorSeverityHigh)
+		opLogger.WithError(sizeErr).Error("File size exceeds maximum allowed")
+		return nil, sizeErr
 	}
 
 	// Get file info for metadata
+	opLogger.Debug("Getting file metadata")
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
-		return nil, models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to get file info", err).
-			WithContext("filePath", filePath)
+		infoErr := models.WrapError(err, models.ErrorTypeFileSystem, "failed to get file info").
+			WithContext("filePath", filePath).
+			WithOperation("ReadStateMachine").
+			WithComponent("repository")
+		opLogger.WithError(infoErr).Error("Failed to get file metadata")
+		return nil, infoErr
 	}
 
 	// Create StateMachine object
+	opLogger.Debug("Creating state machine object")
 	stateMachine := &models.StateMachine{
 		Name:     name,
 		Version:  version,
@@ -89,6 +170,11 @@ func (r *FileSystemRepository) ReadStateMachine(name, version string, location m
 
 	// TODO: Parse references from content (will be implemented in validation layer)
 	stateMachine.References = []models.Reference{}
+
+	opLogger.WithFields(map[string]interface{}{
+		"contentLength": len(stateMachine.Content),
+		"modifiedAt":    stateMachine.Metadata.ModifiedAt,
+	}).Info("State machine read successfully")
 
 	return stateMachine, nil
 }

@@ -8,19 +8,21 @@ import (
 
 // Config represents the configuration for the state machine system
 type Config struct {
-	RootDirectory   string               // Default: ".go-uml-statemachine"
-	ValidationLevel ValidationStrictness // Default validation level
-	BackupEnabled   bool                 // Whether to create backups
-	MaxFileSize     int64                // Maximum file size in bytes
+	RootDirectory      string               // Default: ".go-uml-statemachine"
+	ValidationLevel    ValidationStrictness // Default validation level
+	BackupEnabled      bool                 // Whether to create backups
+	MaxFileSize        int64                // Maximum file size in bytes
+	EnableDebugLogging bool                 // Whether to enable debug logging
 }
 
 // DefaultConfig returns a configuration with default values
 func DefaultConfig() *Config {
 	return &Config{
-		RootDirectory:   ".go-uml-statemachine",
-		ValidationLevel: StrictnessInProgress,
-		BackupEnabled:   false,
-		MaxFileSize:     1024 * 1024, // 1MB
+		RootDirectory:      ".go-uml-statemachine",
+		ValidationLevel:    StrictnessInProgress,
+		BackupEnabled:      false,
+		MaxFileSize:        1024 * 1024, // 1MB
+		EnableDebugLogging: false,
 	}
 }
 
@@ -30,6 +32,7 @@ func DefaultConfig() *Config {
 // - GO_UML_VALIDATION_LEVEL: Validation level (in-progress, products)
 // - GO_UML_BACKUP_ENABLED: Whether to enable backups (true/false)
 // - GO_UML_MAX_FILE_SIZE: Maximum file size in bytes
+// - GO_UML_DEBUG_LOGGING: Whether to enable debug logging (true/false)
 func LoadConfigFromEnv() *Config {
 	config := DefaultConfig()
 
@@ -62,6 +65,13 @@ func LoadConfigFromEnv() *Config {
 		}
 	}
 
+	// Load debug logging
+	if debugLogging := os.Getenv("GO_UML_DEBUG_LOGGING"); debugLogging != "" {
+		if enabled, err := strconv.ParseBool(debugLogging); err == nil {
+			config.EnableDebugLogging = enabled
+		}
+	}
+
 	return config
 }
 
@@ -82,6 +92,9 @@ func (c *Config) MergeWithEnv() *Config {
 	}
 	if os.Getenv("GO_UML_MAX_FILE_SIZE") != "" {
 		c.MaxFileSize = envConfig.MaxFileSize
+	}
+	if os.Getenv("GO_UML_DEBUG_LOGGING") != "" {
+		c.EnableDebugLogging = envConfig.EnableDebugLogging
 	}
 
 	return c

@@ -5,23 +5,30 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/kengibson1111/go-uml-statemachine/internal/logging"
 	"github.com/kengibson1111/go-uml-statemachine/internal/models"
 )
 
 // PlantUMLValidator implements the Validator interface for PlantUML syntax validation
 type PlantUMLValidator struct {
 	repository models.Repository // Optional repository for reference resolution
+	logger     *logging.Logger
 }
 
 // NewPlantUMLValidator creates a new PlantUML validator instance
 func NewPlantUMLValidator() *PlantUMLValidator {
-	return &PlantUMLValidator{}
+	logger := logging.NewDefaultLogger().WithField("component", "PlantUMLValidator")
+	return &PlantUMLValidator{
+		logger: logger,
+	}
 }
 
 // NewPlantUMLValidatorWithRepository creates a new PlantUML validator instance with repository for reference resolution
 func NewPlantUMLValidatorWithRepository(repo models.Repository) *PlantUMLValidator {
+	logger := logging.NewDefaultLogger().WithField("component", "PlantUMLValidator")
 	return &PlantUMLValidator{
 		repository: repo,
+		logger:     logger,
 	}
 }
 

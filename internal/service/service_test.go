@@ -1151,3 +1151,669 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 		})
 	}
 }
+
+// Tests for task 7.4 - Listing and validation operations
+
+func TestService_Validate(t *testing.T) {
+	tests := []struct {
+		name        string
+		inputName   string
+		inputVer    string
+		inputLoc    models.Location
+		setupMock   func(*mockRepository, *mockValidator)
+		wantErr     bool
+		wantErrType models.ErrorType
+		wantResult  *models.ValidationResult
+	}{
+		{
+			name:      "successful validation in-progress with strictness in-progress",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			inputLoc:  models.LocationInProgress,
+			setupMock: func(repo *mockRepository, validator *mockValidator) {
+				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+					return &models.StateMachine{
+						Name:     name,
+						Version:  version,
+						Content:  "@startuml\n[*] --> Idle\n@enduml",
+						Location: location,
+					}, nil
+				}
+				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+					if strictness != models.StrictnessInProgress {
+						t.Errorf("Expected StrictnessInProgress but got %v", strictness)
+					}
+					return &models.ValidationResult{
+						IsValid:  true,
+						Errors:   []models.ValidationError{},
+						Warnings: []models.ValidationWarning{},
+					}, nil
+				}
+			},
+			wantErr: false,
+			wantResult: &models.ValidationResult{
+				IsValid:  true,
+				Errors:   []models.ValidationError{},
+				Warnings: []models.ValidationWarning{},
+			},
+		},
+		{
+			name:      "successful validation products with strictness products",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			inputLoc:  models.LocationProducts,
+			setupMock: func(repo *mockRepository, validator *mockValidator) {
+				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+					return &models.StateMachine{
+						Name:     name,
+						Version:  version,
+						Content:  "@startuml\n[*] --> Idle\n@enduml",
+						Location: location,
+					}, nil
+				}
+				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+					if strictness != models.StrictnessProducts {
+						t.Errorf("Expected StrictnessProducts but got %v", strictness)
+					}
+					return &models.ValidationResult{
+						IsValid: true,
+						Errors:  []models.ValidationError{},
+						Warnings: []models.ValidationWarning{
+							{Code: "STYLE_WARNING", Message: "Consider improving naming"},
+						},
+					}, nil
+				}
+			},
+			wantErr: false,
+			wantResult: &models.ValidationResult{
+				IsValid: true,
+				Errors:  []models.ValidationError{},
+				Warnings: []models.ValidationWarning{
+					{Code: "STYLE_WARNING", Message: "Consider improving naming"},
+				},
+			},
+		},
+		{
+			name:        "empty name validation",
+			inputName:   "",
+			inputVer:    "1.0.0",
+			inputLoc:    models.LocationInProgress,
+			setupMock:   func(repo *mockRepository, validator *mockValidator) {},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeValidation,
+		},
+		{
+			name:        "empty version validation",
+			inputName:   "test-sm",
+			inputVer:    "",
+			inputLoc:    models.LocationInProgress,
+			setupMock:   func(repo *mockRepository, validator *mockValidator) {},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeValidation,
+		},
+		{
+			name:      "state machine not found",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			inputLoc:  models.LocationInProgress,
+			setupMock: func(repo *mockRepository, validator *mockValidator) {
+				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+					return nil, errors.New("file not found")
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeFileNotFound,
+		},
+		{
+			name:      "validator error",
+			inputName: "test-sm",
+			inputVer:  "1.0.0",
+			inputLoc:  models.LocationInProgress,
+			setupMock: func(repo *mockRepository, validator *mockValidator) {
+				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+					return &models.StateMachine{
+						Name:     name,
+						Version:  version,
+						Content:  "invalid content",
+						Location: location,
+					}, nil
+				}
+				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+					return nil, errors.New("validation engine error")
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeValidation,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &mockRepository{}
+			validator := &mockValidator{}
+			tt.setupMock(repo, validator)
+
+			svc := NewService(repo, validator, nil)
+
+			result, err := svc.Validate(tt.inputName, tt.inputVer, tt.inputLoc)
+
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("Validate() expected error but got none")
+					return
+				}
+
+				var smErr *models.StateMachineError
+				if !errors.As(err, &smErr) {
+					t.Errorf("Validate() expected StateMachineError but got %T", err)
+					return
+				}
+
+				if smErr.Type != tt.wantErrType {
+					t.Errorf("Validate() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Validate() unexpected error: %v", err)
+					return
+				}
+
+				if result == nil {
+					t.Error("Validate() expected result but got nil")
+					return
+				}
+
+				if result.IsValid != tt.wantResult.IsValid {
+					t.Errorf("Validate() IsValid = %v, want %v", result.IsValid, tt.wantResult.IsValid)
+				}
+				if len(result.Errors) != len(tt.wantResult.Errors) {
+					t.Errorf("Validate() Errors count = %v, want %v", len(result.Errors), len(tt.wantResult.Errors))
+				}
+				if len(result.Warnings) != len(tt.wantResult.Warnings) {
+					t.Errorf("Validate() Warnings count = %v, want %v", len(result.Warnings), len(tt.wantResult.Warnings))
+				}
+			}
+		})
+	}
+}
+
+func TestService_ListAll(t *testing.T) {
+	tests := []struct {
+		name        string
+		inputLoc    models.Location
+		setupMock   func(*mockRepository)
+		wantErr     bool
+		wantErrType models.ErrorType
+		wantCount   int
+	}{
+		{
+			name:     "successful list in-progress",
+			inputLoc: models.LocationInProgress,
+			setupMock: func(repo *mockRepository) {
+				repo.listStateMachinesFunc = func(location models.Location) ([]models.StateMachine, error) {
+					return []models.StateMachine{
+						{
+							Name:     "sm1",
+							Version:  "1.0.0",
+							Content:  "@startuml\n[*] --> Idle\n@enduml",
+							Location: location,
+						},
+						{
+							Name:     "sm2",
+							Version:  "2.0.0",
+							Content:  "@startuml\n[*] --> Active\n@enduml",
+							Location: location,
+						},
+					}, nil
+				}
+			},
+			wantErr:   false,
+			wantCount: 2,
+		},
+		{
+			name:     "successful list products",
+			inputLoc: models.LocationProducts,
+			setupMock: func(repo *mockRepository) {
+				repo.listStateMachinesFunc = func(location models.Location) ([]models.StateMachine, error) {
+					return []models.StateMachine{
+						{
+							Name:     "prod-sm",
+							Version:  "1.0.0",
+							Content:  "@startuml\n[*] --> Ready\n@enduml",
+							Location: location,
+						},
+					}, nil
+				}
+			},
+			wantErr:   false,
+			wantCount: 1,
+		},
+		{
+			name:     "empty list",
+			inputLoc: models.LocationInProgress,
+			setupMock: func(repo *mockRepository) {
+				repo.listStateMachinesFunc = func(location models.Location) ([]models.StateMachine, error) {
+					return []models.StateMachine{}, nil
+				}
+			},
+			wantErr:   false,
+			wantCount: 0,
+		},
+		{
+			name:     "repository error",
+			inputLoc: models.LocationInProgress,
+			setupMock: func(repo *mockRepository) {
+				repo.listStateMachinesFunc = func(location models.Location) ([]models.StateMachine, error) {
+					return nil, errors.New("directory read error")
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeFileSystem,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &mockRepository{}
+			validator := &mockValidator{}
+			tt.setupMock(repo)
+
+			svc := NewService(repo, validator, nil)
+
+			result, err := svc.ListAll(tt.inputLoc)
+
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("ListAll() expected error but got none")
+					return
+				}
+
+				var smErr *models.StateMachineError
+				if !errors.As(err, &smErr) {
+					t.Errorf("ListAll() expected StateMachineError but got %T", err)
+					return
+				}
+
+				if smErr.Type != tt.wantErrType {
+					t.Errorf("ListAll() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("ListAll() unexpected error: %v", err)
+					return
+				}
+
+				if result == nil {
+					t.Error("ListAll() expected result but got nil")
+					return
+				}
+
+				if len(result) != tt.wantCount {
+					t.Errorf("ListAll() count = %v, want %v", len(result), tt.wantCount)
+				}
+
+				// Verify all returned state machines have the correct location
+				for _, sm := range result {
+					if sm.Location != tt.inputLoc {
+						t.Errorf("ListAll() state machine location = %v, want %v", sm.Location, tt.inputLoc)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestService_ResolveReferences(t *testing.T) {
+	tests := []struct {
+		name        string
+		input       *models.StateMachine
+		setupMock   func(*mockRepository)
+		wantErr     bool
+		wantErrType models.ErrorType
+	}{
+		{
+			name: "successful resolve no references",
+			input: &models.StateMachine{
+				Name:       "test-sm",
+				Version:    "1.0.0",
+				Content:    "@startuml\n[*] --> Idle\n@enduml",
+				Location:   models.LocationInProgress,
+				References: []models.Reference{},
+			},
+			setupMock: func(repo *mockRepository) {},
+			wantErr:   false,
+		},
+		{
+			name: "successful resolve product reference",
+			input: &models.StateMachine{
+				Name:     "test-sm",
+				Version:  "1.0.0",
+				Content:  "@startuml\n[*] --> Idle\n@enduml",
+				Location: models.LocationInProgress,
+				References: []models.Reference{
+					{
+						Name:    "auth-sm",
+						Version: "2.0.0",
+						Type:    models.ReferenceTypeProduct,
+					},
+				},
+			},
+			setupMock: func(repo *mockRepository) {
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					if name == "auth-sm" && version == "2.0.0" && location == models.LocationProducts {
+						return true, nil
+					}
+					return false, nil
+				}
+			},
+			wantErr: false,
+		},
+		{
+			name: "successful resolve nested reference",
+			input: &models.StateMachine{
+				Name:     "test-sm",
+				Version:  "1.0.0",
+				Content:  "@startuml\n[*] --> Idle\n@enduml",
+				Location: models.LocationInProgress,
+				References: []models.Reference{
+					{
+						Name: "nested-sm",
+						Type: models.ReferenceTypeNested,
+					},
+				},
+			},
+			setupMock: func(repo *mockRepository) {
+				repo.directoryExistsFunc = func(path string) (bool, error) {
+					expectedPath := "in-progress\\test-sm-1.0.0\\nested\\nested-sm"
+					if path == expectedPath {
+						return true, nil
+					}
+					return false, nil
+				}
+			},
+			wantErr: false,
+		},
+		{
+			name: "successful resolve multiple references",
+			input: &models.StateMachine{
+				Name:     "test-sm",
+				Version:  "1.0.0",
+				Content:  "@startuml\n[*] --> Idle\n@enduml",
+				Location: models.LocationInProgress,
+				References: []models.Reference{
+					{
+						Name:    "auth-sm",
+						Version: "2.0.0",
+						Type:    models.ReferenceTypeProduct,
+					},
+					{
+						Name: "nested-sm",
+						Type: models.ReferenceTypeNested,
+					},
+				},
+			},
+			setupMock: func(repo *mockRepository) {
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					if name == "auth-sm" && version == "2.0.0" && location == models.LocationProducts {
+						return true, nil
+					}
+					return false, nil
+				}
+				repo.directoryExistsFunc = func(path string) (bool, error) {
+					expectedPath := "in-progress\\test-sm-1.0.0\\nested\\nested-sm"
+					if path == expectedPath {
+						return true, nil
+					}
+					return false, nil
+				}
+			},
+			wantErr: false,
+		},
+		{
+			name:        "nil state machine validation",
+			input:       nil,
+			setupMock:   func(repo *mockRepository) {},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeValidation,
+		},
+		{
+			name: "product reference not found",
+			input: &models.StateMachine{
+				Name:     "test-sm",
+				Version:  "1.0.0",
+				Content:  "@startuml\n[*] --> Idle\n@enduml",
+				Location: models.LocationInProgress,
+				References: []models.Reference{
+					{
+						Name:    "missing-sm",
+						Version: "1.0.0",
+						Type:    models.ReferenceTypeProduct,
+					},
+				},
+			},
+			setupMock: func(repo *mockRepository) {
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					return false, nil // not found
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeReferenceResolution,
+		},
+		{
+			name: "nested reference not found",
+			input: &models.StateMachine{
+				Name:     "test-sm",
+				Version:  "1.0.0",
+				Content:  "@startuml\n[*] --> Idle\n@enduml",
+				Location: models.LocationInProgress,
+				References: []models.Reference{
+					{
+						Name: "missing-nested",
+						Type: models.ReferenceTypeNested,
+					},
+				},
+			},
+			setupMock: func(repo *mockRepository) {
+				repo.directoryExistsFunc = func(path string) (bool, error) {
+					return false, nil // not found
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeReferenceResolution,
+		},
+		{
+			name: "repository error checking product reference",
+			input: &models.StateMachine{
+				Name:     "test-sm",
+				Version:  "1.0.0",
+				Content:  "@startuml\n[*] --> Idle\n@enduml",
+				Location: models.LocationInProgress,
+				References: []models.Reference{
+					{
+						Name:    "auth-sm",
+						Version: "2.0.0",
+						Type:    models.ReferenceTypeProduct,
+					},
+				},
+			},
+			setupMock: func(repo *mockRepository) {
+				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+					return false, models.NewStateMachineError(models.ErrorTypeFileSystem, "filesystem error", nil)
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeFileSystem,
+		},
+		{
+			name: "repository error checking nested reference",
+			input: &models.StateMachine{
+				Name:     "test-sm",
+				Version:  "1.0.0",
+				Content:  "@startuml\n[*] --> Idle\n@enduml",
+				Location: models.LocationInProgress,
+				References: []models.Reference{
+					{
+						Name: "nested-sm",
+						Type: models.ReferenceTypeNested,
+					},
+				},
+			},
+			setupMock: func(repo *mockRepository) {
+				repo.directoryExistsFunc = func(path string) (bool, error) {
+					return false, models.NewStateMachineError(models.ErrorTypeFileSystem, "filesystem error", nil)
+				}
+			},
+			wantErr:     true,
+			wantErrType: models.ErrorTypeFileSystem,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &mockRepository{}
+			validator := &mockValidator{}
+			tt.setupMock(repo)
+
+			svc := NewService(repo, validator, nil)
+
+			err := svc.ResolveReferences(tt.input)
+
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("ResolveReferences() expected error but got none")
+					return
+				}
+
+				var smErr *models.StateMachineError
+				if !errors.As(err, &smErr) {
+					t.Errorf("ResolveReferences() expected StateMachineError but got %T", err)
+					return
+				}
+
+				if smErr.Type != tt.wantErrType {
+					t.Errorf("ResolveReferences() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("ResolveReferences() unexpected error: %v", err)
+					return
+				}
+
+				// Verify that references have been resolved with correct paths
+				if tt.input != nil && len(tt.input.References) > 0 {
+					for _, ref := range tt.input.References {
+						if ref.Path == "" {
+							t.Errorf("ResolveReferences() reference path not set for %s", ref.Name)
+						}
+
+						// Verify path format based on reference type
+						switch ref.Type {
+						case models.ReferenceTypeProduct:
+							expectedPath := "products\\" + ref.Name + "-" + ref.Version + "\\" + ref.Name + "-" + ref.Version + ".puml"
+							if ref.Path != expectedPath {
+								t.Errorf("ResolveReferences() product reference path = %v, want %v", ref.Path, expectedPath)
+							}
+						case models.ReferenceTypeNested:
+							expectedPath := tt.input.Location.String() + "\\" + tt.input.Name + "-" + tt.input.Version + "\\nested\\" + ref.Name + "\\" + ref.Name + ".puml"
+							if ref.Path != expectedPath {
+								t.Errorf("ResolveReferences() nested reference path = %v, want %v", ref.Path, expectedPath)
+							}
+						}
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestService_ResolveReferencesPathBuilding(t *testing.T) {
+	tests := []struct {
+		name         string
+		stateMachine *models.StateMachine
+		reference    models.Reference
+		expectedPath string
+	}{
+		{
+			name: "product reference path building",
+			stateMachine: &models.StateMachine{
+				Name:     "test-sm",
+				Version:  "1.0.0",
+				Location: models.LocationInProgress,
+			},
+			reference: models.Reference{
+				Name:    "auth-service",
+				Version: "2.1.0",
+				Type:    models.ReferenceTypeProduct,
+			},
+			expectedPath: "products\\auth-service-2.1.0\\auth-service-2.1.0.puml",
+		},
+		{
+			name: "nested reference path building in-progress",
+			stateMachine: &models.StateMachine{
+				Name:     "main-sm",
+				Version:  "3.0.0",
+				Location: models.LocationInProgress,
+			},
+			reference: models.Reference{
+				Name: "sub-component",
+				Type: models.ReferenceTypeNested,
+			},
+			expectedPath: "in-progress\\main-sm-3.0.0\\nested\\sub-component\\sub-component.puml",
+		},
+		{
+			name: "nested reference path building products",
+			stateMachine: &models.StateMachine{
+				Name:     "prod-sm",
+				Version:  "1.5.0",
+				Location: models.LocationProducts,
+			},
+			reference: models.Reference{
+				Name: "helper",
+				Type: models.ReferenceTypeNested,
+			},
+			expectedPath: "products\\prod-sm-1.5.0\\nested\\helper\\helper.puml",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &mockRepository{}
+			validator := &mockValidator{}
+
+			// Setup mocks to return success for existence checks
+			repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				return true, nil
+			}
+			repo.directoryExistsFunc = func(path string) (bool, error) {
+				return true, nil
+			}
+
+			svc := NewService(repo, validator, nil)
+
+			// Create a state machine with the test reference
+			sm := &models.StateMachine{
+				Name:       tt.stateMachine.Name,
+				Version:    tt.stateMachine.Version,
+				Location:   tt.stateMachine.Location,
+				References: []models.Reference{tt.reference},
+			}
+
+			err := svc.ResolveReferences(sm)
+
+			if err != nil {
+				t.Errorf("ResolveReferences() unexpected error: %v", err)
+				return
+			}
+
+			if len(sm.References) != 1 {
+				t.Errorf("ResolveReferences() expected 1 reference but got %d", len(sm.References))
+				return
+			}
+
+			actualPath := sm.References[0].Path
+			if actualPath != tt.expectedPath {
+				t.Errorf("ResolveReferences() path = %v, want %v", actualPath, tt.expectedPath)
+			}
+		})
+	}
+}

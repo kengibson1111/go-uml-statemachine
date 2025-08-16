@@ -374,18 +374,178 @@ func (s *service) attemptRollback(name, version string) {
 
 // Validate validates a state machine with the specified strictness level
 func (s *service) Validate(name, version string, location models.Location) (*models.ValidationResult, error) {
-	// Implementation will be added in task 7.4
-	panic("not implemented")
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	// Validate input parameters
+	if name == "" {
+		return nil, models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil)
+	}
+	if version == "" {
+		return nil, models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil)
+	}
+
+	// Read the state machine from repository
+	sm, err := s.repo.ReadStateMachine(name, version, location)
+	if err != nil {
+		return nil, models.NewStateMachineError(models.ErrorTypeFileNotFound,
+			"failed to read state machine for validation", err).
+			WithContext("name", name).
+			WithContext("version", version).
+			WithContext("location", location.String())
+	}
+
+	// Determine validation strictness based on location
+	strictness := models.StrictnessInProgress
+	if location == models.LocationProducts {
+		strictness = models.StrictnessProducts
+	}
+
+	// Validate the state machine using the validator
+	validationResult, err := s.validator.Validate(sm, strictness)
+	if err != nil {
+		return nil, models.NewStateMachineError(models.ErrorTypeValidation,
+			"validation failed", err).
+			WithContext("name", name).
+			WithContext("version", version).
+			WithContext("location", location.String()).
+			WithContext("strictness", strictness.String())
+	}
+
+	return validationResult, nil
 }
 
 // ListAll lists all state machines in the specified location
 func (s *service) ListAll(location models.Location) ([]models.StateMachine, error) {
-	// Implementation will be added in task 7.4
-	panic("not implemented")
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	// Use the repository to list all state machines in the specified location
+	stateMachines, err := s.repo.ListStateMachines(location)
+	if err != nil {
+		return nil, models.NewStateMachineError(models.ErrorTypeFileSystem,
+			"failed to list state machines", err).
+			WithContext("location", location.String())
+	}
+
+	return stateMachines, nil
 }
 
 // ResolveReferences resolves all references in a state machine
 func (s *service) ResolveReferences(sm *models.StateMachine) error {
-	// Implementation will be added in task 7.4
-	panic("not implemented")
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	// Validate input parameters
+	if sm == nil {
+		return models.NewStateMachineError(models.ErrorTypeValidation, "state machine cannot be nil", nil)
+	}
+
+	// If there are no references, nothing to resolve
+	if len(sm.References) == 0 {
+		return nil
+	}
+
+	// Resolve each reference
+	for i := range sm.References {
+		err := s.resolveReference(sm, &sm.References[i])
+		if err != nil {
+			return err // Return the original error from resolveReference
+		}
+	}
+
+	return nil
+}
+
+// resolveReference resolves a single reference within a state machine
+func (s *service) resolveReference(sm *models.StateMachine, ref *models.Reference) error {
+	switch ref.Type {
+	case models.ReferenceTypeProduct:
+		// For product references, check if the referenced state machine exists in products
+		exists, err := s.repo.Exists(ref.Name, ref.Version, models.LocationProducts)
+		if err != nil {
+			return models.NewStateMachineError(models.ErrorTypeFileSystem,
+				"failed to check product reference existence", err).
+				WithContext("reference_name", ref.Name).
+				WithContext("reference_version", ref.Version)
+		}
+		if !exists {
+			return models.NewStateMachineError(models.ErrorTypeReferenceResolution,
+				"product reference not found", nil).
+				WithContext("reference_name", ref.Name).
+				WithContext("reference_version", ref.Version)
+		}
+
+		// Set the resolved path for the reference
+		ref.Path = s.buildProductReferencePath(ref.Name, ref.Version)
+
+	case models.ReferenceTypeNested:
+		// For nested references, check if the referenced state machine exists as a nested item
+		// within the same parent directory as the current state machine
+		nestedPath := s.buildNestedReferencePath(sm, ref.Name)
+
+		// Check if the nested reference exists by attempting to read it
+		// Note: For nested references, we don't use version in the path
+		exists, err := s.checkNestedReferenceExists(sm, ref.Name)
+		if err != nil {
+			return models.NewStateMachineError(models.ErrorTypeFileSystem,
+				"failed to check nested reference existence", err).
+				WithContext("reference_name", ref.Name).
+				WithContext("parent_state_machine", sm.Name)
+		}
+		if !exists {
+			return models.NewStateMachineError(models.ErrorTypeReferenceResolution,
+				"nested reference not found", nil).
+				WithContext("reference_name", ref.Name).
+				WithContext("parent_state_machine", sm.Name)
+		}
+
+		// Set the resolved path for the reference
+		ref.Path = nestedPath
+
+	default:
+		return models.NewStateMachineError(models.ErrorTypeReferenceResolution,
+			"unknown reference type", nil).
+			WithContext("reference_type", ref.Type.String())
+	}
+
+	return nil
+}
+
+// buildProductReferencePath builds the path for a product reference
+func (s *service) buildProductReferencePath(name, version string) string {
+	// Product references are in the format: products/{name}-{version}/{name}-{version}.puml
+	return "products\\" + name + "-" + version + "\\" + name + "-" + version + ".puml"
+}
+
+// buildNestedReferencePath builds the path for a nested reference
+func (s *service) buildNestedReferencePath(sm *models.StateMachine, refName string) string {
+	// Nested references are in the format: {location}/{parent-name}-{parent-version}/nested/{ref-name}/{ref-name}.puml
+	locationStr := sm.Location.String()
+	return locationStr + "\\" + sm.Name + "-" + sm.Version + "\\nested\\" + refName + "\\" + refName + ".puml"
+}
+
+// checkNestedReferenceExists checks if a nested reference exists within the parent state machine's directory
+func (s *service) checkNestedReferenceExists(sm *models.StateMachine, refName string) (bool, error) {
+	// For nested references, we need to check if the nested directory and file exist
+	// This is a simplified check - in a real implementation, we might need more sophisticated
+	// directory traversal logic depending on how the repository is implemented
+
+	// We'll use the repository's directory checking capabilities
+	nestedDirPath := s.buildNestedDirectoryPath(sm, refName)
+
+	// Check if the nested directory exists
+	exists, err := s.repo.DirectoryExists(nestedDirPath)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
+
+// buildNestedDirectoryPath builds the directory path for a nested reference
+func (s *service) buildNestedDirectoryPath(sm *models.StateMachine, refName string) string {
+	// Nested directory path: {location}/{parent-name}-{parent-version}/nested/{ref-name}
+	locationStr := sm.Location.String()
+	return locationStr + "\\" + sm.Name + "-" + sm.Version + "\\nested\\" + refName
 }

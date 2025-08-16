@@ -496,7 +496,9 @@ go run main.go
 
 ## Testing
 
-Run the test suite:
+The module includes comprehensive tests for both internal components and the public API.
+
+### Run All Tests
 
 **Windows:**
 ```cmd
@@ -508,7 +510,7 @@ go test .\...
 go test ./...
 ```
 
-Run tests with verbose output:
+### Run Tests with Verbose Output
 
 **Windows:**
 ```cmd
@@ -520,7 +522,19 @@ go test -v .\...
 go test -v ./...
 ```
 
-Run integration tests:
+### Run Public API Tests Only
+
+**Windows:**
+```cmd
+go test -v .\statemachine\
+```
+
+**Linux/macOS:**
+```bash
+go test -v ./statemachine/
+```
+
+### Run Integration Tests
 
 **Windows:**
 ```cmd
@@ -531,6 +545,14 @@ go test .\integration\...
 ```bash
 go test ./integration/...
 ```
+
+### Test Coverage
+
+The test suite includes:
+- **Public API Tests** (`statemachine/statemachine_test.go`) - Tests all public functions and integration scenarios
+- **Unit Tests** - Individual component tests in each internal package
+- **Integration Tests** - End-to-end workflow tests
+- **Error Handling Tests** - Comprehensive error scenario coverage
 
 ## API Documentation
 

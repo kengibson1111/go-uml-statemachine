@@ -441,7 +441,28 @@ func (s *service) ResolveReferences(sm *models.StateMachine) error {
 		return models.NewStateMachineError(models.ErrorTypeValidation, "state machine cannot be nil", nil)
 	}
 
-	// If there are no references, nothing to resolve
+	// First, parse references from the content if not already done
+	if len(sm.References) == 0 {
+		// Use the validator to parse references from content
+		validationResult, err := s.validator.ValidateReferences(sm)
+		if err != nil {
+			return models.NewStateMachineError(models.ErrorTypeValidation,
+				"failed to parse references from content", err)
+		}
+
+		// Check if reference parsing had critical errors
+		if validationResult.HasErrors() {
+			// Find the first critical error related to reference parsing
+			for _, validationErr := range validationResult.Errors {
+				if validationErr.Code == "REFERENCE_PARSE_ERROR" {
+					return models.NewStateMachineError(models.ErrorTypeValidation,
+						"failed to parse references: "+validationErr.Message, nil)
+				}
+			}
+		}
+	}
+
+	// If there are still no references after parsing, nothing to resolve
 	if len(sm.References) == 0 {
 		return nil
 	}

@@ -186,7 +186,7 @@ func (pm *PathManager) ParseDirectoryName(dirName string) (*PathInfo, error) {
 		}, nil
 	}
 
-	// Parse versioned directory name (name-version)
+	// Try to find a valid version by working backwards through possible splits
 	parts := strings.Split(dirName, "-")
 	if len(parts) < 2 {
 		return nil, NewStateMachineError(ErrorTypeValidation, "invalid directory name format", nil).
@@ -194,29 +194,31 @@ func (pm *PathManager) ParseDirectoryName(dirName string) (*PathInfo, error) {
 			WithContext("expectedFormat", "name-version")
 	}
 
-	// Handle names that contain hyphens by joining all parts except the last one
-	name := strings.Join(parts[:len(parts)-1], "-")
-	version := parts[len(parts)-1]
+	// Try different split points to handle pre-release versions
+	for i := len(parts) - 1; i >= 1; i-- {
+		name := strings.Join(parts[:i], "-")
+		version := strings.Join(parts[i:], "-")
 
-	// Try to parse as version - if it fails, treat as nested (no version)
-	if _, err := ParseVersion(version); err != nil {
-		// This is likely a nested directory with hyphens in the name
-		return &PathInfo{
-			Name:     dirName,
-			Version:  "",
-			IsNested: true,
-		}, nil
+		// Try to parse as version
+		if _, err := ParseVersion(version); err == nil {
+			// Valid version found, validate the name
+			if err := pm.ValidateName(name); err != nil {
+				return nil, err
+			}
+
+			return &PathInfo{
+				Name:     name,
+				Version:  version,
+				IsNested: false,
+			}, nil
+		}
 	}
 
-	// Validate the extracted name
-	if err := pm.ValidateName(name); err != nil {
-		return nil, err
-	}
-
+	// No valid version found, treat as nested (no version)
 	return &PathInfo{
-		Name:     name,
-		Version:  version,
-		IsNested: false,
+		Name:     dirName,
+		Version:  "",
+		IsNested: true,
 	}, nil
 }
 
@@ -244,7 +246,7 @@ func (pm *PathManager) ParseFileName(fileName string) (*PathInfo, error) {
 		}, nil
 	}
 
-	// Parse versioned file name (name-version.puml)
+	// Try to find a valid version by working backwards through possible splits
 	parts := strings.Split(baseName, "-")
 	if len(parts) < 2 {
 		return nil, NewStateMachineError(ErrorTypeValidation, "invalid file name format", nil).
@@ -252,29 +254,31 @@ func (pm *PathManager) ParseFileName(fileName string) (*PathInfo, error) {
 			WithContext("expectedFormat", "name-version.puml")
 	}
 
-	// Handle names that contain hyphens by joining all parts except the last one
-	name := strings.Join(parts[:len(parts)-1], "-")
-	version := parts[len(parts)-1]
+	// Try different split points to handle pre-release versions
+	for i := len(parts) - 1; i >= 1; i-- {
+		name := strings.Join(parts[:i], "-")
+		version := strings.Join(parts[i:], "-")
 
-	// Try to parse as version - if it fails, treat as nested (no version)
-	if _, err := ParseVersion(version); err != nil {
-		// This is likely a nested file with hyphens in the name
-		return &PathInfo{
-			Name:     baseName,
-			Version:  "",
-			IsNested: true,
-		}, nil
+		// Try to parse as version
+		if _, err := ParseVersion(version); err == nil {
+			// Valid version found, validate the name
+			if err := pm.ValidateName(name); err != nil {
+				return nil, err
+			}
+
+			return &PathInfo{
+				Name:     name,
+				Version:  version,
+				IsNested: false,
+			}, nil
+		}
 	}
 
-	// Validate the extracted name
-	if err := pm.ValidateName(name); err != nil {
-		return nil, err
-	}
-
+	// No valid version found, treat as nested (no version)
 	return &PathInfo{
-		Name:     name,
-		Version:  version,
-		IsNested: false,
+		Name:     baseName,
+		Version:  "",
+		IsNested: true,
 	}, nil
 }
 

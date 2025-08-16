@@ -28,20 +28,15 @@ import (
     "fmt"
     "log"
 
-    "github.com/kengibson1111/go-uml-statemachine/internal/models"
-    "github.com/kengibson1111/go-uml-statemachine/internal/repository"
-    "github.com/kengibson1111/go-uml-statemachine/internal/service"
-    "github.com/kengibson1111/go-uml-statemachine/internal/validation"
+    "github.com/kengibson1111/go-uml-statemachine/statemachine"
 )
 
 func main() {
-    // Create configuration
-    config := models.DefaultConfig()
-    
-    // Create dependencies
-    repo := repository.NewFileSystemRepository(config)
-    validator := validation.NewPlantUMLValidatorWithRepository(repo)
-    svc := service.NewService(repo, validator, config)
+    // Create a new state machine service
+    svc, err := statemachine.NewService()
+    if err != nil {
+        log.Fatal(err)
+    }
     
     // Create a new state machine
     content := `@startuml
@@ -50,7 +45,7 @@ func main() {
     Active --> Idle : stop()
     @enduml`
     
-    sm, err := svc.Create("my-machine", "1.0.0", content, models.LocationInProgress)
+    sm, err := svc.Create("my-machine", "1.0.0", content, statemachine.LocationInProgress)
     if err != nil {
         log.Fatal(err)
     }
@@ -102,7 +97,7 @@ The module organizes state machines in a standardized directory structure:
 ### Default Configuration
 
 ```go
-config := models.DefaultConfig()
+config := statemachine.DefaultConfig()
 // Uses:
 // - RootDirectory: ".go-uml-statemachine"
 // - ValidationLevel: StrictnessInProgress
@@ -123,10 +118,10 @@ The module supports configuration through environment variables:
 
 ```go
 // Load configuration from environment
-config := models.LoadConfigFromEnv()
+config := statemachine.LoadConfigFromEnv()
 
 // Or merge with existing config
-config := models.DefaultConfig()
+config := statemachine.DefaultConfig()
 config.MergeWithEnv()
 ```
 
@@ -136,16 +131,16 @@ config.MergeWithEnv()
 
 ```go
 // Create in in-progress location
-sm, err := svc.Create("user-auth", "1.0.0", plantUMLContent, models.LocationInProgress)
+sm, err := svc.Create("user-auth", "1.0.0", plantUMLContent, statemachine.LocationInProgress)
 
 // Create in products location (for direct production deployment)
-sm, err := svc.Create("user-auth", "1.0.0", plantUMLContent, models.LocationProducts)
+sm, err := svc.Create("user-auth", "1.0.0", plantUMLContent, statemachine.LocationProducts)
 ```
 
 ### Reading State Machines
 
 ```go
-sm, err := svc.Read("user-auth", "1.0.0", models.LocationInProgress)
+sm, err := svc.Read("user-auth", "1.0.0", statemachine.LocationInProgress)
 if err != nil {
     log.Printf("Error reading state machine: %v", err)
 }
@@ -161,17 +156,17 @@ err := svc.Update(sm)
 ### Deleting State Machines
 
 ```go
-err := svc.Delete("user-auth", "1.0.0", models.LocationInProgress)
+err := svc.Delete("user-auth", "1.0.0", statemachine.LocationInProgress)
 ```
 
 ### Listing State Machines
 
 ```go
 // List all in-progress state machines
-inProgressSMs, err := svc.ListAll(models.LocationInProgress)
+inProgressSMs, err := svc.ListAll(statemachine.LocationInProgress)
 
 // List all production state machines
-productSMs, err := svc.ListAll(models.LocationProducts)
+productSMs, err := svc.ListAll(statemachine.LocationProducts)
 ```
 
 ## Validation
@@ -184,7 +179,7 @@ The module supports two validation strictness levels:
 - Used for development and testing
 
 ```go
-result, err := svc.Validate("user-auth", "1.0.0", models.LocationInProgress)
+result, err := svc.Validate("user-auth", "1.0.0", statemachine.LocationInProgress)
 if result.HasErrors() {
     fmt.Println("Validation failed with errors:")
     for _, err := range result.Errors {
@@ -285,23 +280,15 @@ for _, ref := range sm.References {
 The module provides comprehensive error handling with context:
 
 ```go
-sm, err := svc.Read("non-existent", "1.0.0", models.LocationInProgress)
+sm, err := svc.Read("non-existent", "1.0.0", statemachine.LocationInProgress)
 if err != nil {
     // Error includes context about the operation, component, and parameters
     fmt.Printf("Error: %v\n", err)
-    
-    // Check error type
-    if smErr, ok := err.(*models.StateMachineError); ok {
-        switch smErr.Type {
-        case models.ErrorTypeFileNotFound:
-            fmt.Println("File not found")
-        case models.ErrorTypeValidation:
-            fmt.Println("Validation error")
-        case models.ErrorTypeDirectoryConflict:
-            fmt.Println("Directory conflict")
-        }
-    }
+    return
 }
+
+// Use the state machine
+fmt.Printf("Content: %s\n", sm.Content)
 ```
 
 ## Examples
@@ -573,6 +560,8 @@ The module provides the following main interfaces:
 ### StateMachineService Interface
 
 ```go
+import "github.com/kengibson1111/go-uml-statemachine/statemachine"
+
 type StateMachineService interface {
     // CRUD operations
     Create(name, version string, content string, location Location) (*StateMachine, error)
@@ -593,6 +582,8 @@ type StateMachineService interface {
 ### Core Types
 
 ```go
+import "github.com/kengibson1111/go-uml-statemachine/statemachine"
+
 // StateMachine represents a UML state machine
 type StateMachine struct {
     Name       string

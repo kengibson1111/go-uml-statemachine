@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/kengibson1111/go-uml-statemachine/internal/models"
@@ -1816,4 +1817,170 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 			}
 		})
 	}
+}
+func TestNewServiceFromEnv(t *testing.T) {
+	// Save original environment variables
+	originalRootDir := os.Getenv("GO_UML_ROOT_DIRECTORY")
+	originalValidationLevel := os.Getenv("GO_UML_VALIDATION_LEVEL")
+	originalBackupEnabled := os.Getenv("GO_UML_BACKUP_ENABLED")
+	originalMaxFileSize := os.Getenv("GO_UML_MAX_FILE_SIZE")
+
+	// Clean up after test
+	defer func() {
+		os.Setenv("GO_UML_ROOT_DIRECTORY", originalRootDir)
+		os.Setenv("GO_UML_VALIDATION_LEVEL", originalValidationLevel)
+		os.Setenv("GO_UML_BACKUP_ENABLED", originalBackupEnabled)
+		os.Setenv("GO_UML_MAX_FILE_SIZE", originalMaxFileSize)
+	}()
+
+	tests := []struct {
+		name           string
+		envRootDir     string
+		envValidation  string
+		envBackup      string
+		envMaxFileSize string
+	}{
+		{
+			name:           "default environment",
+			envRootDir:     "",
+			envValidation:  "",
+			envBackup:      "",
+			envMaxFileSize: "",
+		},
+		{
+			name:           "custom environment",
+			envRootDir:     "C:\\custom\\env\\path",
+			envValidation:  "products",
+			envBackup:      "true",
+			envMaxFileSize: "2097152",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Set environment variables
+			os.Setenv("GO_UML_ROOT_DIRECTORY", tt.envRootDir)
+			os.Setenv("GO_UML_VALIDATION_LEVEL", tt.envValidation)
+			os.Setenv("GO_UML_BACKUP_ENABLED", tt.envBackup)
+			os.Setenv("GO_UML_MAX_FILE_SIZE", tt.envMaxFileSize)
+
+			repo := &mockRepository{}
+			validator := &mockValidator{}
+
+			svc := NewServiceFromEnv(repo, validator)
+
+			if svc == nil {
+				t.Error("NewServiceFromEnv() returned nil")
+				return
+			}
+
+			// Verify the service implements the interface
+			_, ok := svc.(models.StateMachineService)
+			if !ok {
+				t.Error("NewServiceFromEnv() did not return a StateMachineService")
+			}
+		})
+	}
+}
+
+func TestNewServiceWithEnvOverrides(t *testing.T) {
+	// Save original environment variables
+	originalRootDir := os.Getenv("GO_UML_ROOT_DIRECTORY")
+	originalValidationLevel := os.Getenv("GO_UML_VALIDATION_LEVEL")
+	originalBackupEnabled := os.Getenv("GO_UML_BACKUP_ENABLED")
+	originalMaxFileSize := os.Getenv("GO_UML_MAX_FILE_SIZE")
+
+	// Clean up after test
+	defer func() {
+		os.Setenv("GO_UML_ROOT_DIRECTORY", originalRootDir)
+		os.Setenv("GO_UML_VALIDATION_LEVEL", originalValidationLevel)
+		os.Setenv("GO_UML_BACKUP_ENABLED", originalBackupEnabled)
+		os.Setenv("GO_UML_MAX_FILE_SIZE", originalMaxFileSize)
+	}()
+
+	baseConfig := &models.Config{
+		RootDirectory:   "C:\\base\\path",
+		ValidationLevel: models.StrictnessInProgress,
+		BackupEnabled:   false,
+		MaxFileSize:     1024,
+	}
+
+	tests := []struct {
+		name           string
+		baseConfig     *models.Config
+		envRootDir     string
+		envValidation  string
+		envBackup      string
+		envMaxFileSize string
+	}{
+		{
+			name:           "nil base config with env overrides",
+			baseConfig:     nil,
+			envRootDir:     "D:\\env\\path",
+			envValidation:  "products",
+			envBackup:      "true",
+			envMaxFileSize: "4096",
+		},
+		{
+			name:           "base config with partial env overrides",
+			baseConfig:     baseConfig,
+			envRootDir:     "E:\\override\\path",
+			envValidation:  "",
+			envBackup:      "true",
+			envMaxFileSize: "",
+		},
+		{
+			name:           "base config with no env overrides",
+			baseConfig:     baseConfig,
+			envRootDir:     "",
+			envValidation:  "",
+			envBackup:      "",
+			envMaxFileSize: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Set environment variables
+			os.Setenv("GO_UML_ROOT_DIRECTORY", tt.envRootDir)
+			os.Setenv("GO_UML_VALIDATION_LEVEL", tt.envValidation)
+			os.Setenv("GO_UML_BACKUP_ENABLED", tt.envBackup)
+			os.Setenv("GO_UML_MAX_FILE_SIZE", tt.envMaxFileSize)
+
+			repo := &mockRepository{}
+			validator := &mockValidator{}
+
+			svc := NewServiceWithEnvOverrides(repo, validator, tt.baseConfig)
+
+			if svc == nil {
+				t.Error("NewServiceWithEnvOverrides() returned nil")
+				return
+			}
+
+			// Verify the service implements the interface
+			_, ok := svc.(models.StateMachineService)
+			if !ok {
+				t.Error("NewServiceWithEnvOverrides() did not return a StateMachineService")
+			}
+		})
+	}
+}
+
+func TestServiceFactoryFunctions(t *testing.T) {
+	repo := &mockRepository{}
+	validator := &mockValidator{}
+
+	t.Run("NewServiceWithDefaults", func(t *testing.T) {
+		svc := NewServiceWithDefaults(repo, validator)
+		if svc == nil {
+			t.Error("NewServiceWithDefaults() returned nil")
+		}
+	})
+
+	t.Run("NewService with nil config", func(t *testing.T) {
+		svc := NewService(repo, validator, nil)
+		if svc == nil {
+			t.Error("NewService() with nil config returned nil")
+		}
+	})
 }

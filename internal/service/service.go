@@ -33,6 +33,26 @@ func NewServiceWithDefaults(repo models.Repository, validator models.Validator) 
 	return NewService(repo, validator, models.DefaultConfig())
 }
 
+// NewServiceFromEnv creates a new StateMachineService with configuration loaded from environment variables
+func NewServiceFromEnv(repo models.Repository, validator models.Validator) models.StateMachineService {
+	config := models.LoadConfigFromEnv()
+	return NewService(repo, validator, config)
+}
+
+// NewServiceWithEnvOverrides creates a new StateMachineService with the provided config merged with environment variables
+// Environment variables take precedence over the provided config
+func NewServiceWithEnvOverrides(repo models.Repository, validator models.Validator, baseConfig *models.Config) models.StateMachineService {
+	if baseConfig == nil {
+		baseConfig = models.DefaultConfig()
+	}
+
+	// Create a copy of the base config and merge with environment
+	config := *baseConfig
+	config.MergeWithEnv()
+
+	return NewService(repo, validator, &config)
+}
+
 // Create creates a new state machine with the specified parameters
 func (s *service) Create(name, version string, content string, location models.Location) (*models.StateMachine, error) {
 	s.mu.Lock()

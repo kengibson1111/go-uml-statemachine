@@ -489,12 +489,12 @@ The module includes comprehensive tests for both internal components and the pub
 
 **Windows:**
 ```cmd
-go test .\internal\... .\statemachine\... .\integration\...
+go test .\internal\... .\statemachine\...
 ```
 
 **Linux/macOS:**
 ```bash
-go test ./internal/... ./statemachine/... ./integration/...
+go test ./internal/... ./statemachine/...
 ```
 
 **Alternative (includes informational messages for example directories):**
@@ -513,12 +513,12 @@ go test ./...
 
 **Windows:**
 ```cmd
-go test -v .\internal\... .\statemachine\... .\integration\...
+go test -v .\internal\... .\statemachine\...
 ```
 
 **Linux/macOS:**
 ```bash
-go test -v ./internal/... ./statemachine/... ./integration/...
+go test -v ./internal/... ./statemachine/...
 ```
 
 ### Run Public API Tests Only
@@ -537,20 +537,20 @@ go test -v ./statemachine/
 
 **Windows:**
 ```cmd
-go test .\integration\...
+go test .\internal\integration\...
 ```
 
 **Linux/macOS:**
 ```bash
-go test ./integration/...
+go test ./internal/integration/...
 ```
 
 ### Test Coverage
 
 The test suite includes:
 - **Public API Tests** (`statemachine/statemachine_test.go`) - Tests all public functions and integration scenarios
-- **Unit Tests** - Individual component tests in each internal package
-- **Integration Tests** - End-to-end workflow tests
+- **Unit Tests** - Individual component tests in each internal package (`internal/*/`)
+- **Integration Tests** (`internal/integration/`) - End-to-end workflow tests using internal packages
 - **Error Handling Tests** - Comprehensive error scenario coverage
 
 ## API Documentation

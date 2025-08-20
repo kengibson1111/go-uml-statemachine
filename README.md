@@ -59,7 +59,8 @@ func main() {
 The module organizes state machines in a standardized directory structure:
 
 **Windows:**
-```
+
+```text
 .go-uml-statemachine\
 ├── in-progress\
 │   └── {name}-{version}\
@@ -76,7 +77,8 @@ The module organizes state machines in a standardized directory structure:
 ```
 
 **Linux/macOS:**
-```
+
+```text
 .go-uml-statemachine/
 ├── in-progress/
 │   └── {name}-{version}/
@@ -174,6 +176,7 @@ productSMs, err := svc.ListAll(statemachine.LocationProducts)
 The module supports two validation strictness levels:
 
 ### In-Progress Validation
+
 - Returns both errors and warnings
 - Prevents promotion if errors exist
 - Used for development and testing
@@ -189,6 +192,7 @@ if result.HasErrors() {
 ```
 
 ### Products Validation
+
 - Returns warnings only (no blocking errors)
 - Used for production state machines
 - More lenient to allow operational flexibility
@@ -206,6 +210,7 @@ if err != nil {
 ```
 
 The promotion process:
+
 1. Validates the state machine exists in in-progress
 2. Checks for conflicts in products directory
 3. Validates the state machine content
@@ -217,9 +222,11 @@ The promotion process:
 State machines can reference other state machines:
 
 ### Product References
+
 Reference state machines in the products directory:
 
 **Windows:**
+
 ```plantuml
 @startuml
 !include products\base-auth-1.0.0\base-auth-1.0.0.puml
@@ -230,6 +237,7 @@ base-auth --> TwoFactor : success
 ```
 
 **Linux/macOS:**
+
 ```plantuml
 @startuml
 !include products/base-auth-1.0.0/base-auth-1.0.0.puml
@@ -240,9 +248,11 @@ base-auth --> TwoFactor : success
 ```
 
 ### Nested References
+
 Reference state machines within the same parent directory:
 
 **Windows:**
+
 ```plantuml
 @startuml
 !include nested\sub-process\sub-process.puml
@@ -252,6 +262,7 @@ Reference state machines within the same parent directory:
 ```
 
 **Linux/macOS:**
+
 ```plantuml
 @startuml
 !include nested/sub-process/sub-process.puml
@@ -296,9 +307,11 @@ fmt.Printf("Content: %s\n", sm.Content)
 The module includes examples organized into two categories:
 
 ### Public API Examples (examples/)
+
 These examples use the public `statemachine` package and demonstrate how external users would interact with the module. **These are the recommended examples for learning how to use the module.**
 
 ### Internal Examples (internal/examples/)
+
 These examples use internal packages directly and are primarily for development and testing purposes. They provide deeper insight into the module's internal architecture but are not recommended for typical usage.
 
 ## Running Examples
@@ -308,63 +321,75 @@ These examples use internal packages directly and are primarily for development 
 These examples demonstrate the recommended way to use the module through its public API:
 
 #### API Test Example
+
 Simple test to verify the public API works correctly.
 
 **Windows Command Prompt:**
+
 ```cmd
 cd examples\api_test
 go run main.go
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 Set-Location examples\api_test
 go run main.go
 ```
 
 **Linux/macOS:**
+
 ```bash
 cd examples/api_test
 go run main.go
 ```
 
 #### Common Use Cases Example
+
 Comprehensive example covering six different use cases including batch operations and environment configuration.
 
 **Windows Command Prompt:**
+
 ```cmd
 cd examples\common_use_cases
 go run main.go
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 Set-Location examples\common_use_cases
 go run main.go
 ```
 
 **Linux/macOS:**
+
 ```bash
 cd examples/common_use_cases
 go run main.go
 ```
 
 #### Comprehensive Demo
+
 Complete demonstration of all major features including service creation, CRUD operations, validation workflow, reference management, batch operations, error handling, and environment configuration.
 
 **Windows Command Prompt:**
+
 ```cmd
 cd examples\comprehensive_demo
 go run main.go
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 Set-Location examples\comprehensive_demo
 go run main.go
 ```
 
 **Linux/macOS:**
+
 ```bash
 cd examples/comprehensive_demo
 go run main.go
@@ -375,111 +400,129 @@ go run main.go
 These examples use internal packages directly and are primarily for development and testing purposes:
 
 #### Basic Usage (Internal)
+
 Demonstrates fundamental operations using internal packages directly.
 
 **Windows Command Prompt:**
+
 ```cmd
 cd internal\examples\basic_usage
 go run main.go
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 Set-Location internal\examples\basic_usage
 go run main.go
 ```
 
 **Linux/macOS:**
+
 ```bash
 cd internal/examples/basic_usage
 go run main.go
 ```
 
 #### Advanced Usage (Internal)
+
 Shows complex scenarios including references, custom configuration, and error handling using internal packages.
 
 **Windows Command Prompt:**
+
 ```cmd
 cd internal\examples\advanced_usage
 go run main.go
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 Set-Location internal\examples\advanced_usage
 go run main.go
 ```
 
 **Linux/macOS:**
+
 ```bash
 cd internal/examples/advanced_usage
 go run main.go
 ```
 
 #### Configuration Demo (Internal)
+
 Demonstrates configuration management and environment variable usage.
 
 **Windows Command Prompt:**
+
 ```cmd
 cd internal\examples\config_demo
 go run main.go
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 Set-Location internal\examples\config_demo
 go run main.go
 ```
 
 **Linux/macOS:**
+
 ```bash
 cd internal/examples/config_demo
 go run main.go
 ```
 
 #### Error Handling Demo (Internal)
+
 Shows comprehensive error handling patterns and recovery scenarios.
 
 **Windows Command Prompt:**
+
 ```cmd
 cd internal\examples\error_handling_demo
 go run main.go
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 Set-Location internal\examples\error_handling_demo
 go run main.go
 ```
 
 **Linux/macOS:**
+
 ```bash
 cd internal/examples/error_handling_demo
 go run main.go
 ```
 
 #### Reference Validation Demo (Internal)
+
 Demonstrates reference resolution and validation between state machines.
 
 **Windows Command Prompt:**
+
 ```cmd
 cd internal\examples\reference_validation_demo
 go run main.go
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 Set-Location internal\examples\reference_validation_demo
 go run main.go
 ```
 
 **Linux/macOS:**
+
 ```bash
 cd internal/examples/reference_validation_demo
 go run main.go
 ```
-
-
 
 ## Testing
 
@@ -488,11 +531,13 @@ The module includes comprehensive tests for both internal components and the pub
 ### Run All Tests
 
 **Windows:**
+
 ```cmd
 go test .\internal\... .\statemachine\...
 ```
 
 **Linux/macOS:**
+
 ```bash
 go test ./internal/... ./statemachine/...
 ```
@@ -500,11 +545,13 @@ go test ./internal/... ./statemachine/...
 **Alternative (includes informational messages for example directories):**
 
 **Windows:**
+
 ```cmd
 go test .\...
 ```
 
 **Linux/macOS:**
+
 ```bash
 go test ./...
 ```
@@ -512,11 +559,13 @@ go test ./...
 ### Run Tests with Verbose Output
 
 **Windows:**
+
 ```cmd
 go test -v .\internal\... .\statemachine\...
 ```
 
 **Linux/macOS:**
+
 ```bash
 go test -v ./internal/... ./statemachine/...
 ```
@@ -524,11 +573,13 @@ go test -v ./internal/... ./statemachine/...
 ### Run Public API Tests Only
 
 **Windows:**
+
 ```cmd
 go test -v .\statemachine\
 ```
 
 **Linux/macOS:**
+
 ```bash
 go test -v ./statemachine/
 ```
@@ -536,11 +587,13 @@ go test -v ./statemachine/
 ### Run Integration Tests
 
 **Windows:**
+
 ```cmd
 go test .\internal\integration\...
 ```
 
 **Linux/macOS:**
+
 ```bash
 go test ./internal/integration/...
 ```
@@ -548,6 +601,7 @@ go test ./internal/integration/...
 ### Test Coverage
 
 The test suite includes:
+
 - **Public API Tests** (`statemachine/statemachine_test.go`) - Tests all public functions and integration scenarios
 - **Unit Tests** - Individual component tests in each internal package (`internal/*/`)
 - **Integration Tests** (`internal/integration/`) - End-to-end workflow tests using internal packages
@@ -623,24 +677,24 @@ type ValidationResult struct {
 
 ### Common Issues
 
-**Directory Permission Errors**
-- Ensure the application has write permissions to the root directory
-- Check that the directory path is valid and accessible
+- **Directory Permission Errors**
+  - Ensure the application has write permissions to the root directory
+  - Check that the directory path is valid and accessible
 
-**Validation Failures**
-- Verify PlantUML syntax is correct
-- Check that all referenced state machines exist
-- Ensure proper @startuml/@enduml tags
+- **Validation Failures**
+  - Verify PlantUML syntax is correct
+  - Check that all referenced state machines exist
+  - Ensure proper @startuml/@enduml tags
 
-**Reference Resolution Errors**
-- Verify referenced state machines exist in the expected locations
-- Check that product references use correct version numbers
-- Ensure nested references are in the correct directory structure
+- **Reference Resolution Errors**
+  - Verify referenced state machines exist in the expected locations
+  - Check that product references use correct version numbers
+  - Ensure nested references are in the correct directory structure
 
-**Promotion Failures**
-- Validate the state machine passes all validation checks
-- Ensure no conflicting directories exist in products
-- Check file system permissions for move operations
+- **Promotion Failures**
+  - Validate the state machine passes all validation checks
+  - Ensure no conflicting directories exist in products
+  - Check file system permissions for move operations
 
 ## Contributing
 

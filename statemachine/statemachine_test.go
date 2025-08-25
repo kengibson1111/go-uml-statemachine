@@ -283,7 +283,7 @@ Error --> Idle : reset()
 @enduml`
 
 	// Test Create
-	sm, err := svc.Create("test-integration", "1.0.0", content, LocationInProgress)
+	sm, err := svc.Create(FileTypePUML, "test-integration", "1.0.0", content, LocationInProgress)
 	if err != nil {
 		t.Fatalf("Create() failed: %v", err)
 	}
@@ -298,7 +298,7 @@ Error --> Idle : reset()
 	}
 
 	// Test Read
-	readSM, err := svc.Read("test-integration", "1.0.0", LocationInProgress)
+	readSM, err := svc.Read(FileTypePUML, "test-integration", "1.0.0", LocationInProgress)
 	if err != nil {
 		t.Fatalf("Read() failed: %v", err)
 	}
@@ -307,7 +307,7 @@ Error --> Idle : reset()
 	}
 
 	// Test Validate
-	result, err := svc.Validate("test-integration", "1.0.0", LocationInProgress)
+	result, err := svc.Validate(FileTypePUML, "test-integration", "1.0.0", LocationInProgress)
 	if err != nil {
 		t.Fatalf("Validate() failed: %v", err)
 	}
@@ -316,7 +316,7 @@ Error --> Idle : reset()
 	}
 
 	// Test ListAll
-	stateMachines, err := svc.ListAll(LocationInProgress)
+	stateMachines, err := svc.ListAll(FileTypePUML, LocationInProgress)
 	if err != nil {
 		t.Fatalf("ListAll() failed: %v", err)
 	}
@@ -340,7 +340,7 @@ Error --> Idle : reset()
 	}
 
 	// Verify update
-	updatedSM, err := svc.Read("test-integration", "1.0.0", LocationInProgress)
+	updatedSM, err := svc.Read(FileTypePUML, "test-integration", "1.0.0", LocationInProgress)
 	if err != nil {
 		t.Fatalf("Read() after update failed: %v", err)
 	}
@@ -350,13 +350,13 @@ Error --> Idle : reset()
 
 	// Test Promote (if validation passes)
 	if result.IsValid && !result.HasErrors() {
-		err = svc.Promote("test-integration", "1.0.0")
+		err = svc.Promote(FileTypePUML, "test-integration", "1.0.0")
 		if err != nil {
 			t.Fatalf("Promote() failed: %v", err)
 		}
 
 		// Verify promotion
-		productSMs, err := svc.ListAll(LocationProducts)
+		productSMs, err := svc.ListAll(FileTypePUML, LocationProducts)
 		if err != nil {
 			t.Fatalf("ListAll(LocationProducts) failed: %v", err)
 		}
@@ -372,13 +372,13 @@ Error --> Idle : reset()
 		}
 
 		// Clean up from products
-		err = svc.Delete("test-integration", "1.0.0", LocationProducts)
+		err = svc.Delete(FileTypePUML, "test-integration", "1.0.0", LocationProducts)
 		if err != nil {
 			t.Logf("Warning: Could not clean up from products: %v", err)
 		}
 	} else {
 		// Clean up from in-progress
-		err = svc.Delete("test-integration", "1.0.0", LocationInProgress)
+		err = svc.Delete(FileTypePUML, "test-integration", "1.0.0", LocationInProgress)
 		if err != nil {
 			t.Logf("Warning: Could not clean up from in-progress: %v", err)
 		}
@@ -392,41 +392,41 @@ func TestPublicAPIErrorHandling(t *testing.T) {
 	}
 
 	// Test Create with invalid parameters
-	_, err = svc.Create("", "1.0.0", "content", LocationInProgress)
+	_, err = svc.Create(FileTypePUML, "", "1.0.0", "content", LocationInProgress)
 	if err == nil {
 		t.Error("Create() with empty name should fail")
 	}
 
-	_, err = svc.Create("test", "", "content", LocationInProgress)
+	_, err = svc.Create(FileTypePUML, "test", "", "content", LocationInProgress)
 	if err == nil {
 		t.Error("Create() with empty version should fail")
 	}
 
-	_, err = svc.Create("test", "1.0.0", "", LocationInProgress)
+	_, err = svc.Create(FileTypePUML, "test", "1.0.0", "", LocationInProgress)
 	if err == nil {
 		t.Error("Create() with empty content should fail")
 	}
 
 	// Test Read non-existent
-	_, err = svc.Read("non-existent", "1.0.0", LocationInProgress)
+	_, err = svc.Read(FileTypePUML, "non-existent", "1.0.0", LocationInProgress)
 	if err == nil {
 		t.Error("Read() of non-existent state machine should fail")
 	}
 
 	// Test Delete non-existent
-	err = svc.Delete("non-existent", "1.0.0", LocationInProgress)
+	err = svc.Delete(FileTypePUML, "non-existent", "1.0.0", LocationInProgress)
 	if err == nil {
 		t.Error("Delete() of non-existent state machine should fail")
 	}
 
 	// Test Promote non-existent
-	err = svc.Promote("non-existent", "1.0.0")
+	err = svc.Promote(FileTypePUML, "non-existent", "1.0.0")
 	if err == nil {
 		t.Error("Promote() of non-existent state machine should fail")
 	}
 
 	// Test Validate non-existent
-	_, err = svc.Validate("non-existent", "1.0.0", LocationInProgress)
+	_, err = svc.Validate(FileTypePUML, "non-existent", "1.0.0", LocationInProgress)
 	if err == nil {
 		t.Error("Validate() of non-existent state machine should fail")
 	}

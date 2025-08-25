@@ -23,12 +23,12 @@ type MockErrorRepository struct {
 	listResult          []models.StateMachine
 
 	// Function fields for custom behavior
-	ExistsFunc func(name, version string, location models.Location) (bool, error)
+	ExistsFunc func(fileType models.FileType, name, version string, location models.Location) (bool, error)
 }
 
-func (m *MockErrorRepository) Exists(name, version string, location models.Location) (bool, error) {
+func (m *MockErrorRepository) Exists(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 	if m.ExistsFunc != nil {
-		return m.ExistsFunc(name, version, location)
+		return m.ExistsFunc(fileType, name, version, location)
 	}
 	if m.shouldFailExists {
 		return false, errors.New("mock exists error")
@@ -36,7 +36,7 @@ func (m *MockErrorRepository) Exists(name, version string, location models.Locat
 	return m.existsResult, nil
 }
 
-func (m *MockErrorRepository) ReadStateMachine(name, version string, location models.Location) (*models.StateMachine, error) {
+func (m *MockErrorRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 	if m.shouldFailRead {
 		return nil, errors.New("mock read error")
 	}
@@ -50,21 +50,21 @@ func (m *MockErrorRepository) WriteStateMachine(sm *models.StateMachine) error {
 	return nil
 }
 
-func (m *MockErrorRepository) MoveStateMachine(name, version string, from, to models.Location) error {
+func (m *MockErrorRepository) MoveStateMachine(fileType models.FileType, name, version string, from, to models.Location) error {
 	if m.shouldFailMove {
 		return errors.New("mock move error")
 	}
 	return nil
 }
 
-func (m *MockErrorRepository) DeleteStateMachine(name, version string, location models.Location) error {
+func (m *MockErrorRepository) DeleteStateMachine(fileType models.FileType, name, version string, location models.Location) error {
 	if m.shouldFailDelete {
 		return errors.New("mock delete error")
 	}
 	return nil
 }
 
-func (m *MockErrorRepository) ListStateMachines(location models.Location) ([]models.StateMachine, error) {
+func (m *MockErrorRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
 	if m.shouldFailList {
 		return nil, errors.New("mock list error")
 	}
@@ -149,7 +149,7 @@ func TestService_Create_ValidationErrors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := svc.Create(tt.inputName, tt.inputVersion, tt.inputContent, tt.location)
+			_, err := svc.Create(models.FileTypePUML, tt.inputName, tt.inputVersion, tt.inputContent, tt.location)
 
 			if err == nil {
 				t.Error("Expected error but got nil")
@@ -224,7 +224,7 @@ func TestService_Create_RepositoryErrors(t *testing.T) {
 			config := models.DefaultConfig()
 			svc := NewService(repo, validator, config)
 
-			_, err := svc.Create("test", "1.0.0", "content", models.LocationInProgress)
+			_, err := svc.Create(models.FileTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
 
 			if err == nil {
 				t.Error("Expected error but got nil")
@@ -261,7 +261,7 @@ func TestService_Create_ProductConflictCheck(t *testing.T) {
 
 		// Create a custom exists function that fails on the second call
 		callCount := 0
-		repo.ExistsFunc = func(name, version string, location models.Location) (bool, error) {
+		repo.ExistsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 			callCount++
 			if callCount == 2 { // Second call (products check)
 				return false, errors.New("mock products check error")
@@ -271,7 +271,7 @@ func TestService_Create_ProductConflictCheck(t *testing.T) {
 
 		svc := NewService(repo, validator, config)
 
-		_, err := svc.Create("test", "1.0.0", "content", models.LocationInProgress)
+		_, err := svc.Create(models.FileTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
 
 		if err == nil {
 			t.Error("Expected error but got nil")
@@ -297,7 +297,7 @@ func TestService_Create_ProductConflictCheck(t *testing.T) {
 
 		// Create a custom exists function that returns conflict on second call
 		callCount := 0
-		repo.ExistsFunc = func(name, version string, location models.Location) (bool, error) {
+		repo.ExistsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 			callCount++
 			if callCount == 1 { // First call (in-progress check)
 				return false, nil
@@ -307,7 +307,7 @@ func TestService_Create_ProductConflictCheck(t *testing.T) {
 
 		svc := NewService(repo, validator, config)
 
-		_, err := svc.Create("test", "1.0.0", "content", models.LocationInProgress)
+		_, err := svc.Create(models.FileTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
 
 		if err == nil {
 			t.Error("Expected error but got nil")
@@ -357,7 +357,7 @@ func TestService_Read_ValidationErrors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := svc.Read(tt.inputName, tt.inputVersion, tt.location)
+			_, err := svc.Read(models.FileTypePUML, tt.inputName, tt.inputVersion, tt.location)
 
 			if err == nil {
 				t.Error("Expected error but got nil")
@@ -389,7 +389,7 @@ func TestService_Read_RepositoryError(t *testing.T) {
 	config := models.DefaultConfig()
 	svc := NewService(repo, validator, config)
 
-	_, err := svc.Read("test", "1.0.0", models.LocationInProgress)
+	_, err := svc.Read(models.FileTypePUML, "test", "1.0.0", models.LocationInProgress)
 
 	if err == nil {
 		t.Error("Expected error but got nil")
@@ -423,7 +423,7 @@ func TestService_ErrorContextPropagation(t *testing.T) {
 	config := models.DefaultConfig()
 	svc := NewService(repo, validator, config)
 
-	_, err := svc.Create("test-name", "1.2.3", "content", models.LocationInProgress)
+	_, err := svc.Create(models.FileTypePUML, "test-name", "1.2.3", "content", models.LocationInProgress)
 
 	if err == nil {
 		t.Error("Expected error but got nil")
@@ -453,7 +453,7 @@ func TestService_ErrorContextPropagation(t *testing.T) {
 func TestService_ErrorWrapping(t *testing.T) {
 	originalErr := errors.New("original repository error")
 	repo := &MockErrorRepository{}
-	repo.ExistsFunc = func(name, version string, location models.Location) (bool, error) {
+	repo.ExistsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 		return false, originalErr
 	}
 
@@ -461,7 +461,7 @@ func TestService_ErrorWrapping(t *testing.T) {
 	config := models.DefaultConfig()
 	svc := NewService(repo, validator, config)
 
-	_, err := svc.Create("test", "1.0.0", "content", models.LocationInProgress)
+	_, err := svc.Create(models.FileTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
 
 	if err == nil {
 		t.Error("Expected error but got nil")
@@ -519,9 +519,9 @@ func TestService_ErrorSeverityAssignment(t *testing.T) {
 
 			var err error
 			if tt.name == "validation error - high severity" {
-				_, err = svc.Create("", "1.0.0", "content", models.LocationInProgress) // Empty name
+				_, err = svc.Create(models.FileTypePUML, "", "1.0.0", "content", models.LocationInProgress) // Empty name
 			} else {
-				_, err = svc.Create("test", "1.0.0", "content", models.LocationInProgress)
+				_, err = svc.Create(models.FileTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
 			}
 
 			if err == nil {

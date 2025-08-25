@@ -517,7 +517,7 @@ func (m *MockRepository) AddStateMachine(sm *models.StateMachine) {
 	m.existsMap[key] = true
 }
 
-func (m *MockRepository) ReadStateMachine(name, version string, location models.Location) (*models.StateMachine, error) {
+func (m *MockRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 	key := fmt.Sprintf("%s-%s-%s", name, version, location.String())
 	if sm, exists := m.stateMachines[key]; exists {
 		return sm, nil
@@ -525,20 +525,20 @@ func (m *MockRepository) ReadStateMachine(name, version string, location models.
 	return nil, fmt.Errorf("state machine not found: %s", key)
 }
 
-func (m *MockRepository) Exists(name, version string, location models.Location) (bool, error) {
+func (m *MockRepository) Exists(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 	key := fmt.Sprintf("%s-%s-%s", name, version, location.String())
 	return m.existsMap[key], nil
 }
 
 // Implement other Repository methods as no-ops for testing
-func (m *MockRepository) ListStateMachines(location models.Location) ([]models.StateMachine, error) {
+func (m *MockRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
 	return nil, nil
 }
 func (m *MockRepository) WriteStateMachine(sm *models.StateMachine) error { return nil }
-func (m *MockRepository) MoveStateMachine(name, version string, from, to models.Location) error {
+func (m *MockRepository) MoveStateMachine(fileType models.FileType, name, version string, from, to models.Location) error {
 	return nil
 }
-func (m *MockRepository) DeleteStateMachine(name, version string, location models.Location) error {
+func (m *MockRepository) DeleteStateMachine(fileType models.FileType, name, version string, location models.Location) error {
 	return nil
 }
 func (m *MockRepository) CreateDirectory(path string) error         { return nil }

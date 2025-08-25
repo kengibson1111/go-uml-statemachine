@@ -163,10 +163,11 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 				}
 
 				// Verify file was created
-				filePath := th.repo.pathManager.GetStateMachineFilePath(
+				filePath := th.repo.pathManager.GetStateMachineFilePathWithFileType(
 					tt.stateMachine.Name,
 					tt.stateMachine.Version,
 					tt.stateMachine.Location,
+					tt.stateMachine.FileType,
 				)
 
 				if _, err := os.Stat(filePath); os.IsNotExist(err) {
@@ -241,7 +242,7 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sm, err := th.repo.ReadStateMachine(tt.smName, tt.version, tt.location)
+			sm, err := th.repo.ReadStateMachine(models.FileTypePUML, tt.smName, tt.version, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -333,7 +334,7 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			exists, err := th.repo.Exists(tt.smName, tt.version, tt.location)
+			exists, err := th.repo.Exists(models.FileTypePUML, tt.smName, tt.version, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -557,7 +558,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := th.repo.MoveStateMachine(tt.smName, tt.version, tt.from, tt.to)
+			err := th.repo.MoveStateMachine(models.FileTypePUML, tt.smName, tt.version, tt.from, tt.to)
 
 			if tt.expectError {
 				if err == nil {
@@ -577,7 +578,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 				}
 
 				// Verify source no longer exists
-				sourceExists, err := th.repo.Exists(tt.smName, tt.version, tt.from)
+				sourceExists, err := th.repo.Exists(models.FileTypePUML, tt.smName, tt.version, tt.from)
 				if err != nil {
 					t.Errorf("Error checking source existence: %v", err)
 				}
@@ -586,7 +587,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 				}
 
 				// Verify destination exists
-				destExists, err := th.repo.Exists(tt.smName, tt.version, tt.to)
+				destExists, err := th.repo.Exists(models.FileTypePUML, tt.smName, tt.version, tt.to)
 				if err != nil {
 					t.Errorf("Error checking destination existence: %v", err)
 				}
@@ -595,7 +596,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 				}
 
 				// Verify content is preserved
-				sm, err := th.repo.ReadStateMachine(tt.smName, tt.version, tt.to)
+				sm, err := th.repo.ReadStateMachine(models.FileTypePUML, tt.smName, tt.version, tt.to)
 				if err != nil {
 					t.Errorf("Error reading moved state machine: %v", err)
 				}
@@ -668,7 +669,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 				}
 			}
 
-			err := th.repo.DeleteStateMachine(tt.smName, tt.version, tt.location)
+			err := th.repo.DeleteStateMachine(models.FileTypePUML, tt.smName, tt.version, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -688,7 +689,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 				}
 
 				// Verify state machine no longer exists
-				exists, err := th.repo.Exists(tt.smName, tt.version, tt.location)
+				exists, err := th.repo.Exists(models.FileTypePUML, tt.smName, tt.version, tt.location)
 				if err != nil {
 					t.Errorf("Error checking existence after delete: %v", err)
 				}
@@ -747,7 +748,7 @@ func TestFileSystemRepository_ListStateMachines(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sms, err := th.repo.ListStateMachines(tt.location)
+			sms, err := th.repo.ListStateMachines(models.FileTypePUML, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -789,7 +790,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 2. Verify it exists
-	exists, err := th.repo.Exists(testSM.Name, testSM.Version, testSM.Location)
+	exists, err := th.repo.Exists(models.FileTypePUML, testSM.Name, testSM.Version, testSM.Location)
 	if err != nil {
 		t.Fatalf("Failed to check existence: %v", err)
 	}
@@ -798,7 +799,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 3. Read it back
-	readSM, err := th.repo.ReadStateMachine(testSM.Name, testSM.Version, testSM.Location)
+	readSM, err := th.repo.ReadStateMachine(models.FileTypePUML, testSM.Name, testSM.Version, testSM.Location)
 	if err != nil {
 		t.Fatalf("Failed to read state machine: %v", err)
 	}
@@ -807,7 +808,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 4. List state machines
-	sms, err := th.repo.ListStateMachines(models.LocationInProgress)
+	sms, err := th.repo.ListStateMachines(models.FileTypePUML, models.LocationInProgress)
 	if err != nil {
 		t.Fatalf("Failed to list state machines: %v", err)
 	}
@@ -816,13 +817,13 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 5. Move to products
-	err = th.repo.MoveStateMachine(testSM.Name, testSM.Version, models.LocationInProgress, models.LocationProducts)
+	err = th.repo.MoveStateMachine(models.FileTypePUML, testSM.Name, testSM.Version, models.LocationInProgress, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to move state machine: %v", err)
 	}
 
 	// 6. Verify it's in products now
-	exists, err = th.repo.Exists(testSM.Name, testSM.Version, models.LocationProducts)
+	exists, err = th.repo.Exists(models.FileTypePUML, testSM.Name, testSM.Version, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to check existence in products: %v", err)
 	}
@@ -831,7 +832,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 7. Verify it's no longer in in-progress
-	exists, err = th.repo.Exists(testSM.Name, testSM.Version, models.LocationInProgress)
+	exists, err = th.repo.Exists(models.FileTypePUML, testSM.Name, testSM.Version, models.LocationInProgress)
 	if err != nil {
 		t.Fatalf("Failed to check existence in in-progress: %v", err)
 	}
@@ -840,13 +841,13 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 8. Delete from products
-	err = th.repo.DeleteStateMachine(testSM.Name, testSM.Version, models.LocationProducts)
+	err = th.repo.DeleteStateMachine(models.FileTypePUML, testSM.Name, testSM.Version, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to delete state machine: %v", err)
 	}
 
 	// 9. Verify it's gone
-	exists, err = th.repo.Exists(testSM.Name, testSM.Version, models.LocationProducts)
+	exists, err = th.repo.Exists(models.FileTypePUML, testSM.Name, testSM.Version, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to check existence after delete: %v", err)
 	}

@@ -6,33 +6,33 @@ import (
 
 // mockRepository is a mock implementation of the Repository interface for testing
 type mockRepository struct {
-	readStateMachineFunc   func(name, version string, location models.Location) (*models.StateMachine, error)
-	listStateMachinesFunc  func(location models.Location) ([]models.StateMachine, error)
-	existsFunc             func(name, version string, location models.Location) (bool, error)
+	readStateMachineFunc   func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error)
+	listStateMachinesFunc  func(fileType models.FileType, location models.Location) ([]models.StateMachine, error)
+	existsFunc             func(fileType models.FileType, name, version string, location models.Location) (bool, error)
 	writeStateMachineFunc  func(sm *models.StateMachine) error
-	moveStateMachineFunc   func(name, version string, from, to models.Location) error
-	deleteStateMachineFunc func(name, version string, location models.Location) error
+	moveStateMachineFunc   func(fileType models.FileType, name, version string, from, to models.Location) error
+	deleteStateMachineFunc func(fileType models.FileType, name, version string, location models.Location) error
 	createDirectoryFunc    func(path string) error
 	directoryExistsFunc    func(path string) (bool, error)
 }
 
-func (m *mockRepository) ReadStateMachine(name, version string, location models.Location) (*models.StateMachine, error) {
+func (m *mockRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 	if m.readStateMachineFunc != nil {
-		return m.readStateMachineFunc(name, version, location)
+		return m.readStateMachineFunc(fileType, name, version, location)
 	}
 	return nil, nil
 }
 
-func (m *mockRepository) ListStateMachines(location models.Location) ([]models.StateMachine, error) {
+func (m *mockRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
 	if m.listStateMachinesFunc != nil {
-		return m.listStateMachinesFunc(location)
+		return m.listStateMachinesFunc(fileType, location)
 	}
 	return nil, nil
 }
 
-func (m *mockRepository) Exists(name, version string, location models.Location) (bool, error) {
+func (m *mockRepository) Exists(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 	if m.existsFunc != nil {
-		return m.existsFunc(name, version, location)
+		return m.existsFunc(fileType, name, version, location)
 	}
 	return false, nil
 }
@@ -44,16 +44,16 @@ func (m *mockRepository) WriteStateMachine(sm *models.StateMachine) error {
 	return nil
 }
 
-func (m *mockRepository) MoveStateMachine(name, version string, from, to models.Location) error {
+func (m *mockRepository) MoveStateMachine(fileType models.FileType, name, version string, from, to models.Location) error {
 	if m.moveStateMachineFunc != nil {
-		return m.moveStateMachineFunc(name, version, from, to)
+		return m.moveStateMachineFunc(fileType, name, version, from, to)
 	}
 	return nil
 }
 
-func (m *mockRepository) DeleteStateMachine(name, version string, location models.Location) error {
+func (m *mockRepository) DeleteStateMachine(fileType models.FileType, name, version string, location models.Location) error {
 	if m.deleteStateMachineFunc != nil {
-		return m.deleteStateMachineFunc(name, version, location)
+		return m.deleteStateMachineFunc(fileType, name, version, location)
 	}
 	return nil
 }

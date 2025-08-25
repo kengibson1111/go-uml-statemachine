@@ -154,7 +154,7 @@ func TestService_Create(t *testing.T) {
 			inputContent: "@startuml\n[*] --> Idle\n@enduml",
 			inputLoc:     models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					if location == models.LocationInProgress {
 						return false, nil // doesn't exist in progress
 					}
@@ -203,7 +203,7 @@ func TestService_Create(t *testing.T) {
 			inputContent: "content",
 			inputLoc:     models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					return true, nil // already exists
 				}
 			},
@@ -217,7 +217,7 @@ func TestService_Create(t *testing.T) {
 			inputContent: "content",
 			inputLoc:     models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					if location == models.LocationInProgress {
 						return false, nil // doesn't exist in progress
 					}
@@ -237,7 +237,7 @@ func TestService_Create(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			result, err := svc.Create(tt.inputName, tt.inputVer, tt.inputContent, tt.inputLoc)
+			result, err := svc.Create(models.FileTypePUML, tt.inputName, tt.inputVer, tt.inputContent, tt.inputLoc)
 
 			if tt.wantErr {
 				if err == nil {
@@ -299,7 +299,7 @@ func TestService_Read(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 					return &models.StateMachine{
 						Name:     name,
 						Version:  version,
@@ -340,7 +340,7 @@ func TestService_Read(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 					return nil, errors.New("file not found")
 				}
 			},
@@ -357,7 +357,7 @@ func TestService_Read(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			result, err := svc.Read(tt.inputName, tt.inputVer, tt.inputLoc)
+			result, err := svc.Read(models.FileTypePUML, tt.inputName, tt.inputVer, tt.inputLoc)
 
 			if tt.wantErr {
 				if err == nil {
@@ -419,7 +419,7 @@ func TestService_Update(t *testing.T) {
 				Location: models.LocationInProgress,
 			},
 			setupMock: func(repo *mockRepository) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					return true, nil // exists
 				}
 				repo.writeStateMachineFunc = func(sm *models.StateMachine) error {
@@ -480,7 +480,7 @@ func TestService_Update(t *testing.T) {
 				Location: models.LocationInProgress,
 			},
 			setupMock: func(repo *mockRepository) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					return false, nil // doesn't exist
 				}
 			},
@@ -539,10 +539,10 @@ func TestService_Delete(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					return true, nil // exists
 				}
-				repo.deleteStateMachineFunc = func(name, version string, location models.Location) error {
+				repo.deleteStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) error {
 					return nil
 				}
 			},
@@ -572,7 +572,7 @@ func TestService_Delete(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					return false, nil // doesn't exist
 				}
 			},
@@ -585,10 +585,10 @@ func TestService_Delete(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					return true, nil // exists
 				}
-				repo.deleteStateMachineFunc = func(name, version string, location models.Location) error {
+				repo.deleteStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) error {
 					return errors.New("delete failed")
 				}
 			},
@@ -605,7 +605,7 @@ func TestService_Delete(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			err := svc.Delete(tt.inputName, tt.inputVer, tt.inputLoc)
+			err := svc.Delete(models.FileTypePUML, tt.inputName, tt.inputVer, tt.inputLoc)
 
 			if tt.wantErr {
 				if err == nil {
@@ -645,7 +645,7 @@ func TestService_Promote(t *testing.T) {
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// State machine exists in in-progress
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					if location == models.LocationInProgress {
 						return true, nil
 					}
@@ -656,7 +656,7 @@ func TestService_Promote(t *testing.T) {
 				}
 
 				// Read state machine for validation
-				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 					return &models.StateMachine{
 						Name:     name,
 						Version:  version,
@@ -675,13 +675,13 @@ func TestService_Promote(t *testing.T) {
 				}
 
 				// Move operation succeeds
-				repo.moveStateMachineFunc = func(name, version string, from, to models.Location) error {
+				repo.moveStateMachineFunc = func(fileType models.FileType, name, version string, from, to models.Location) error {
 					return nil
 				}
 
 				// After move verification - track call count to simulate state change
 				callCount := 0
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					callCount++
 					if callCount <= 2 {
 						// First two calls are the initial checks
@@ -723,7 +723,7 @@ func TestService_Promote(t *testing.T) {
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					return false, nil // doesn't exist anywhere
 				}
 			},
@@ -735,7 +735,7 @@ func TestService_Promote(t *testing.T) {
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					if location == models.LocationInProgress {
 						return true, nil // exists in in-progress
 					}
@@ -754,7 +754,7 @@ func TestService_Promote(t *testing.T) {
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// State machine exists in in-progress
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					if location == models.LocationInProgress {
 						return true, nil
 					}
@@ -762,7 +762,7 @@ func TestService_Promote(t *testing.T) {
 				}
 
 				// Read state machine for validation
-				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 					return &models.StateMachine{
 						Name:     name,
 						Version:  version,
@@ -792,7 +792,7 @@ func TestService_Promote(t *testing.T) {
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// State machine exists in in-progress
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					if location == models.LocationInProgress {
 						return true, nil
 					}
@@ -800,7 +800,7 @@ func TestService_Promote(t *testing.T) {
 				}
 
 				// Read state machine for validation
-				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 					return &models.StateMachine{
 						Name:     name,
 						Version:  version,
@@ -819,7 +819,7 @@ func TestService_Promote(t *testing.T) {
 				}
 
 				// Move operation fails
-				repo.moveStateMachineFunc = func(name, version string, from, to models.Location) error {
+				repo.moveStateMachineFunc = func(fileType models.FileType, name, version string, from, to models.Location) error {
 					return errors.New("filesystem error during move")
 				}
 			},
@@ -836,7 +836,7 @@ func TestService_Promote(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			err := svc.Promote(tt.inputName, tt.inputVer)
+			err := svc.Promote(models.FileTypePUML, tt.inputName, tt.inputVer)
 
 			if tt.wantErr {
 				if err == nil {
@@ -878,7 +878,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// Initial setup - state machine exists in in-progress
 				initialCallCount := 0
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					initialCallCount++
 					if initialCallCount <= 2 {
 						// First two calls are the initial checks
@@ -898,7 +898,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 				}
 
 				// Read state machine for validation
-				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 					return &models.StateMachine{
 						Name:     name,
 						Version:  version,
@@ -918,7 +918,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 
 				// Move operation appears to succeed initially
 				moveCallCount := 0
-				repo.moveStateMachineFunc = func(name, version string, from, to models.Location) error {
+				repo.moveStateMachineFunc = func(fileType models.FileType, name, version string, from, to models.Location) error {
 					moveCallCount++
 					if moveCallCount == 1 {
 						// First move (promotion) succeeds
@@ -938,7 +938,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// Initial setup - state machine exists in in-progress
 				initialCallCount := 0
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					initialCallCount++
 					if initialCallCount <= 2 {
 						// First two calls are the initial checks
@@ -958,7 +958,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 				}
 
 				// Read state machine for validation
-				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 					return &models.StateMachine{
 						Name:     name,
 						Version:  version,
@@ -977,7 +977,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 				}
 
 				// Move operation appears to succeed
-				repo.moveStateMachineFunc = func(name, version string, from, to models.Location) error {
+				repo.moveStateMachineFunc = func(fileType models.FileType, name, version string, from, to models.Location) error {
 					return nil
 				}
 			},
@@ -994,7 +994,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			err := svc.Promote(tt.inputName, tt.inputVer)
+			err := svc.Promote(models.FileTypePUML, tt.inputName, tt.inputVer)
 
 			if tt.wantErr {
 				if err == nil {
@@ -1080,14 +1080,14 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 			validator := &mockValidator{}
 
 			// Setup common mock behavior
-			repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+			repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 				if location == models.LocationInProgress {
 					return true, nil
 				}
 				return false, nil
 			}
 
-			repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+			repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 				return &models.StateMachine{
 					Name:     name,
 					Version:  version,
@@ -1102,7 +1102,7 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 			// Setup successful move if validation passes
 			if !tt.wantErr {
 				callCount := 0
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					callCount++
 					if callCount <= 2 {
 						if location == models.LocationInProgress {
@@ -1120,14 +1120,14 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 					return false, nil
 				}
 
-				repo.moveStateMachineFunc = func(name, version string, from, to models.Location) error {
+				repo.moveStateMachineFunc = func(fileType models.FileType, name, version string, from, to models.Location) error {
 					return nil
 				}
 			}
 
 			svc := NewService(repo, validator, nil)
 
-			err := svc.Promote(tt.inputName, tt.inputVer)
+			err := svc.Promote(models.FileTypePUML, tt.inputName, tt.inputVer)
 
 			if tt.wantErr {
 				if err == nil {
@@ -1172,7 +1172,7 @@ func TestService_Validate(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 					return &models.StateMachine{
 						Name:     name,
 						Version:  version,
@@ -1204,7 +1204,7 @@ func TestService_Validate(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationProducts,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 					return &models.StateMachine{
 						Name:     name,
 						Version:  version,
@@ -1258,7 +1258,7 @@ func TestService_Validate(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 					return nil, errors.New("file not found")
 				}
 			},
@@ -1271,7 +1271,7 @@ func TestService_Validate(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				repo.readStateMachineFunc = func(name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 					return &models.StateMachine{
 						Name:     name,
 						Version:  version,
@@ -1296,7 +1296,7 @@ func TestService_Validate(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			result, err := svc.Validate(tt.inputName, tt.inputVer, tt.inputLoc)
+			result, err := svc.Validate(models.FileTypePUML, tt.inputName, tt.inputVer, tt.inputLoc)
 
 			if tt.wantErr {
 				if err == nil {
@@ -1351,7 +1351,7 @@ func TestService_ListAll(t *testing.T) {
 			name:     "successful list in-progress",
 			inputLoc: models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.listStateMachinesFunc = func(location models.Location) ([]models.StateMachine, error) {
+				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
 					return []models.StateMachine{
 						{
 							Name:     "sm1",
@@ -1375,7 +1375,7 @@ func TestService_ListAll(t *testing.T) {
 			name:     "successful list products",
 			inputLoc: models.LocationProducts,
 			setupMock: func(repo *mockRepository) {
-				repo.listStateMachinesFunc = func(location models.Location) ([]models.StateMachine, error) {
+				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
 					return []models.StateMachine{
 						{
 							Name:     "prod-sm",
@@ -1393,7 +1393,7 @@ func TestService_ListAll(t *testing.T) {
 			name:     "empty list",
 			inputLoc: models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.listStateMachinesFunc = func(location models.Location) ([]models.StateMachine, error) {
+				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
 					return []models.StateMachine{}, nil
 				}
 			},
@@ -1404,7 +1404,7 @@ func TestService_ListAll(t *testing.T) {
 			name:     "repository error",
 			inputLoc: models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.listStateMachinesFunc = func(location models.Location) ([]models.StateMachine, error) {
+				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
 					return nil, errors.New("directory read error")
 				}
 			},
@@ -1421,7 +1421,7 @@ func TestService_ListAll(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			result, err := svc.ListAll(tt.inputLoc)
+			result, err := svc.ListAll(models.FileTypePUML, tt.inputLoc)
 
 			if tt.wantErr {
 				if err == nil {
@@ -1500,7 +1500,7 @@ func TestService_ResolveReferences(t *testing.T) {
 				},
 			},
 			setupMock: func(repo *mockRepository) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					if name == "auth-sm" && version == "2.0.0" && location == models.LocationProducts {
 						return true, nil
 					}
@@ -1525,7 +1525,7 @@ func TestService_ResolveReferences(t *testing.T) {
 			},
 			setupMock: func(repo *mockRepository) {
 				repo.directoryExistsFunc = func(path string) (bool, error) {
-					expectedPath := "in-progress\\test-sm-1.0.0\\nested\\nested-sm"
+					expectedPath := "in-progress\\puml\\test-sm-1.0.0\\nested\\nested-sm"
 					if path == expectedPath {
 						return true, nil
 					}
@@ -1554,14 +1554,14 @@ func TestService_ResolveReferences(t *testing.T) {
 				},
 			},
 			setupMock: func(repo *mockRepository) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					if name == "auth-sm" && version == "2.0.0" && location == models.LocationProducts {
 						return true, nil
 					}
 					return false, nil
 				}
 				repo.directoryExistsFunc = func(path string) (bool, error) {
-					expectedPath := "in-progress\\test-sm-1.0.0\\nested\\nested-sm"
+					expectedPath := "in-progress\\puml\\test-sm-1.0.0\\nested\\nested-sm"
 					if path == expectedPath {
 						return true, nil
 					}
@@ -1593,7 +1593,7 @@ func TestService_ResolveReferences(t *testing.T) {
 				},
 			},
 			setupMock: func(repo *mockRepository) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					return false, nil // not found
 				}
 			},
@@ -1638,7 +1638,7 @@ func TestService_ResolveReferences(t *testing.T) {
 				},
 			},
 			setupMock: func(repo *mockRepository) {
-				repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					return false, models.NewStateMachineError(models.ErrorTypeFileSystem, "filesystem error", nil)
 				}
 			},
@@ -1710,12 +1710,12 @@ func TestService_ResolveReferences(t *testing.T) {
 						// Verify path format based on reference type
 						switch ref.Type {
 						case models.ReferenceTypeProduct:
-							expectedPath := "products\\" + ref.Name + "-" + ref.Version + "\\" + ref.Name + "-" + ref.Version + ".puml"
+							expectedPath := "products\\puml\\" + ref.Name + "-" + ref.Version + "\\" + ref.Name + "-" + ref.Version + ".puml"
 							if ref.Path != expectedPath {
 								t.Errorf("ResolveReferences() product reference path = %v, want %v", ref.Path, expectedPath)
 							}
 						case models.ReferenceTypeNested:
-							expectedPath := tt.input.Location.String() + "\\" + tt.input.Name + "-" + tt.input.Version + "\\nested\\" + ref.Name + "\\" + ref.Name + ".puml"
+							expectedPath := tt.input.Location.String() + "\\puml\\" + tt.input.Name + "-" + tt.input.Version + "\\nested\\" + ref.Name + "\\" + ref.Name + ".puml"
 							if ref.Path != expectedPath {
 								t.Errorf("ResolveReferences() nested reference path = %v, want %v", ref.Path, expectedPath)
 							}
@@ -1746,7 +1746,7 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 				Version: "2.1.0",
 				Type:    models.ReferenceTypeProduct,
 			},
-			expectedPath: "products\\auth-service-2.1.0\\auth-service-2.1.0.puml",
+			expectedPath: "products\\puml\\auth-service-2.1.0\\auth-service-2.1.0.puml",
 		},
 		{
 			name: "nested reference path building in-progress",
@@ -1759,7 +1759,7 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 				Name: "sub-component",
 				Type: models.ReferenceTypeNested,
 			},
-			expectedPath: "in-progress\\main-sm-3.0.0\\nested\\sub-component\\sub-component.puml",
+			expectedPath: "in-progress\\puml\\main-sm-3.0.0\\nested\\sub-component\\sub-component.puml",
 		},
 		{
 			name: "nested reference path building products",
@@ -1772,7 +1772,7 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 				Name: "helper",
 				Type: models.ReferenceTypeNested,
 			},
-			expectedPath: "products\\prod-sm-1.5.0\\nested\\helper\\helper.puml",
+			expectedPath: "products\\puml\\prod-sm-1.5.0\\nested\\helper\\helper.puml",
 		},
 	}
 
@@ -1782,7 +1782,7 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 			validator := &mockValidator{}
 
 			// Setup mocks to return success for existence checks
-			repo.existsFunc = func(name, version string, location models.Location) (bool, error) {
+			repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 				return true, nil
 			}
 			repo.directoryExistsFunc = func(path string) (bool, error) {

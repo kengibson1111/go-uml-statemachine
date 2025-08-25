@@ -52,8 +52,8 @@ func NewFileSystemRepository(config *models.Config) *FileSystemRepository {
 	return repo
 }
 
-// ReadStateMachine reads a state machine from the file system
-func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
+// ReadStateMachine reads a state-machine diagram from the file system
+func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	// Create operation logger with context
 	opLogger := r.logger.WithFields(map[string]interface{}{
 		"operation": "ReadStateMachine",
@@ -63,11 +63,11 @@ func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, 
 		"location":  location.String(),
 	})
 
-	opLogger.Debug("Starting state machine read operation")
+	opLogger.Debug("Starting state-machine diagram read operation")
 
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
-		wrappedErr := models.WrapError(err, models.ErrorTypeValidation, "invalid state machine name").
+		wrappedErr := models.WrapError(err, models.ErrorTypeValidation, "invalid state-machine diagram name").
 			WithOperation("ReadStateMachine").
 			WithComponent("repository").
 			WithContext("name", name)
@@ -76,7 +76,7 @@ func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, 
 	}
 
 	if location != models.LocationNested && version == "" {
-		err := models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state machines", nil).
+		err := models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state-machine diagrams", nil).
 			WithContext("name", name).
 			WithContext("location", location.String()).
 			WithOperation("ReadStateMachine").
@@ -95,7 +95,7 @@ func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, 
 	// Check if file exists
 	opLogger.Debug("Checking if file exists")
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		notFoundErr := models.NewStateMachineError(models.ErrorTypeFileNotFound, "state machine file not found", err).
+		notFoundErr := models.NewStateMachineError(models.ErrorTypeFileNotFound, "state-machine diagram file not found", err).
 			WithContext("name", name).
 			WithContext("version", version).
 			WithContext("location", location.String()).
@@ -103,7 +103,7 @@ func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, 
 			WithOperation("ReadStateMachine").
 			WithComponent("repository").
 			WithSeverity(models.ErrorSeverityMedium)
-		opLogger.WithError(notFoundErr).Warn("State machine file not found")
+		opLogger.WithError(notFoundErr).Warn("State-machine diagram file not found")
 		return nil, notFoundErr
 	} else if err != nil {
 		statErr := models.WrapError(err, models.ErrorTypeFileSystem, "failed to check file existence").
@@ -119,7 +119,7 @@ func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, 
 	// Read file content
 	content, err := os.ReadFile(filePath)
 	if err != nil {
-		readErr := models.WrapError(err, models.ErrorTypeFileSystem, "failed to read state machine file").
+		readErr := models.WrapError(err, models.ErrorTypeFileSystem, "failed to read state-machine diagram file").
 			WithContext("filePath", filePath).
 			WithOperation("ReadStateMachine").
 			WithComponent("repository").
@@ -156,8 +156,8 @@ func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, 
 	}
 
 	// Create StateMachine object
-	opLogger.Debug("Creating state machine object")
-	stateMachine := &models.StateMachine{
+	opLogger.Debug("Creating state-machine diagram object")
+	stateMachine := &models.StateMachineDiagram{
 		Name:     name,
 		Version:  version,
 		Content:  string(content),
@@ -176,15 +176,15 @@ func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, 
 	opLogger.WithFields(map[string]interface{}{
 		"contentLength": len(stateMachine.Content),
 		"modifiedAt":    stateMachine.Metadata.ModifiedAt,
-	}).Info("State machine read successfully")
+	}).Info("State-machine diagram read successfully")
 
 	return stateMachine, nil
 }
 
-// WriteStateMachine writes a state machine to the file system
-func (r *FileSystemRepository) WriteStateMachine(sm *models.StateMachine) error {
+// WriteStateMachine writes a state-machine diagram to the file system
+func (r *FileSystemRepository) WriteStateMachine(sm *models.StateMachineDiagram) error {
 	if sm == nil {
-		return models.NewStateMachineError(models.ErrorTypeValidation, "state machine cannot be nil", nil)
+		return models.NewStateMachineError(models.ErrorTypeValidation, "state-machine diagram cannot be nil", nil)
 	}
 
 	// Validate inputs
@@ -193,7 +193,7 @@ func (r *FileSystemRepository) WriteStateMachine(sm *models.StateMachine) error 
 	}
 
 	if sm.Location != models.LocationNested && sm.Version == "" {
-		return models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state machines", nil).
+		return models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state-machine diagrams", nil).
 			WithContext("name", sm.Name).
 			WithContext("location", sm.Location.String())
 	}
@@ -211,19 +211,19 @@ func (r *FileSystemRepository) WriteStateMachine(sm *models.StateMachine) error 
 
 	// Create directory if it doesn't exist
 	if err := r.CreateDirectory(dirPath); err != nil {
-		return fmt.Errorf("failed to create directory for state machine: %w", err)
+		return fmt.Errorf("failed to create directory for state-machine diagram: %w", err)
 	}
 
 	// Write the file
 	if err := os.WriteFile(filePath, []byte(sm.Content), 0644); err != nil {
-		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to write state machine file", err).
+		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to write state-machine diagram file", err).
 			WithContext("filePath", filePath)
 	}
 
 	return nil
 }
 
-// Exists checks if a state machine exists
+// Exists checks if a state-machine diagram exists
 func (r *FileSystemRepository) Exists(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
@@ -231,7 +231,7 @@ func (r *FileSystemRepository) Exists(fileType models.FileType, name, version st
 	}
 
 	if location != models.LocationNested && version == "" {
-		return false, models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state machines", nil).
+		return false, models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state-machine diagrams", nil).
 			WithContext("name", name).
 			WithContext("location", location.String())
 	}
@@ -297,7 +297,7 @@ func (r *FileSystemRepository) DirectoryExists(path string) (bool, error) {
 		WithContext("path", path)
 }
 
-// MoveStateMachine moves a state machine from one location to another
+// MoveStateMachine moves a state-machine diagram from one location to another
 func (r *FileSystemRepository) MoveStateMachine(fileType models.FileType, name, version string, from, to models.Location) error {
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
@@ -325,7 +325,7 @@ func (r *FileSystemRepository) MoveStateMachine(fileType models.FileType, name, 
 		return fmt.Errorf("failed to check source directory: %w", err)
 	}
 	if !sourceExists {
-		return models.NewStateMachineError(models.ErrorTypeFileNotFound, "source state machine directory not found", nil).
+		return models.NewStateMachineError(models.ErrorTypeFileNotFound, "source state-machine diagram directory not found", nil).
 			WithContext("name", name).
 			WithContext("version", version).
 			WithContext("location", from.String()).
@@ -353,7 +353,7 @@ func (r *FileSystemRepository) MoveStateMachine(fileType models.FileType, name, 
 
 	// Move the directory
 	if err := os.Rename(sourcePath, destPath); err != nil {
-		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to move state machine directory", err).
+		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to move state-machine diagram directory", err).
 			WithContext("sourcePath", sourcePath).
 			WithContext("destPath", destPath)
 	}
@@ -361,7 +361,7 @@ func (r *FileSystemRepository) MoveStateMachine(fileType models.FileType, name, 
 	return nil
 }
 
-// DeleteStateMachine deletes a state machine and its directory
+// DeleteStateMachine deletes a state-machine diagram and its directory
 func (r *FileSystemRepository) DeleteStateMachine(fileType models.FileType, name, version string, location models.Location) error {
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
@@ -369,7 +369,7 @@ func (r *FileSystemRepository) DeleteStateMachine(fileType models.FileType, name
 	}
 
 	if location != models.LocationNested && version == "" {
-		return models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state machines", nil).
+		return models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state-machine diagrams", nil).
 			WithContext("name", name).
 			WithContext("location", location.String())
 	}
@@ -383,7 +383,7 @@ func (r *FileSystemRepository) DeleteStateMachine(fileType models.FileType, name
 		return fmt.Errorf("failed to check directory existence: %w", err)
 	}
 	if !exists {
-		return models.NewStateMachineError(models.ErrorTypeFileNotFound, "state machine directory not found", nil).
+		return models.NewStateMachineError(models.ErrorTypeFileNotFound, "state-machine diagram directory not found", nil).
 			WithContext("name", name).
 			WithContext("version", version).
 			WithContext("location", location.String()).
@@ -392,15 +392,15 @@ func (r *FileSystemRepository) DeleteStateMachine(fileType models.FileType, name
 
 	// Remove the entire directory
 	if err := os.RemoveAll(dirPath); err != nil {
-		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to delete state machine directory", err).
+		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to delete state-machine diagram directory", err).
 			WithContext("dirPath", dirPath)
 	}
 
 	return nil
 }
 
-// ListStateMachines lists all state machines in a location
-func (r *FileSystemRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
+// ListStateMachines lists all state-machine diagrams in a location
+func (r *FileSystemRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
 	// Get the location path
 	locationPath := r.pathManager.GetLocationWithFileTypePath(location, fileType)
 
@@ -411,7 +411,7 @@ func (r *FileSystemRepository) ListStateMachines(fileType models.FileType, locat
 	}
 	if !exists {
 		// Return empty list if location doesn't exist
-		return []models.StateMachine{}, nil
+		return []models.StateMachineDiagram{}, nil
 	}
 
 	// Read directory entries
@@ -421,7 +421,7 @@ func (r *FileSystemRepository) ListStateMachines(fileType models.FileType, locat
 			WithContext("locationPath", locationPath)
 	}
 
-	var stateMachines []models.StateMachine
+	var stateMachines []models.StateMachineDiagram
 
 	// Process each directory entry
 	for _, entry := range entries {
@@ -441,10 +441,10 @@ func (r *FileSystemRepository) ListStateMachines(fileType models.FileType, locat
 			continue
 		}
 
-		// Try to read the state machine
+		// Try to read the state-machine diagram
 		sm, err := r.ReadStateMachine(fileType, pathInfo.Name, pathInfo.Version, location)
 		if err != nil {
-			// Skip state machines that can't be read, but continue processing others
+			// Skip state-machine diagrams that can't be read, but continue processing others
 			continue
 		}
 

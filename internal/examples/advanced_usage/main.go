@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Go UML State Machine - Advanced Usage Example")
+	fmt.Println("Go UML State-Machine Diagram - Advanced Usage Example")
 	fmt.Println("==============================================")
 
 	// Create configuration with custom settings
@@ -28,8 +28,8 @@ func main() {
 	validator := validation.NewPlantUMLValidatorWithRepository(repo)
 	svc := service.NewService(repo, validator, config)
 
-	// Example 1: Create a base authentication state machine
-	fmt.Println("\n1. Creating base authentication state machine...")
+	// Example 1: Create a base authentication state-machine diagram
+	fmt.Println("\n1. Creating base authentication state-machine diagram...")
 	baseAuthContent := `@startuml
 title Base Authentication
 
@@ -104,8 +104,8 @@ Failed --> RequireAuth : retry
 		}
 	}
 
-	// Example 4: Update an existing state machine
-	fmt.Println("\n4. Updating state machine...")
+	// Example 4: Update an existing state-machine diagram
+	fmt.Println("\n4. Updating state-machine diagram...")
 	updatedContent := `@startuml
 title Advanced Authentication System v1.1
 
@@ -131,9 +131,9 @@ SessionTimeout --> RequireAuth : session_expired
 	advancedSM.Content = updatedContent
 	err = svc.Update(advancedSM)
 	if err != nil {
-		log.Printf("Error updating state machine: %v", err)
+		log.Printf("Error updating state-machine diagram: %v", err)
 	} else {
-		fmt.Println("✓ State machine updated successfully")
+		fmt.Println("✓ State-machine diagram updated successfully")
 	}
 
 	// Example 5: Validate with different strictness levels
@@ -157,7 +157,7 @@ SessionTimeout --> RequireAuth : session_expired
 		fmt.Printf("✓ Expected error for duplicate creation: %v\n", err)
 	}
 
-	// Try to read non-existent state machine
+	// Try to read non-existent state-machine diagram
 	_, err = svc.Read(models.FileTypePUML, "non-existent", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		fmt.Printf("✓ Expected error for non-existent read: %v\n", err)
@@ -179,7 +179,7 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Printf("  - Max File Size: %d bytes\n", envConfig.MaxFileSize)
 	fmt.Printf("  - Debug Logging: %t\n", envConfig.EnableDebugLogging)
 
-	// Example 8: Clean up (delete the test state machines)
+	// Example 8: Clean up (delete the test state-machine diagrams)
 	fmt.Println("\n8. Cleaning up test data...")
 
 	// Delete from products first

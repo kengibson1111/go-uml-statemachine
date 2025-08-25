@@ -19,8 +19,8 @@ type MockErrorRepository struct {
 	shouldFailDirExists bool
 	existsResult        bool
 	dirExistsResult     bool
-	readResult          *models.StateMachine
-	listResult          []models.StateMachine
+	readResult          *models.StateMachineDiagram
+	listResult          []models.StateMachineDiagram
 
 	// Function fields for custom behavior
 	ExistsFunc func(fileType models.FileType, name, version string, location models.Location) (bool, error)
@@ -36,14 +36,14 @@ func (m *MockErrorRepository) Exists(fileType models.FileType, name, version str
 	return m.existsResult, nil
 }
 
-func (m *MockErrorRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
+func (m *MockErrorRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	if m.shouldFailRead {
 		return nil, errors.New("mock read error")
 	}
 	return m.readResult, nil
 }
 
-func (m *MockErrorRepository) WriteStateMachine(sm *models.StateMachine) error {
+func (m *MockErrorRepository) WriteStateMachine(sm *models.StateMachineDiagram) error {
 	if m.shouldFailWrite {
 		return errors.New("mock write error")
 	}
@@ -64,7 +64,7 @@ func (m *MockErrorRepository) DeleteStateMachine(fileType models.FileType, name,
 	return nil
 }
 
-func (m *MockErrorRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
+func (m *MockErrorRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
 	if m.shouldFailList {
 		return nil, errors.New("mock list error")
 	}
@@ -93,14 +93,14 @@ type MockErrorValidator struct {
 	referencesResult             *models.ValidationResult
 }
 
-func (m *MockErrorValidator) Validate(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+func (m *MockErrorValidator) Validate(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 	if m.shouldFailValidate {
 		return nil, errors.New("mock validation error")
 	}
 	return m.validationResult, nil
 }
 
-func (m *MockErrorValidator) ValidateReferences(sm *models.StateMachine) (*models.ValidationResult, error) {
+func (m *MockErrorValidator) ValidateReferences(sm *models.StateMachineDiagram) (*models.ValidationResult, error) {
 	if m.shouldFailValidateReferences {
 		return nil, errors.New("mock reference validation error")
 	}
@@ -194,15 +194,15 @@ func TestService_Create_RepositoryErrors(t *testing.T) {
 				repo.shouldFailExists = true
 			},
 			expectedErrType: models.ErrorTypeFileSystem,
-			expectedMsg:     "failed to check if state machine exists",
+			expectedMsg:     "failed to check if state-machine diagram exists",
 		},
 		{
-			name: "state machine already exists",
+			name: "state-machine diagram already exists",
 			setupRepo: func(repo *MockErrorRepository) {
 				repo.existsResult = true
 			},
 			expectedErrType: models.ErrorTypeDirectoryConflict,
-			expectedMsg:     "state machine already exists",
+			expectedMsg:     "state-machine diagram already exists",
 		},
 		{
 			name: "write fails",
@@ -211,7 +211,7 @@ func TestService_Create_RepositoryErrors(t *testing.T) {
 				repo.shouldFailWrite = true
 			},
 			expectedErrType: models.ErrorTypeFileSystem,
-			expectedMsg:     "failed to write state machine",
+			expectedMsg:     "failed to write state-machine diagram",
 		},
 	}
 
@@ -502,7 +502,7 @@ func TestService_ErrorSeverityAssignment(t *testing.T) {
 		{
 			name: "conflict error - medium severity",
 			setupRepo: func(repo *MockErrorRepository) {
-				repo.existsResult = true // State machine already exists
+				repo.existsResult = true // State-machine diagram already exists
 			},
 			expectedSeverity: models.ErrorSeverityMedium,
 		},

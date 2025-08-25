@@ -1,4 +1,4 @@
-package statemachine
+package diagram
 
 import (
 	"os"
@@ -272,7 +272,7 @@ func TestPublicAPIIntegration(t *testing.T) {
 
 	// Test content
 	content := `@startuml
-title Test State Machine
+title Test State-Machine Diagram
 
 [*] --> Idle
 Idle --> Active : start()
@@ -288,13 +288,13 @@ Error --> Idle : reset()
 		t.Fatalf("Create() failed: %v", err)
 	}
 	if sm == nil {
-		t.Fatal("Create() returned nil state machine")
+		t.Fatal("Create() returned nil state-machine diagram")
 	}
 	if sm.Name != "test-integration" {
-		t.Errorf("Created state machine name = %q, want %q", sm.Name, "test-integration")
+		t.Errorf("Created state-machine diagram name = %q, want %q", sm.Name, "test-integration")
 	}
 	if sm.Version != "1.0.0" {
-		t.Errorf("Created state machine version = %q, want %q", sm.Version, "1.0.0")
+		t.Errorf("Created state-machine diagram version = %q, want %q", sm.Version, "1.0.0")
 	}
 
 	// Test Read
@@ -328,7 +328,7 @@ Error --> Idle : reset()
 		}
 	}
 	if !found {
-		t.Error("Created state machine not found in ListAll() results")
+		t.Error("Created state-machine diagram not found in ListAll() results")
 	}
 
 	// Test Update
@@ -368,7 +368,7 @@ Error --> Idle : reset()
 			}
 		}
 		if !found {
-			t.Error("Promoted state machine not found in products")
+			t.Error("Promoted state-machine diagram not found in products")
 		}
 
 		// Clean up from products
@@ -410,25 +410,25 @@ func TestPublicAPIErrorHandling(t *testing.T) {
 	// Test Read non-existent
 	_, err = svc.Read(FileTypePUML, "non-existent", "1.0.0", LocationInProgress)
 	if err == nil {
-		t.Error("Read() of non-existent state machine should fail")
+		t.Error("Read() of non-existent state-machine diagram should fail")
 	}
 
 	// Test Delete non-existent
 	err = svc.Delete(FileTypePUML, "non-existent", "1.0.0", LocationInProgress)
 	if err == nil {
-		t.Error("Delete() of non-existent state machine should fail")
+		t.Error("Delete() of non-existent state-machine diagram should fail")
 	}
 
 	// Test Promote non-existent
 	err = svc.Promote(FileTypePUML, "non-existent", "1.0.0")
 	if err == nil {
-		t.Error("Promote() of non-existent state machine should fail")
+		t.Error("Promote() of non-existent state-machine diagram should fail")
 	}
 
 	// Test Validate non-existent
 	_, err = svc.Validate(FileTypePUML, "non-existent", "1.0.0", LocationInProgress)
 	if err == nil {
-		t.Error("Validate() of non-existent state machine should fail")
+		t.Error("Validate() of non-existent state-machine diagram should fail")
 	}
 }
 

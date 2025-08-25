@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	fmt.Println("=== Go UML State Machine - Error Handling and Logging Demo ===")
+	fmt.Println("=== Go UML State-Machine Diagram - Error Handling and Logging Demo ===")
 	fmt.Println()
 
 	// Configure logging with debug level
@@ -51,7 +51,7 @@ func main() {
 	logger.Info("Error handling and logging demonstration completed")
 }
 
-func demonstrateValidationErrors(svc models.StateMachineService, logger *logging.Logger) {
+func demonstrateValidationErrors(svc models.DiagramService, logger *logging.Logger) {
 	logger.Info("=== Demonstrating Validation Errors ===")
 
 	// Test empty name
@@ -91,10 +91,10 @@ func demonstrateValidationErrors(svc models.StateMachineService, logger *logging
 	}
 }
 
-func demonstrateFileSystemErrors(svc models.StateMachineService, logger *logging.Logger) {
+func demonstrateFileSystemErrors(svc models.DiagramService, logger *logging.Logger) {
 	logger.Info("=== Demonstrating File System Errors ===")
 
-	// Try to read a non-existent state machine
+	// Try to read a non-existent state-machine diagram
 	logger.Info("Testing file not found error...")
 	_, err := svc.Read(models.FileTypePUML, "nonexistent", "1.0.0", models.LocationInProgress)
 	if err != nil {
@@ -108,11 +108,11 @@ func demonstrateFileSystemErrors(svc models.StateMachineService, logger *logging
 	}
 }
 
-func demonstrateErrorWrapping(svc models.StateMachineService, logger *logging.Logger) {
+func demonstrateErrorWrapping(svc models.DiagramService, logger *logging.Logger) {
 	logger.Info("=== Demonstrating Error Wrapping ===")
 
-	// Create a state machine first
-	logger.Info("Creating a state machine for conflict demonstration...")
+	// Create a state-machine diagram first
+	logger.Info("Creating a state-machine diagram for conflict demonstration...")
 	validContent := `@startuml
 [*] --> Idle
 Idle --> Active : start
@@ -121,14 +121,14 @@ Active --> [*] : stop
 
 	sm, err := svc.Create(models.FileTypePUML, "demo-sm", "1.0.0", validContent, models.LocationInProgress)
 	if err != nil {
-		logger.WithError(err).Error("Failed to create demo state machine")
+		logger.WithError(err).Error("Failed to create demo state-machine diagram")
 		return
 	}
 
-	logger.WithField("name", sm.Name).Info("Demo state machine created successfully")
+	logger.WithField("name", sm.Name).Info("Demo state-machine diagram created successfully")
 
-	// Try to create the same state machine again (should cause conflict)
-	logger.Info("Attempting to create duplicate state machine...")
+	// Try to create the same state-machine diagram again (should cause conflict)
+	logger.Info("Attempting to create duplicate state-machine diagram...")
 	_, err = svc.Create(models.FileTypePUML, "demo-sm", "1.0.0", validContent, models.LocationInProgress)
 	if err != nil {
 		if smErr, ok := err.(*models.StateMachineError); ok {
@@ -146,13 +146,13 @@ Active --> [*] : stop
 	}
 
 	// Clean up
-	logger.Info("Cleaning up demo state machine...")
+	logger.Info("Cleaning up demo state-machine diagram...")
 	if err := svc.Delete(models.FileTypePUML, "demo-sm", "1.0.0", models.LocationInProgress); err != nil {
-		logger.WithError(err).Warn("Failed to clean up demo state machine")
+		logger.WithError(err).Warn("Failed to clean up demo state-machine diagram")
 	}
 }
 
-func demonstrateErrorSeverities(svc models.StateMachineService, logger *logging.Logger) {
+func demonstrateErrorSeverities(svc models.DiagramService, logger *logging.Logger) {
 	logger.Info("=== Demonstrating Error Severities ===")
 
 	// Create errors with different severities

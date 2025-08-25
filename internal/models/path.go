@@ -8,13 +8,13 @@ import (
 )
 
 const (
-	// RootDirectoryName is the top-level directory for state machines
+	// RootDirectoryName is the top-level directory for state-machine diagrams
 	RootDirectoryName = ".go-uml-statemachine-parsers"
 
 	// PlantUMLExtension is the file extension for PlantUML files
 	PlantUMLExtension = ".puml"
 
-	// NestedDirectoryName is the subdirectory name for nested state machines
+	// NestedDirectoryName is the subdirectory name for nested state-machine diagrams
 	NestedDirectoryName = "nested"
 )
 
@@ -54,59 +54,59 @@ func (pm *PathManager) GetLocationWithFileTypePath(location Location, fileType F
 	return filepath.Join(locationPath, fileType.String())
 }
 
-// GetStateMachineDirectoryPath returns the directory path for a state machine
+// GetStateMachineDirectoryPath returns the directory path for a state-machine diagram
 func (pm *PathManager) GetStateMachineDirectoryPath(name, version string, location Location) string {
 	locationPath := pm.GetLocationPath(location)
 	if location == LocationNested {
-		// Nested state machines don't include version in directory name
+		// Nested state-machine diagrams don't include version in directory name
 		return filepath.Join(locationPath, name)
 	}
 	return filepath.Join(locationPath, fmt.Sprintf("%s-%s", name, version))
 }
 
-// GetStateMachineDirectoryPathWithFileType returns the directory path for a state machine with file type
+// GetStateMachineDirectoryPathWithFileType returns the directory path for a state-machine diagram with file type
 func (pm *PathManager) GetStateMachineDirectoryPathWithFileType(name, version string, location Location, fileType FileType) string {
 	locationPath := pm.GetLocationWithFileTypePath(location, fileType)
 	if location == LocationNested {
-		// Nested state machines don't include version in directory name
+		// Nested state-machine diagrams don't include version in directory name
 		return filepath.Join(locationPath, name)
 	}
 	return filepath.Join(locationPath, fmt.Sprintf("%s-%s", name, version))
 }
 
-// GetStateMachineFilePath returns the full file path for a state machine
+// GetStateMachineFilePath returns the full file path for a state-machine diagram
 func (pm *PathManager) GetStateMachineFilePath(name, version string, location Location) string {
 	dirPath := pm.GetStateMachineDirectoryPath(name, version, location)
 	if location == LocationNested {
-		// Nested state machines don't include version in filename
+		// Nested state-machine diagrams don't include version in filename
 		return filepath.Join(dirPath, name+PlantUMLExtension)
 	}
 	return filepath.Join(dirPath, fmt.Sprintf("%s-%s%s", name, version, PlantUMLExtension))
 }
 
-// GetStateMachineFilePathWithFileType returns the full file path for a state machine with file type
+// GetStateMachineFilePathWithFileType returns the full file path for a state-machine diagram with file type
 func (pm *PathManager) GetStateMachineFilePathWithFileType(name, version string, location Location, fileType FileType) string {
 	dirPath := pm.GetStateMachineDirectoryPathWithFileType(name, version, location, fileType)
 	if location == LocationNested {
-		// Nested state machines don't include version in filename
+		// Nested state-machine diagrams don't include version in filename
 		return filepath.Join(dirPath, name+PlantUMLExtension)
 	}
 	return filepath.Join(dirPath, fmt.Sprintf("%s-%s%s", name, version, PlantUMLExtension))
 }
 
-// GetNestedDirectoryPath returns the path for nested state machines within a parent
+// GetNestedDirectoryPath returns the path for nested state-machine diagrams within a parent
 func (pm *PathManager) GetNestedDirectoryPath(parentName, parentVersion string, parentLocation Location) string {
 	parentDir := pm.GetStateMachineDirectoryPath(parentName, parentVersion, parentLocation)
 	return filepath.Join(parentDir, NestedDirectoryName)
 }
 
-// GetNestedStateMachineDirectoryPath returns the directory path for a nested state machine
+// GetNestedStateMachineDirectoryPath returns the directory path for a nested state-machine diagram
 func (pm *PathManager) GetNestedStateMachineDirectoryPath(parentName, parentVersion string, parentLocation Location, nestedName string) string {
 	nestedDir := pm.GetNestedDirectoryPath(parentName, parentVersion, parentLocation)
 	return filepath.Join(nestedDir, nestedName)
 }
 
-// GetNestedStateMachineFilePath returns the file path for a nested state machine
+// GetNestedStateMachineFilePath returns the file path for a nested state-machine diagram
 func (pm *PathManager) GetNestedStateMachineFilePath(parentName, parentVersion string, parentLocation Location, nestedName string) string {
 	nestedDir := pm.GetNestedStateMachineDirectoryPath(parentName, parentVersion, parentLocation, nestedName)
 	return filepath.Join(nestedDir, nestedName+PlantUMLExtension)
@@ -118,7 +118,7 @@ type PathInfo struct {
 	Version  string
 	Location Location
 	IsNested bool
-	Parent   *PathInfo // For nested state machines
+	Parent   *PathInfo // For nested state-machine diagrams
 }
 
 // ValidatePath validates a path to prevent directory traversal attacks
@@ -164,7 +164,7 @@ func (pm *PathManager) ValidatePath(path string) error {
 	return nil
 }
 
-// ValidateName validates a state machine name
+// ValidateName validates a state-machine diagram name
 func (pm *PathManager) ValidateName(name string) error {
 	if name == "" {
 		return NewStateMachineError(ErrorTypeValidation, "name cannot be empty", nil)
@@ -344,9 +344,9 @@ func (pm *PathManager) ParseFullPath(fullPath string) (*PathInfo, error) {
 			WithContext("location", pathParts[0])
 	}
 
-	// Parse the state machine directory name
+	// Parse the state-machine diagram directory name
 	if len(pathParts) < 2 {
-		return nil, NewStateMachineError(ErrorTypeValidation, "missing state machine directory", nil).
+		return nil, NewStateMachineError(ErrorTypeValidation, "missing state-machine diagram directory", nil).
 			WithContext("path", fullPath)
 	}
 
@@ -357,11 +357,11 @@ func (pm *PathManager) ParseFullPath(fullPath string) (*PathInfo, error) {
 
 	pathInfo.Location = location
 
-	// Check if this is a nested state machine path
+	// Check if this is a nested state-machine diagram path
 	if len(pathParts) > 3 && pathParts[2] == NestedDirectoryName {
-		// This is a nested state machine
+		// This is a nested state-machine diagram
 		if len(pathParts) < 4 {
-			return nil, NewStateMachineError(ErrorTypeValidation, "missing nested state machine directory", nil).
+			return nil, NewStateMachineError(ErrorTypeValidation, "missing nested state-machine diagram directory", nil).
 				WithContext("path", fullPath)
 		}
 

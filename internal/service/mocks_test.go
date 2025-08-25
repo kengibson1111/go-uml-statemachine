@@ -6,24 +6,24 @@ import (
 
 // mockRepository is a mock implementation of the Repository interface for testing
 type mockRepository struct {
-	readStateMachineFunc   func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error)
-	listStateMachinesFunc  func(fileType models.FileType, location models.Location) ([]models.StateMachine, error)
+	readStateMachineFunc   func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error)
+	listStateMachinesFunc  func(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error)
 	existsFunc             func(fileType models.FileType, name, version string, location models.Location) (bool, error)
-	writeStateMachineFunc  func(sm *models.StateMachine) error
+	writeStateMachineFunc  func(sm *models.StateMachineDiagram) error
 	moveStateMachineFunc   func(fileType models.FileType, name, version string, from, to models.Location) error
 	deleteStateMachineFunc func(fileType models.FileType, name, version string, location models.Location) error
 	createDirectoryFunc    func(path string) error
 	directoryExistsFunc    func(path string) (bool, error)
 }
 
-func (m *mockRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
+func (m *mockRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	if m.readStateMachineFunc != nil {
 		return m.readStateMachineFunc(fileType, name, version, location)
 	}
 	return nil, nil
 }
 
-func (m *mockRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
+func (m *mockRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
 	if m.listStateMachinesFunc != nil {
 		return m.listStateMachinesFunc(fileType, location)
 	}
@@ -37,7 +37,7 @@ func (m *mockRepository) Exists(fileType models.FileType, name, version string, 
 	return false, nil
 }
 
-func (m *mockRepository) WriteStateMachine(sm *models.StateMachine) error {
+func (m *mockRepository) WriteStateMachine(sm *models.StateMachineDiagram) error {
 	if m.writeStateMachineFunc != nil {
 		return m.writeStateMachineFunc(sm)
 	}
@@ -74,18 +74,18 @@ func (m *mockRepository) DirectoryExists(path string) (bool, error) {
 
 // mockValidator is a mock implementation of the Validator interface for testing
 type mockValidator struct {
-	validateFunc           func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error)
-	validateReferencesFunc func(sm *models.StateMachine) (*models.ValidationResult, error)
+	validateFunc           func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error)
+	validateReferencesFunc func(sm *models.StateMachineDiagram) (*models.ValidationResult, error)
 }
 
-func (m *mockValidator) Validate(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+func (m *mockValidator) Validate(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 	if m.validateFunc != nil {
 		return m.validateFunc(sm, strictness)
 	}
 	return &models.ValidationResult{IsValid: true}, nil
 }
 
-func (m *mockValidator) ValidateReferences(sm *models.StateMachine) (*models.ValidationResult, error) {
+func (m *mockValidator) ValidateReferences(sm *models.StateMachineDiagram) (*models.ValidationResult, error) {
 	if m.validateReferencesFunc != nil {
 		return m.validateReferencesFunc(sm)
 	}

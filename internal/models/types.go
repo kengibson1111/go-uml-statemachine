@@ -19,7 +19,7 @@ func (ft FileType) String() string {
 	}
 }
 
-// Location indicates where the state machine is stored
+// Location indicates where the state-machine diagram is stored
 type Location int
 
 const (
@@ -62,8 +62,8 @@ func (rt ReferenceType) String() string {
 	}
 }
 
-// StateMachine represents a UML state machine
-type StateMachine struct {
+// StateMachineDiagram represents a UML state-machine diagram
+type StateMachineDiagram struct {
 	Name       string
 	Version    string
 	Content    string
@@ -73,7 +73,7 @@ type StateMachine struct {
 	Metadata   Metadata
 }
 
-// Reference represents a reference to another state machine
+// Reference represents a reference to another state-machine diagram
 type Reference struct {
 	Name    string
 	Version string // empty for nested references
@@ -81,7 +81,7 @@ type Reference struct {
 	Path    string
 }
 
-// Metadata contains additional information about the state machine
+// Metadata contains additional information about the state-machine diagram
 type Metadata struct {
 	CreatedAt  time.Time
 	ModifiedAt time.Time

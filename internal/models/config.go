@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// Config represents the configuration for the state machine system
+// Config represents the configuration for the state-machine diagram system
 type Config struct {
 	RootDirectory      string               // Default: ".go-uml-statemachine-parsers"
 	ValidationLevel    ValidationStrictness // Default validation level
@@ -28,7 +28,7 @@ func DefaultConfig() *Config {
 
 // LoadConfigFromEnv loads configuration from environment variables
 // Environment variables:
-// - GO_UML_ROOT_DIRECTORY: Root directory for state machines
+// - GO_UML_ROOT_DIRECTORY: Root directory for state-machine diagrams
 // - GO_UML_VALIDATION_LEVEL: Validation level (in-progress, products)
 // - GO_UML_BACKUP_ENABLED: Whether to enable backups (true/false)
 // - GO_UML_MAX_FILE_SIZE: Maximum file size in bytes

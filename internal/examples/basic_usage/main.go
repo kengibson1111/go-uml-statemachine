@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Go UML State Machine - Basic Usage Example")
+	fmt.Println("Go UML State-Machine Diagram - Basic Usage Example")
 	fmt.Println("==========================================")
 
 	// Create configuration
@@ -28,9 +28,9 @@ func main() {
 	// Create service
 	svc := service.NewService(repo, validator, config)
 
-	// Example PlantUML content for a simple user authentication state machine
+	// Example PlantUML content for a simple user authentication state-machine diagram
 	authContent := `@startuml
-title User Authentication State Machine
+title User Authentication State-Machine Diagram
 
 [*] --> Idle : Start
 
@@ -42,30 +42,30 @@ Authenticated --> Idle : logout()
 
 @enduml`
 
-	// Example 1: Create a new state machine in in-progress
-	fmt.Println("\n1. Creating a new state machine...")
+	// Example 1: Create a new state-machine diagram in in-progress
+	fmt.Println("\n1. Creating a new state-machine diagram...")
 	sm, err := svc.Create(models.FileTypePUML, "user-auth", "1.0.0", authContent, models.LocationInProgress)
 	if err != nil {
-		log.Printf("Error creating state machine: %v", err)
+		log.Printf("Error creating state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created state machine: %s-%s\n", sm.Name, sm.Version)
+	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", sm.Name, sm.Version)
 
-	// Example 2: Read the state machine back
-	fmt.Println("\n2. Reading the state machine...")
+	// Example 2: Read the state-machine diagram back
+	fmt.Println("\n2. Reading the state-machine diagram...")
 	readSM, err := svc.Read(models.FileTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
-		log.Printf("Error reading state machine: %v", err)
+		log.Printf("Error reading state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Read state machine: %s-%s (content length: %d)\n",
+	fmt.Printf("✓ Read state-machine diagram: %s-%s (content length: %d)\n",
 		readSM.Name, readSM.Version, len(readSM.Content))
 
-	// Example 3: Validate the state machine
-	fmt.Println("\n3. Validating the state machine...")
+	// Example 3: Validate the state-machine diagram
+	fmt.Println("\n3. Validating the state-machine diagram...")
 	validationResult, err := svc.Validate(models.FileTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
-		log.Printf("Error validating state machine: %v", err)
+		log.Printf("Error validating state-machine diagram: %v", err)
 		return
 	}
 	fmt.Printf("✓ Validation result: Valid=%t, Errors=%d, Warnings=%d\n",
@@ -85,14 +85,14 @@ Authenticated --> Idle : logout()
 		}
 	}
 
-	// Example 4: List all state machines in in-progress
-	fmt.Println("\n4. Listing all in-progress state machines...")
+	// Example 4: List all state-machine diagrams in in-progress
+	fmt.Println("\n4. Listing all in-progress state-machine diagrams...")
 	stateMachines, err := svc.ListAll(models.FileTypePUML, models.LocationInProgress)
 	if err != nil {
-		log.Printf("Error listing state machines: %v", err)
+		log.Printf("Error listing state-machine diagrams: %v", err)
 		return
 	}
-	fmt.Printf("✓ Found %d state machine(s) in in-progress:\n", len(stateMachines))
+	fmt.Printf("✓ Found %d state-machine diagram(s) in in-progress:\n", len(stateMachines))
 	for _, sm := range stateMachines {
 		fmt.Printf("  - %s-%s (created: %s)\n",
 			sm.Name, sm.Version, sm.Metadata.CreatedAt.Format("2006-01-02 15:04:05"))
@@ -100,10 +100,10 @@ Authenticated --> Idle : logout()
 
 	// Example 5: Promote to products (if validation passes)
 	if validationResult.IsValid && !validationResult.HasErrors() {
-		fmt.Println("\n5. Promoting state machine to products...")
+		fmt.Println("\n5. Promoting state-machine diagram to products...")
 		err = svc.Promote(models.FileTypePUML, "user-auth", "1.0.0")
 		if err != nil {
-			log.Printf("Error promoting state machine: %v", err)
+			log.Printf("Error promoting state-machine diagram: %v", err)
 		} else {
 			fmt.Println("✓ Successfully promoted to products")
 		}
@@ -112,13 +112,13 @@ Authenticated --> Idle : logout()
 	}
 
 	// Example 6: List products
-	fmt.Println("\n6. Listing all product state machines...")
+	fmt.Println("\n6. Listing all product state-machine diagrams...")
 	productSMs, err := svc.ListAll(models.FileTypePUML, models.LocationProducts)
 	if err != nil {
-		log.Printf("Error listing product state machines: %v", err)
+		log.Printf("Error listing product state-machine diagrams: %v", err)
 		return
 	}
-	fmt.Printf("✓ Found %d state machine(s) in products:\n", len(productSMs))
+	fmt.Printf("✓ Found %d state-machine diagram(s) in products:\n", len(productSMs))
 	for _, sm := range productSMs {
 		fmt.Printf("  - %s-%s (created: %s)\n",
 			sm.Name, sm.Version, sm.Metadata.CreatedAt.Format("2006-01-02 15:04:05"))

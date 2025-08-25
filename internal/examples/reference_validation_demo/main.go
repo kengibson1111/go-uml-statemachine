@@ -14,9 +14,9 @@ func main() {
 	// Create a validator
 	validator := validation.NewPlantUMLValidator()
 
-	// Test 1: State machine with valid product reference
+	// Test 1: State-machine diagram with valid product reference
 	fmt.Println("\n1. Testing valid product reference:")
-	sm1 := &models.StateMachine{
+	sm1 := &models.StateMachineDiagram{
 		Name:    "main-service",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -42,9 +42,9 @@ Authenticated --> [*]
 	}
 	fmt.Printf("Errors: %d, Warnings: %d\n", len(result1.Errors), len(result1.Warnings))
 
-	// Test 2: State machine with valid nested reference
+	// Test 2: State-machine diagram with valid nested reference
 	fmt.Println("\n2. Testing valid nested reference:")
-	sm2 := &models.StateMachine{
+	sm2 := &models.StateMachineDiagram{
 		Name:    "workflow",
 		Version: "2.0.0",
 		Content: `@startuml
@@ -70,9 +70,9 @@ End --> [*]
 	}
 	fmt.Printf("Errors: %d, Warnings: %d\n", len(result2.Errors), len(result2.Warnings))
 
-	// Test 3: State machine with invalid version
+	// Test 3: State-machine diagram with invalid version
 	fmt.Println("\n3. Testing invalid product version:")
-	sm3 := &models.StateMachine{
+	sm3 := &models.StateMachineDiagram{
 		Name:    "test-service",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -93,9 +93,9 @@ End --> [*]
 		fmt.Printf("  Error: %s - %s\n", result3.Errors[0].Code, result3.Errors[0].Message)
 	}
 
-	// Test 4: State machine with self-reference
+	// Test 4: State-machine diagram with self-reference
 	fmt.Println("\n4. Testing self-reference:")
-	sm4 := &models.StateMachine{
+	sm4 := &models.StateMachineDiagram{
 		Name:    "self-ref",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -118,7 +118,7 @@ End --> [*]
 
 	// Test 5: Multiple references
 	fmt.Println("\n5. Testing multiple references:")
-	sm5 := &models.StateMachine{
+	sm5 := &models.StateMachineDiagram{
 		Name:    "complex-service",
 		Version: "1.0.0",
 		Content: `@startuml

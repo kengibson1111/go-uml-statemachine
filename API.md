@@ -1,10 +1,10 @@
-# Go UML State Machine API Documentation
+# Go UML State Machine Parsers API Documentation
 
-This document provides comprehensive API documentation for the Go UML State Machine module.
+This document provides comprehensive API documentation for the Go UML State Machine Parsers module.
 
 ## Package Overview
 
-The `statemachine` package provides functionality for managing UML state machine diagrams in PlantUML format with structured file organization, versioning, validation, and cross-references.
+The `diagram` package provides functionality for managing UML state-machine diagrams in PlantUML format with structured file organization, versioning, validation, and cross-references.
 
 ```go
 import "github.com/kengibson1111/go-uml-statemachine-parsers"
@@ -24,16 +24,16 @@ const (
 )
 ```
 
-### StateMachine
+### diagram
 
-Represents a UML state machine with its metadata and content.
+Represents a UML state-machine diagram with its metadata and content.
 
 ```go
-type StateMachine struct {
-    Name       string      // State machine name
+type diagram struct {
+    Name       string      // State-machine diagram name
     Version    string      // Semantic version (e.g., "1.0.0")
     Content    string      // PlantUML content
-    References []Reference // References to other state machines
+    References []Reference // References to other state-machines diagrams
     Location   Location    // Storage location
     FileType   FileType    // Type of file (e.g., PUML)
     Metadata   Metadata    // Additional metadata
@@ -42,7 +42,7 @@ type StateMachine struct {
 
 ### Location
 
-Indicates where the state machine is stored.
+Indicates where the state-machine diagram is stored.
 
 ```go
 type Location int
@@ -50,17 +50,17 @@ type Location int
 const (
     LocationInProgress Location = iota // Development/testing phase
     LocationProducts                   // Production-ready
-    LocationNested                     // Nested within another state machine
+    LocationNested                     // Nested within a state-machine diagram
 )
 ```
 
 ### Reference
 
-Represents a reference to another state machine.
+Represents a reference to another state-machine diagram.
 
 ```go
 type Reference struct {
-    Name    string        // Referenced state machine name
+    Name    string        // Referenced state-machine diagram name
     Version string        // Version (empty for nested references)
     Type    ReferenceType // Type of reference
     Path    string        // Resolved file path
@@ -69,20 +69,20 @@ type Reference struct {
 
 ### ReferenceType
 
-Indicates the type of reference between state machines.
+Indicates the type of reference between state-machine diagrams.
 
 ```go
 type ReferenceType int
 
 const (
     ReferenceTypeProduct ReferenceType = iota // Reference to products directory
-    ReferenceTypeNested                       // Reference to nested state machine
+    ReferenceTypeNested                       // Reference to nested state-machine diagram
 )
 ```
 
 ### ValidationResult
 
-Contains the outcome of state machine validation.
+Contains the outcome of state-machine diagram validation.
 
 ```go
 type ValidationResult struct {
@@ -110,7 +110,7 @@ const (
 
 ### Config
 
-Represents the configuration for the state machine system.
+Represents the configuration for the state-machine diagram system.
 
 ```go
 type Config struct {
@@ -124,25 +124,25 @@ type Config struct {
 
 ## Service Interface
 
-### StateMachineService
+### DiagramService
 
-The main interface for state machine operations.
+The main interface for state-machine diagram operations.
 
 ```go
-type StateMachineService interface {
+type DiagramService interface {
     // CRUD operations
-    Create(fileType FileType, name, version string, content string, location Location) (*StateMachine, error)
-    Read(fileType FileType, name, version string, location Location) (*StateMachine, error)
-    Update(sm *StateMachine) error
+    Create(fileType FileType, name, version string, content string, location Location) (*diagram, error)
+    Read(fileType FileType, name, version string, location Location) (*diagram, error)
+    Update(sm *diagram) error
     Delete(fileType FileType, name, version string, location Location) error
 
     // Business operations
     Promote(fileType FileType, name, version string) error
     Validate(fileType FileType, name, version string, location Location) (*ValidationResult, error)
-    ListAll(fileType FileType, location Location) ([]StateMachine, error)
+    ListAll(fileType FileType, location Location) ([]diagram, error)
 
     // Reference operations
-    ResolveReferences(sm *StateMachine) error
+    ResolveReferences(sm *diagram) error
 }
 ```
 
@@ -150,15 +150,15 @@ type StateMachineService interface {
 
 ### NewService
 
-Creates a new StateMachineService with default configuration.
+Creates a new DiagramService with default configuration.
 
 ```go
-func NewService() (StateMachineService, error)
+func NewService() (DiagramService, error)
 ```
 
 **Example:**
 ```go
-svc, err := statemachine.NewService()
+svc, err := diagram.NewService()
 if err != nil {
     log.Fatal(err)
 }
@@ -166,10 +166,10 @@ if err != nil {
 
 ### NewServiceWithConfig
 
-Creates a new StateMachineService with custom configuration.
+Creates a new DiagramService with custom configuration.
 
 ```go
-func NewServiceWithConfig(config *Config) (StateMachineService, error)
+func NewServiceWithConfig(config *Config) (DiagramService, error)
 ```
 
 **Parameters:**
@@ -177,12 +177,12 @@ func NewServiceWithConfig(config *Config) (StateMachineService, error)
 
 **Example:**
 ```go
-config := &statemachine.Config{
+config := &diagram.Config{
     RootDirectory:      "custom-directory",
     EnableDebugLogging: true,
     MaxFileSize:        2 * 1024 * 1024, // 2MB
 }
-svc, err := statemachine.NewServiceWithConfig(config)
+svc, err := diagram.NewServiceWithConfig(config)
 if err != nil {
     log.Fatal(err)
 }
@@ -190,14 +190,14 @@ if err != nil {
 
 ### NewServiceFromEnv
 
-Creates a new StateMachineService with configuration from environment variables.
+Creates a new DiagramService with configuration from environment variables.
 
 ```go
-func NewServiceFromEnv() (StateMachineService, error)
+func NewServiceFromEnv() (DiagramService, error)
 ```
 
 **Environment Variables:**
-- `GO_UML_ROOT_DIRECTORY`: Root directory for state machines
+- `GO_UML_ROOT_DIRECTORY`: Root directory for state-machine diagrams
 - `GO_UML_VALIDATION_LEVEL`: Validation level ("in-progress" or "products")
 - `GO_UML_BACKUP_ENABLED`: Enable backups ("true" or "false")
 - `GO_UML_MAX_FILE_SIZE`: Maximum file size in bytes
@@ -208,7 +208,7 @@ func NewServiceFromEnv() (StateMachineService, error)
 os.Setenv("GO_UML_ROOT_DIRECTORY", "my-state-machines")
 os.Setenv("GO_UML_DEBUG_LOGGING", "true")
 
-svc, err := statemachine.NewServiceFromEnv()
+svc, err := diagram.NewServiceFromEnv()
 if err != nil {
     log.Fatal(err)
 }
@@ -245,26 +245,26 @@ func LoadConfigFromEnv() *Config
 
 #### Create
 
-Creates a new state machine with the specified parameters.
+Creates a new state-machine diagram with the specified parameters.
 
 ```go
-Create(fileType FileType, name, version string, content string, location Location) (*StateMachine, error)
+Create(fileType FileType, name, version string, content string, location Location) (*diagram, error)
 ```
 
 **Parameters:**
 - `fileType`: Type of file (e.g., FileTypePUML)
-- `name`: State machine name (must be non-empty)
+- `name`: State-machine diagram name (must be non-empty)
 - `version`: Semantic version (must be non-empty)
 - `content`: PlantUML content (must be non-empty)
 - `location`: Storage location
 
 **Returns:**
-- `*StateMachine`: Created state machine
+- `*diagram`: Created state-machine diagram
 - `error`: Error if creation fails
 
 **Errors:**
 - Validation error if parameters are empty
-- Directory conflict if state machine already exists
+- Directory conflict if state-machine diagram already exists
 - File system error if write operation fails
 
 **Example:**
@@ -275,7 +275,7 @@ Idle --> Active : start()
 Active --> Idle : stop()
 @enduml`
 
-sm, err := svc.Create(statemachine.FileTypePUML, "my-machine", "1.0.0", content, statemachine.LocationInProgress)
+sm, err := svc.Create(diagram.FileTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -283,29 +283,29 @@ if err != nil {
 
 #### Read
 
-Retrieves a state machine by name, version, and location.
+Retrieves a state-machine diagram by name, version, and location.
 
 ```go
-Read(fileType FileType, name, version string, location Location) (*StateMachine, error)
+Read(fileType FileType, name, version string, location Location) (*diagram, error)
 ```
 
 **Parameters:**
 - `fileType`: Type of file (e.g., FileTypePUML)
-- `name`: State machine name
-- `version`: State machine version
+- `name`: State-machine diagram name
+- `version`: State-machine diagram version
 - `location`: Storage location
 
 **Returns:**
-- `*StateMachine`: Retrieved state machine
+- `*diagram`: Retrieved state-machine diagram
 - `error`: Error if read fails
 
 **Errors:**
 - Validation error if parameters are empty
-- File not found error if state machine doesn't exist
+- File not found error if state-machine diagram doesn't exist
 
 **Example:**
 ```go
-sm, err := svc.Read(statemachine.FileTypePUML, "my-machine", "1.0.0", statemachine.LocationInProgress)
+sm, err := svc.Read(diagram.FileTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -314,21 +314,21 @@ fmt.Printf("Content: %s\n", sm.Content)
 
 #### Update
 
-Modifies an existing state machine.
+Modifies an existing state-machine diagram.
 
 ```go
-Update(sm *StateMachine) error
+Update(sm *diagram) error
 ```
 
 **Parameters:**
-- `sm`: State machine to update (must not be nil)
+- `sm`: State-machine diagram to update (must not be nil)
 
 **Returns:**
 - `error`: Error if update fails
 
 **Errors:**
-- Validation error if state machine is nil or has empty fields
-- File not found error if state machine doesn't exist
+- Validation error if state-machine diagram is nil or has empty fields
+- File not found error if state-machine diagram doesn't exist
 - File system error if write operation fails
 
 **Example:**
@@ -342,7 +342,7 @@ if err != nil {
 
 #### Delete
 
-Removes a state machine by name, version, and location.
+Removes a state-machine diagram by name, version, and location.
 
 ```go
 Delete(fileType FileType, name, version string, location Location) error
@@ -350,8 +350,8 @@ Delete(fileType FileType, name, version string, location Location) error
 
 **Parameters:**
 - `fileType`: Type of file (e.g., FileTypePUML)
-- `name`: State machine name
-- `version`: State machine version
+- `name`: State-machine diagram name
+- `version`: State-machine diagram version
 - `location`: Storage location
 
 **Returns:**
@@ -359,12 +359,12 @@ Delete(fileType FileType, name, version string, location Location) error
 
 **Errors:**
 - Validation error if parameters are empty
-- File not found error if state machine doesn't exist
+- File not found error if state-machine diagram doesn't exist
 - File system error if delete operation fails
 
 **Example:**
 ```go
-err := svc.Delete(statemachine.FileTypePUML, "my-machine", "1.0.0", statemachine.LocationInProgress)
+err := svc.Delete(diagram.FileTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -374,7 +374,7 @@ if err != nil {
 
 #### Promote
 
-Moves a state machine from in-progress to products with validation.
+Moves a state-machine diagram from in-progress to products with validation.
 
 ```go
 Promote(fileType FileType, name, version string) error
@@ -382,28 +382,28 @@ Promote(fileType FileType, name, version string) error
 
 **Parameters:**
 - `fileType`: Type of file (e.g., FileTypePUML)
-- `name`: State machine name
-- `version`: State machine version
+- `name`: State-machine diagram name
+- `version`: State-machine diagram version
 
 **Returns:**
 - `error`: Error if promotion fails
 
 **Process:**
-1. Validates state machine exists in in-progress
+1. Validates state-machine diagram exists in in-progress
 2. Checks for conflicts in products directory
-3. Validates state machine content
+3. Validates state-machine diagram content
 4. Performs atomic move operation
 5. Includes rollback capability on failure
 
 **Errors:**
 - Validation error if parameters are empty
-- File not found error if state machine doesn't exist in in-progress
+- File not found error if state-machine diagram doesn't exist in in-progress
 - Directory conflict error if same name exists in products
-- Validation error if state machine has validation errors
+- Validation error if state-machine diagram has validation errors
 
 **Example:**
 ```go
-err := svc.Promote(statemachine.FileTypePUML, "my-machine", "1.0.0")
+err := svc.Promote(diagram.FileTypePUML, "my-machine", "1.0.0")
 if err != nil {
     log.Fatal(err)
 }
@@ -411,7 +411,7 @@ if err != nil {
 
 #### Validate
 
-Validates a state machine with the specified strictness level.
+Validates a state-machine diagram with the specified strictness level.
 
 ```go
 Validate(fileType FileType, name, version string, location Location) (*ValidationResult, error)
@@ -419,8 +419,8 @@ Validate(fileType FileType, name, version string, location Location) (*Validatio
 
 **Parameters:**
 - `fileType`: Type of file (e.g., FileTypePUML)
-- `name`: State machine name
-- `version`: State machine version
+- `name`: State-machine diagram name
+- `version`: State-machine diagram version
 - `location`: Storage location
 
 **Returns:**
@@ -433,7 +433,7 @@ Validate(fileType FileType, name, version string, location Location) (*Validatio
 
 **Example:**
 ```go
-result, err := svc.Validate(statemachine.FileTypePUML, "my-machine", "1.0.0", statemachine.LocationInProgress)
+result, err := svc.Validate(diagram.FileTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -448,10 +448,10 @@ if result.HasErrors() {
 
 #### ListAll
 
-Lists all state machines in the specified location.
+Lists all state-machine diagrams in the specified location.
 
 ```go
-ListAll(fileType FileType, location Location) ([]StateMachine, error)
+ListAll(fileType FileType, location Location) ([]diagram, error)
 ```
 
 **Parameters:**
@@ -459,17 +459,17 @@ ListAll(fileType FileType, location Location) ([]StateMachine, error)
 - `location`: Storage location to list
 
 **Returns:**
-- `[]StateMachine`: List of state machines
+- `[]diagram`: List of state-machine diagrams
 - `error`: Error if listing fails
 
 **Example:**
 ```go
-stateMachines, err := svc.ListAll(statemachine.FileTypePUML, statemachine.LocationInProgress)
+diagrams, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
 
-for _, sm := range stateMachines {
+for _, sm := range diagrams {
     fmt.Printf("- %s-%s\n", sm.Name, sm.Version)
 }
 ```
@@ -478,14 +478,14 @@ for _, sm := range stateMachines {
 
 #### ResolveReferences
 
-Resolves all references in a state machine.
+Resolves all references in a state-machine diagram.
 
 ```go
-ResolveReferences(sm *StateMachine) error
+ResolveReferences(sm *diagram) error
 ```
 
 **Parameters:**
-- `sm`: State machine with references to resolve
+- `sm`: State-machine diagram with references to resolve
 
 **Returns:**
 - `error`: Error if reference resolution fails
@@ -496,8 +496,8 @@ ResolveReferences(sm *StateMachine) error
 3. Sets resolved paths for valid references
 
 **Reference Types:**
-- **Product References**: References to state machines in products directory
-- **Nested References**: References to nested state machines within same parent
+- **Product References**: References to state-machine diagrams in products directory
+- **Nested References**: References to nested state-machine diagrams within same parent
 
 **Example:**
 ```go
@@ -542,13 +542,13 @@ Errors include context information such as:
 ### Example Error Handling
 
 ```go
-sm, err := svc.Read("non-existent", "1.0.0", statemachine.LocationInProgress)
+sm, err := svc.Read("non-existent", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     // Check if it's a specific error type
-    if smErr, ok := err.(*models.StateMachineError); ok {
+    if smErr, ok := err.(*models.diagramError); ok {
         switch smErr.Type {
         case models.ErrorTypeFileNotFound:
-            fmt.Println("State machine not found")
+            fmt.Println("State-machine diagram not found")
         case models.ErrorTypeValidation:
             fmt.Println("Validation error")
         case models.ErrorTypeDirectoryConflict:
@@ -568,13 +568,13 @@ if err != nil {
 - Consider backward compatibility when updating
 
 ### 2. Content Validation
-- Always validate state machines before promotion
+- Always validate state-machine diagrams before promotion
 - Handle validation errors appropriately
 - Use appropriate strictness levels for different environments
 
 ### 3. Reference Management
-- Resolve references after creating state machines with dependencies
-- Ensure referenced state machines exist before creating references
+- Resolve references after creating state-machine diagrams with dependencies
+- Ensure referenced state-machine diagrams exist before creating references
 - Use product references for stable dependencies
 
 ### 4. Error Handling
@@ -598,7 +598,7 @@ The service implementation is thread-safe and uses mutex locks to protect concur
 
 ## Performance Considerations
 
-- State machine content is loaded on-demand
+- State-machine diagram content is loaded on-demand
 - File system operations are optimized for common use cases
 - Validation is performed efficiently with configurable strictness
 - Reference resolution is cached where appropriate
@@ -608,4 +608,4 @@ The service implementation is thread-safe and uses mutex locks to protect concur
 - Maximum file size is configurable (default: 1MB)
 - Directory depth is limited by file system constraints
 - PlantUML syntax validation is basic (focused on structure)
-- Reference resolution requires referenced state machines to exist
+- Reference resolution requires referenced state-machine diagrams to exist

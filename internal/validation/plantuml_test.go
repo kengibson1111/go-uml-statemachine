@@ -18,7 +18,7 @@ func TestNewPlantUMLValidator(t *testing.T) {
 func TestPlantUMLValidator_ValidBasicStateMachine(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -34,7 +34,7 @@ Active --> [*]
 	}
 
 	if !result.IsValid {
-		t.Error("Expected valid result for basic state machine")
+		t.Error("Expected valid result for basic state-machine diagram")
 	}
 
 	if len(result.Errors) != 0 {
@@ -45,7 +45,7 @@ Active --> [*]
 func TestPlantUMLValidator_MissingStartTag(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `Idle --> Active
@@ -81,7 +81,7 @@ func TestPlantUMLValidator_MissingStartTag(t *testing.T) {
 func TestPlantUMLValidator_MissingEndTag(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -113,7 +113,7 @@ Idle --> Active`,
 func TestPlantUMLValidator_NoInitialStateWarning(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -146,7 +146,7 @@ StateA --> StateB
 func TestPlantUMLValidator_ComplexValidStateMachine(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -165,7 +165,7 @@ Failed --> Idle : retry
 	}
 
 	if !result.IsValid {
-		t.Error("Expected valid result for complex state machine")
+		t.Error("Expected valid result for complex state-machine diagram")
 	}
 
 	if len(result.Errors) != 0 {
@@ -181,7 +181,7 @@ func TestPlantUMLValidator_StrictnessLevels(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
 	// Content with warnings but no critical errors
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -213,7 +213,7 @@ StateA --> StateB
 func TestPlantUMLValidator_ValidateReferences_NoReferences(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: "@startuml\n[*] --> Idle\n@enduml",
@@ -240,7 +240,7 @@ func TestPlantUMLValidator_ValidateReferences_NoReferences(t *testing.T) {
 func TestPlantUMLValidator_ValidateReferences_ProductReference(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -281,7 +281,7 @@ func TestPlantUMLValidator_ValidateReferences_ProductReference(t *testing.T) {
 func TestPlantUMLValidator_ValidateReferences_NestedReference(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -322,7 +322,7 @@ func TestPlantUMLValidator_ValidateReferences_NestedReference(t *testing.T) {
 func TestPlantUMLValidator_ValidateReferences_InvalidProductVersion(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -360,7 +360,7 @@ func TestPlantUMLValidator_ValidateReferences_InvalidProductVersion(t *testing.T
 func TestPlantUMLValidator_ValidateReferences_SelfReference(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -394,7 +394,7 @@ func TestPlantUMLValidator_ValidateReferences_SelfReference(t *testing.T) {
 func TestPlantUMLValidator_ValidateReferences_MultipleReferences(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -500,29 +500,29 @@ func TestPlantUMLValidator_IsValidVersion(t *testing.T) {
 
 // MockRepository is a mock implementation of Repository for testing
 type MockRepository struct {
-	stateMachines map[string]*models.StateMachine
+	stateMachines map[string]*models.StateMachineDiagram
 	existsMap     map[string]bool
 }
 
 func NewMockRepository() *MockRepository {
 	return &MockRepository{
-		stateMachines: make(map[string]*models.StateMachine),
+		stateMachines: make(map[string]*models.StateMachineDiagram),
 		existsMap:     make(map[string]bool),
 	}
 }
 
-func (m *MockRepository) AddStateMachine(sm *models.StateMachine) {
+func (m *MockRepository) AddStateMachine(sm *models.StateMachineDiagram) {
 	key := fmt.Sprintf("%s-%s-%s", sm.Name, sm.Version, sm.Location.String())
 	m.stateMachines[key] = sm
 	m.existsMap[key] = true
 }
 
-func (m *MockRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
+func (m *MockRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	key := fmt.Sprintf("%s-%s-%s", name, version, location.String())
 	if sm, exists := m.stateMachines[key]; exists {
 		return sm, nil
 	}
-	return nil, fmt.Errorf("state machine not found: %s", key)
+	return nil, fmt.Errorf("state-machine diagram not found: %s", key)
 }
 
 func (m *MockRepository) Exists(fileType models.FileType, name, version string, location models.Location) (bool, error) {
@@ -531,10 +531,10 @@ func (m *MockRepository) Exists(fileType models.FileType, name, version string, 
 }
 
 // Implement other Repository methods as no-ops for testing
-func (m *MockRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
+func (m *MockRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
 	return nil, nil
 }
-func (m *MockRepository) WriteStateMachine(sm *models.StateMachine) error { return nil }
+func (m *MockRepository) WriteStateMachine(sm *models.StateMachineDiagram) error { return nil }
 func (m *MockRepository) MoveStateMachine(fileType models.FileType, name, version string, from, to models.Location) error {
 	return nil
 }
@@ -547,7 +547,7 @@ func (m *MockRepository) DirectoryExists(path string) (bool, error) { return fal
 func TestPlantUMLValidator_ResolveReferences_NoRepository(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -582,8 +582,8 @@ func TestPlantUMLValidator_ResolveReferences_ExistingReference(t *testing.T) {
 	mockRepo := NewMockRepository()
 	validator := NewPlantUMLValidatorWithRepository(mockRepo)
 
-	// Add a referenced state machine to the mock repository
-	referencedSM := &models.StateMachine{
+	// Add a referenced state-machine diagram to the mock repository
+	referencedSM := &models.StateMachineDiagram{
 		Name:     "auth-service",
 		Version:  "1.2.0",
 		Location: models.LocationProducts,
@@ -591,7 +591,7 @@ func TestPlantUMLValidator_ResolveReferences_ExistingReference(t *testing.T) {
 	}
 	mockRepo.AddStateMachine(referencedSM)
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -618,7 +618,7 @@ func TestPlantUMLValidator_ResolveReferences_MissingReference(t *testing.T) {
 	mockRepo := NewMockRepository()
 	validator := NewPlantUMLValidatorWithRepository(mockRepo)
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -653,8 +653,8 @@ func TestPlantUMLValidator_ResolveReferences_CircularReference(t *testing.T) {
 	mockRepo := NewMockRepository()
 	validator := NewPlantUMLValidatorWithRepository(mockRepo)
 
-	// Create two state machines that reference each other
-	sm1 := &models.StateMachine{
+	// Create two state-machine diagrams that reference each other
+	sm1 := &models.StateMachineDiagram{
 		Name:     "service-a",
 		Version:  "1.0.0",
 		Location: models.LocationProducts,
@@ -664,7 +664,7 @@ func TestPlantUMLValidator_ResolveReferences_CircularReference(t *testing.T) {
 @enduml`,
 	}
 
-	sm2 := &models.StateMachine{
+	sm2 := &models.StateMachineDiagram{
 		Name:     "service-b",
 		Version:  "1.0.0",
 		Location: models.LocationProducts,
@@ -703,8 +703,8 @@ func TestPlantUMLValidator_ResolveReferences_NestedReference(t *testing.T) {
 	mockRepo := NewMockRepository()
 	validator := NewPlantUMLValidatorWithRepository(mockRepo)
 
-	// Add a nested state machine to the mock repository
-	nestedSM := &models.StateMachine{
+	// Add a nested state-machine diagram to the mock repository
+	nestedSM := &models.StateMachineDiagram{
 		Name:     "sub-process",
 		Version:  "",
 		Location: models.LocationNested,
@@ -712,7 +712,7 @@ func TestPlantUMLValidator_ResolveReferences_NestedReference(t *testing.T) {
 	}
 	mockRepo.AddStateMachine(nestedSM)
 
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -740,7 +740,7 @@ func TestPlantUMLValidator_StrictnessInProgress_ErrorsAndWarnings(t *testing.T) 
 	validator := NewPlantUMLValidator()
 
 	// Content with both errors and warnings
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -782,7 +782,7 @@ func TestPlantUMLValidator_StrictnessProducts_WarningsOnly(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
 	// Content with non-critical validation issues
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -817,7 +817,7 @@ func TestPlantUMLValidator_StrictnessProducts_CriticalErrors(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
 	// Content with critical structural errors
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `StateA --> StateB`, // Missing @startuml and @enduml tags
@@ -862,7 +862,7 @@ func TestPlantUMLValidator_StrictnessComparison(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
 	// Content with non-critical issues that would be errors in in-progress but warnings in products
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -910,7 +910,7 @@ func TestPlantUMLValidator_StrictnessWithReferences(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
 	// Content with invalid reference version (non-critical error)
-	sm := &models.StateMachine{
+	sm := &models.StateMachineDiagram{
 		Name:    "test",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -964,8 +964,8 @@ func TestPlantUMLValidator_StrictnessWithCircularReference(t *testing.T) {
 	mockRepo := NewMockRepository()
 	validator := NewPlantUMLValidatorWithRepository(mockRepo)
 
-	// Create a state machine that references itself (critical error)
-	sm := &models.StateMachine{
+	// Create a state-machine diagram that references itself (critical error)
+	sm := &models.StateMachineDiagram{
 		Name:     "test",
 		Version:  "1.0.0",
 		Location: models.LocationProducts,

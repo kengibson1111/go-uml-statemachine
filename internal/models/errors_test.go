@@ -68,11 +68,11 @@ func TestStateMachineError_Error(t *testing.T) {
 			name: "error without cause",
 			error: &StateMachineError{
 				Type:     ErrorTypeFileNotFound,
-				Message:  "state machine not found",
+				Message:  "state-machine diagram not found",
 				Cause:    nil,
 				Severity: ErrorSeverityMedium, // Default severity
 			},
-			expected: "[file_not_found] state machine not found | severity=medium",
+			expected: "[file_not_found] state-machine diagram not found | severity=medium",
 		},
 		{
 			name: "error with cause",

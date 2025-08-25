@@ -83,7 +83,7 @@ func setupTestEnvironment(t *testing.T) (string, func()) {
 }
 
 // createTestService creates a service instance for testing
-func createTestService(rootDir string) models.StateMachineService {
+func createTestService(rootDir string) models.DiagramService {
 	config := &models.Config{
 		RootDirectory: rootDir,
 		MaxFileSize:   1024 * 1024, // 1MB
@@ -104,10 +104,10 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 	// Test fixture
 	fixture := testFixtures[0] // user-auth
 
-	t.Run("Create state machine in in-progress", func(t *testing.T) {
+	t.Run("Create state-machine diagram in in-progress", func(t *testing.T) {
 		sm, err := svc.Create(models.FileTypePUML, fixture.Name, fixture.Version, fixture.Content, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to create state machine: %v", err)
+			t.Fatalf("Failed to create state-machine diagram: %v", err)
 		}
 
 		if sm.Name != fixture.Name {
@@ -121,10 +121,10 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		}
 	})
 
-	t.Run("Read state machine from in-progress", func(t *testing.T) {
+	t.Run("Read state-machine diagram from in-progress", func(t *testing.T) {
 		sm, err := svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to read state machine: %v", err)
+			t.Fatalf("Failed to read state-machine diagram: %v", err)
 		}
 
 		if sm.Content != fixture.Content {
@@ -132,27 +132,27 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		}
 	})
 
-	t.Run("Update state machine content", func(t *testing.T) {
-		// Read the current state machine
+	t.Run("Update state-machine diagram content", func(t *testing.T) {
+		// Read the current state-machine diagram
 		sm, err := svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to read state machine for update: %v", err)
+			t.Fatalf("Failed to read state-machine diagram for update: %v", err)
 		}
 
 		// Update content
 		updatedContent := fixture.Content + "\n' Updated content"
 		sm.Content = updatedContent
 
-		// Update the state machine
+		// Update the state-machine diagram
 		err = svc.Update(sm)
 		if err != nil {
-			t.Fatalf("Failed to update state machine: %v", err)
+			t.Fatalf("Failed to update state-machine diagram: %v", err)
 		}
 
 		// Verify the update
 		updatedSM, err := svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to read updated state machine: %v", err)
+			t.Fatalf("Failed to read updated state-machine diagram: %v", err)
 		}
 
 		if updatedSM.Content != updatedContent {
@@ -160,21 +160,21 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		}
 	})
 
-	t.Run("Validate state machine", func(t *testing.T) {
+	t.Run("Validate state-machine diagram", func(t *testing.T) {
 		result, err := svc.Validate(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to validate state machine: %v", err)
+			t.Fatalf("Failed to validate state-machine diagram: %v", err)
 		}
 
 		if !result.IsValid {
-			t.Errorf("State machine should be valid. Errors: %v", result.Errors)
+			t.Errorf("State-machine diagram should be valid. Errors: %v", result.Errors)
 		}
 	})
 
-	t.Run("List state machines in in-progress", func(t *testing.T) {
+	t.Run("List state-machine diagrams in in-progress", func(t *testing.T) {
 		stateMachines, err := svc.ListAll(models.FileTypePUML, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to list state machines: %v", err)
+			t.Fatalf("Failed to list state-machine diagrams: %v", err)
 		}
 
 		found := false
@@ -186,20 +186,20 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		}
 
 		if !found {
-			t.Errorf("Created state machine not found in list")
+			t.Errorf("Created state-machine diagram not found in list")
 		}
 	})
 
-	t.Run("Promote state machine to products", func(t *testing.T) {
+	t.Run("Promote state-machine diagram to products", func(t *testing.T) {
 		err := svc.Promote(models.FileTypePUML, fixture.Name, fixture.Version)
 		if err != nil {
-			t.Fatalf("Failed to promote state machine: %v", err)
+			t.Fatalf("Failed to promote state-machine diagram: %v", err)
 		}
 
 		// Verify it exists in products
 		sm, err := svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
 		if err != nil {
-			t.Fatalf("Failed to read promoted state machine: %v", err)
+			t.Fatalf("Failed to read promoted state-machine diagram: %v", err)
 		}
 
 		if sm.Location != models.LocationProducts {
@@ -209,14 +209,14 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		// Verify it no longer exists in in-progress
 		_, err = svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err == nil {
-			t.Errorf("State machine should no longer exist in in-progress after promotion")
+			t.Errorf("State-machine diagram should no longer exist in in-progress after promotion")
 		}
 	})
 
-	t.Run("List state machines in products", func(t *testing.T) {
+	t.Run("List state-machine diagrams in products", func(t *testing.T) {
 		stateMachines, err := svc.ListAll(models.FileTypePUML, models.LocationProducts)
 		if err != nil {
-			t.Fatalf("Failed to list state machines in products: %v", err)
+			t.Fatalf("Failed to list state-machine diagrams in products: %v", err)
 		}
 
 		found := false
@@ -228,20 +228,20 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		}
 
 		if !found {
-			t.Errorf("Promoted state machine not found in products list")
+			t.Errorf("Promoted state-machine diagram not found in products list")
 		}
 	})
 
-	t.Run("Delete state machine from products", func(t *testing.T) {
+	t.Run("Delete state-machine diagram from products", func(t *testing.T) {
 		err := svc.Delete(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
 		if err != nil {
-			t.Fatalf("Failed to delete state machine: %v", err)
+			t.Fatalf("Failed to delete state-machine diagram: %v", err)
 		}
 
 		// Verify it no longer exists
 		_, err = svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
 		if err == nil {
-			t.Errorf("State machine should not exist after deletion")
+			t.Errorf("State-machine diagram should not exist after deletion")
 		}
 	})
 }
@@ -254,17 +254,17 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 	svc := createTestService(tempDir)
 	fixture := testFixtures[1] // payment-flow
 
-	t.Run("Create duplicate state machine", func(t *testing.T) {
-		// Create first state machine
+	t.Run("Create duplicate state-machine diagram", func(t *testing.T) {
+		// Create first state-machine diagram
 		_, err := svc.Create(models.FileTypePUML, fixture.Name, fixture.Version, fixture.Content, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to create first state machine: %v", err)
+			t.Fatalf("Failed to create first state-machine diagram: %v", err)
 		}
 
 		// Try to create duplicate
 		_, err = svc.Create(models.FileTypePUML, fixture.Name, fixture.Version, fixture.Content, models.LocationInProgress)
 		if err == nil {
-			t.Errorf("Should not be able to create duplicate state machine")
+			t.Errorf("Should not be able to create duplicate state-machine diagram")
 		}
 
 		// Verify error type
@@ -277,10 +277,10 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 		}
 	})
 
-	t.Run("Read non-existent state machine", func(t *testing.T) {
+	t.Run("Read non-existent state-machine diagram", func(t *testing.T) {
 		_, err := svc.Read(models.FileTypePUML, "non-existent", "1.0.0", models.LocationInProgress)
 		if err == nil {
-			t.Errorf("Should not be able to read non-existent state machine")
+			t.Errorf("Should not be able to read non-existent state-machine diagram")
 		}
 
 		// Verify error type
@@ -291,8 +291,8 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 		}
 	})
 
-	t.Run("Update non-existent state machine", func(t *testing.T) {
-		sm := &models.StateMachine{
+	t.Run("Update non-existent state-machine diagram", func(t *testing.T) {
+		sm := &models.StateMachineDiagram{
 			Name:     "non-existent",
 			Version:  "1.0.0",
 			Content:  "@startuml\n[*] --> Test\n@enduml",
@@ -301,7 +301,7 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 
 		err := svc.Update(sm)
 		if err == nil {
-			t.Errorf("Should not be able to update non-existent state machine")
+			t.Errorf("Should not be able to update non-existent state-machine diagram")
 		}
 
 		// Verify error type
@@ -312,10 +312,10 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 		}
 	})
 
-	t.Run("Promote non-existent state machine", func(t *testing.T) {
+	t.Run("Promote non-existent state-machine diagram", func(t *testing.T) {
 		err := svc.Promote(models.FileTypePUML, "non-existent", "1.0.0")
 		if err == nil {
-			t.Errorf("Should not be able to promote non-existent state machine")
+			t.Errorf("Should not be able to promote non-existent state-machine diagram")
 		}
 
 		// Verify error type
@@ -327,17 +327,17 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 	})
 
 	t.Run("Promote with validation errors", func(t *testing.T) {
-		// Create state machine with invalid PlantUML content
+		// Create state-machine diagram with invalid PlantUML content
 		invalidContent := "@startuml\n' Missing @enduml tag"
 		_, err := svc.Create(models.FileTypePUML, "invalid-sm", "1.0.0", invalidContent, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to create invalid state machine: %v", err)
+			t.Fatalf("Failed to create invalid state-machine diagram: %v", err)
 		}
 
 		// Try to promote - should fail due to validation errors
 		err = svc.Promote(models.FileTypePUML, "invalid-sm", "1.0.0")
 		if err == nil {
-			t.Errorf("Should not be able to promote state machine with validation errors")
+			t.Errorf("Should not be able to promote state-machine diagram with validation errors")
 		}
 
 		// Verify error type
@@ -349,15 +349,15 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 	})
 
 	t.Run("Create in-progress when products exists", func(t *testing.T) {
-		// First create and promote a state machine
+		// First create and promote a state-machine diagram
 		_, err := svc.Create(models.FileTypePUML, "conflict-test", "1.0.0", fixture.Content, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to create state machine: %v", err)
+			t.Fatalf("Failed to create state-machine diagram: %v", err)
 		}
 
 		err = svc.Promote(models.FileTypePUML, "conflict-test", "1.0.0")
 		if err != nil {
-			t.Fatalf("Failed to promote state machine: %v", err)
+			t.Fatalf("Failed to promote state-machine diagram: %v", err)
 		}
 
 		// Now try to create in-progress with same name/version
@@ -393,10 +393,10 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 			t.Errorf("Should not accept empty content")
 		}
 
-		// Test nil state machine for update
+		// Test nil state-machine diagram for update
 		err = svc.Update(nil)
 		if err == nil {
-			t.Errorf("Should not accept nil state machine for update")
+			t.Errorf("Should not accept nil state-machine diagram for update")
 		}
 	})
 }
@@ -413,7 +413,7 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 		errors := make(chan error, len(testFixtures))
 		successes := make(chan string, len(testFixtures))
 
-		// Create multiple state machines concurrently
+		// Create multiple state-machine diagrams concurrently
 		for i, fixture := range testFixtures {
 			wg.Add(1)
 			go func(idx int, f TestFixture) {
@@ -447,37 +447,37 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 			successList = append(successList, name)
 		}
 
-		// Verify all state machines were created
+		// Verify all state-machine diagrams were created
 		stateMachines, err := svc.ListAll(models.FileTypePUML, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to list state machines: %v", err)
+			t.Fatalf("Failed to list state-machine diagrams: %v", err)
 		}
 
-		t.Logf("Created %d state machines successfully: %v", len(successList), successList)
-		t.Logf("Found %d state machines in listing", len(stateMachines))
+		t.Logf("Created %d state-machine diagrams successfully: %v", len(successList), successList)
+		t.Logf("Found %d state-machine diagrams in listing", len(stateMachines))
 		t.Logf("Had %d errors: %v", len(errorList), errorList)
 
 		if len(stateMachines) != len(testFixtures) {
-			t.Errorf("Expected %d state machines, got %d", len(testFixtures), len(stateMachines))
+			t.Errorf("Expected %d state-machine diagrams, got %d", len(testFixtures), len(stateMachines))
 			for _, sm := range stateMachines {
-				t.Logf("Found state machine: %s-%s", sm.Name, sm.Version)
+				t.Logf("Found state-machine diagram: %s-%s", sm.Name, sm.Version)
 			}
 		}
 	})
 
-	t.Run("Concurrent reads of same state machine", func(t *testing.T) {
-		// First create a state machine
+	t.Run("Concurrent reads of same state-machine diagram", func(t *testing.T) {
+		// First create a state-machine diagram
 		fixture := testFixtures[0]
 		_, err := svc.Create(models.FileTypePUML, "concurrent-read-test", fixture.Version, fixture.Content, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to create state machine for concurrent read test: %v", err)
+			t.Fatalf("Failed to create state-machine diagram for concurrent read test: %v", err)
 		}
 
 		var wg sync.WaitGroup
 		errors := make(chan error, 10)
-		results := make(chan *models.StateMachine, 10)
+		results := make(chan *models.StateMachineDiagram, 10)
 
-		// Read the same state machine concurrently
+		// Read the same state-machine diagram concurrently
 		for i := 0; i < 10; i++ {
 			wg.Add(1)
 			go func() {
@@ -518,18 +518,18 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 	})
 
 	t.Run("Concurrent promote attempts", func(t *testing.T) {
-		// Create a state machine
+		// Create a state-machine diagram
 		fixture := testFixtures[2]
 		_, err := svc.Create(models.FileTypePUML, "concurrent-promote-test", fixture.Version, fixture.Content, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to create state machine for concurrent promote test: %v", err)
+			t.Fatalf("Failed to create state-machine diagram for concurrent promote test: %v", err)
 		}
 
 		var wg sync.WaitGroup
 		errors := make(chan error, 5)
 		successes := make(chan bool, 5)
 
-		// Try to promote the same state machine concurrently
+		// Try to promote the same state-machine diagram concurrently
 		for i := 0; i < 5; i++ {
 			wg.Add(1)
 			go func() {
@@ -559,16 +559,16 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 			t.Errorf("Expected exactly 4 failed promotions, got %d", errorCount)
 		}
 
-		// Verify the state machine is in products
+		// Verify the state-machine diagram is in products
 		_, err = svc.Read(models.FileTypePUML, "concurrent-promote-test", fixture.Version, models.LocationProducts)
 		if err != nil {
-			t.Errorf("State machine should be in products after promotion: %v", err)
+			t.Errorf("State-machine diagram should be in products after promotion: %v", err)
 		}
 
 		// Verify it's not in in-progress
 		_, err = svc.Read(models.FileTypePUML, "concurrent-promote-test", fixture.Version, models.LocationInProgress)
 		if err == nil {
-			t.Errorf("State machine should not be in in-progress after promotion")
+			t.Errorf("State-machine diagram should not be in in-progress after promotion")
 		}
 	})
 
@@ -600,7 +600,7 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 				}
 			}()
 
-			// Validation operations (on existing state machines)
+			// Validation operations (on existing state-machine diagrams)
 			if i > 0 { // Only after we've created some
 				wg.Add(1)
 				go func(idx int) {
@@ -633,24 +633,24 @@ func TestReferenceResolutionWorkflow(t *testing.T) {
 
 	svc := createTestService(tempDir)
 
-	t.Run("Setup referenced state machines", func(t *testing.T) {
-		// Create and promote the user-auth state machine that will be referenced
+	t.Run("Setup referenced state-machine diagrams", func(t *testing.T) {
+		// Create and promote the user-auth state-machine diagram that will be referenced
 		userAuthFixture := testFixtures[0] // user-auth
 		_, err := svc.Create(models.FileTypePUML, userAuthFixture.Name, userAuthFixture.Version, userAuthFixture.Content, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to create user-auth state machine: %v", err)
+			t.Fatalf("Failed to create user-auth state-machine diagram: %v", err)
 		}
 
 		err = svc.Promote(models.FileTypePUML, userAuthFixture.Name, userAuthFixture.Version)
 		if err != nil {
-			t.Fatalf("Failed to promote user-auth state machine: %v", err)
+			t.Fatalf("Failed to promote user-auth state-machine diagram: %v", err)
 		}
 
 		// Create the main workflow that references user-auth
 		mainWorkflowFixture := referencedFixtures[0] // main-workflow
 		_, err = svc.Create(models.FileTypePUML, mainWorkflowFixture.Name, mainWorkflowFixture.Version, mainWorkflowFixture.Content, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to create main-workflow state machine: %v", err)
+			t.Fatalf("Failed to create main-workflow state-machine diagram: %v", err)
 		}
 	})
 
@@ -743,13 +743,13 @@ func TestValidationStrictnessLevels(t *testing.T) {
 
 	svc := createTestService(tempDir)
 
-	// Create a state machine with minor issues (warnings but not critical errors)
+	// Create a state-machine diagram with minor issues (warnings but not critical errors)
 	contentWithWarnings := "@startuml\n[*] --> idle_state\nidle_state --> active-state : activate\nactive-state --> [*]\n@enduml"
 
-	t.Run("Create state machine with warnings", func(t *testing.T) {
+	t.Run("Create state-machine diagram with warnings", func(t *testing.T) {
 		_, err := svc.Create(models.FileTypePUML, "strictness-test", "1.0.0", contentWithWarnings, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to create state machine: %v", err)
+			t.Fatalf("Failed to create state-machine diagram: %v", err)
 		}
 	})
 
@@ -760,7 +760,7 @@ func TestValidationStrictnessLevels(t *testing.T) {
 		}
 
 		// In-progress validation should show both errors and warnings
-		// The state machine should still be valid if there are no critical structural errors
+		// The state-machine diagram should still be valid if there are no critical structural errors
 		if !result.IsValid && len(result.Errors) > 0 {
 			// Check if errors are critical
 			hasCriticalErrors := false
@@ -771,16 +771,16 @@ func TestValidationStrictnessLevels(t *testing.T) {
 				}
 			}
 			if hasCriticalErrors {
-				t.Errorf("State machine has critical structural errors: %v", result.Errors)
+				t.Errorf("State-machine diagram has critical structural errors: %v", result.Errors)
 			}
 		}
 	})
 
 	t.Run("Promote and validate products strictness", func(t *testing.T) {
-		// Promote the state machine
+		// Promote the state-machine diagram
 		err := svc.Promote(models.FileTypePUML, "strictness-test", "1.0.0")
 		if err != nil {
-			t.Fatalf("Failed to promote state machine: %v", err)
+			t.Fatalf("Failed to promote state-machine diagram: %v", err)
 		}
 
 		// Validate with products strictness
@@ -791,7 +791,7 @@ func TestValidationStrictnessLevels(t *testing.T) {
 
 		// Products validation should be more lenient - non-critical errors become warnings
 		if !result.IsValid {
-			t.Errorf("State machine should be valid in products with lenient strictness. Errors: %v", result.Errors)
+			t.Errorf("State-machine diagram should be valid in products with lenient strictness. Errors: %v", result.Errors)
 		}
 	})
 }
@@ -813,13 +813,13 @@ func TestFileSystemEdgeCases(t *testing.T) {
 
 		_, err := svc.Create(models.FileTypePUML, "large-content-test", "1.0.0", largeContent, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to create state machine with large content: %v", err)
+			t.Fatalf("Failed to create state-machine diagram with large content: %v", err)
 		}
 
 		// Verify we can read it back
 		sm, err := svc.Read(models.FileTypePUML, "large-content-test", "1.0.0", models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to read large content state machine: %v", err)
+			t.Fatalf("Failed to read large content state-machine diagram: %v", err)
 		}
 
 		if sm.Content != largeContent {
@@ -832,13 +832,13 @@ func TestFileSystemEdgeCases(t *testing.T) {
 
 		_, err := svc.Create(models.FileTypePUML, "special-chars-test", "1.0.0", specialContent, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to create state machine with special characters: %v", err)
+			t.Fatalf("Failed to create state-machine diagram with special characters: %v", err)
 		}
 
 		// Verify we can read it back correctly
 		sm, err := svc.Read(models.FileTypePUML, "special-chars-test", "1.0.0", models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to read special characters state machine: %v", err)
+			t.Fatalf("Failed to read special characters state-machine diagram: %v", err)
 		}
 
 		if sm.Content != specialContent {
@@ -850,7 +850,7 @@ func TestFileSystemEdgeCases(t *testing.T) {
 		fixture := testFixtures[0]
 		_, err := svc.Create(models.FileTypePUML, "dir-structure-test", fixture.Version, fixture.Content, models.LocationInProgress)
 		if err != nil {
-			t.Fatalf("Failed to create state machine: %v", err)
+			t.Fatalf("Failed to create state-machine diagram: %v", err)
 		}
 
 		// Verify the directory structure was created correctly
@@ -867,7 +867,7 @@ func TestFileSystemEdgeCases(t *testing.T) {
 		// Promote and verify products directory structure
 		err = svc.Promote(models.FileTypePUML, "dir-structure-test", fixture.Version)
 		if err != nil {
-			t.Fatalf("Failed to promote state machine: %v", err)
+			t.Fatalf("Failed to promote state-machine diagram: %v", err)
 		}
 
 		expectedProductsDir := filepath.Join(tempDir, "products", "puml", "dir-structure-test-"+fixture.Version)
@@ -923,7 +923,7 @@ func TestVersionHandling(t *testing.T) {
 				// Verify we can read it back
 				sm, err := svc.Read(models.FileTypePUML, testName, tt.version, models.LocationInProgress)
 				if err != nil {
-					t.Errorf("Failed to read back state machine with version %s: %v", tt.version, err)
+					t.Errorf("Failed to read back state-machine diagram with version %s: %v", tt.version, err)
 				} else if sm.Version != tt.version {
 					t.Errorf("Version mismatch: expected %s, got %s", tt.version, sm.Version)
 				}

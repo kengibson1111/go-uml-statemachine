@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Go UML State Machine - Configuration Demo")
+	fmt.Println("Go UML State-Machine Diagram - Configuration Demo")
 	fmt.Println("=========================================")
 
 	// Demo 1: Default configuration

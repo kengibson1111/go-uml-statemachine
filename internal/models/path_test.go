@@ -80,21 +80,21 @@ func TestPathManager_GetStateMachineDirectoryPath(t *testing.T) {
 		expected string
 	}{
 		{
-			name:     "in-progress state machine",
+			name:     "in-progress state-machine diagram",
 			smName:   "user-auth",
 			version:  "1.0.0",
 			location: LocationInProgress,
 			expected: filepath.Join(RootDirectoryName, "in-progress", "user-auth-1.0.0"),
 		},
 		{
-			name:     "products state machine",
+			name:     "products state-machine diagram",
 			smName:   "payment-flow",
 			version:  "2.1.0",
 			location: LocationProducts,
 			expected: filepath.Join(RootDirectoryName, "products", "payment-flow-2.1.0"),
 		},
 		{
-			name:     "nested state machine",
+			name:     "nested state-machine diagram",
 			smName:   "child-sm",
 			version:  "1.0.0",
 			location: LocationNested,
@@ -123,21 +123,21 @@ func TestPathManager_GetStateMachineFilePath(t *testing.T) {
 		expected string
 	}{
 		{
-			name:     "in-progress state machine file",
+			name:     "in-progress state-machine diagram file",
 			smName:   "user-auth",
 			version:  "1.0.0",
 			location: LocationInProgress,
 			expected: filepath.Join(RootDirectoryName, "in-progress", "user-auth-1.0.0", "user-auth-1.0.0.puml"),
 		},
 		{
-			name:     "products state machine file",
+			name:     "products state-machine diagram file",
 			smName:   "payment-flow",
 			version:  "2.1.0",
 			location: LocationProducts,
 			expected: filepath.Join(RootDirectoryName, "products", "payment-flow-2.1.0", "payment-flow-2.1.0.puml"),
 		},
 		{
-			name:     "nested state machine file",
+			name:     "nested state-machine diagram file",
 			smName:   "child-sm",
 			version:  "1.0.0",
 			location: LocationNested,
@@ -166,7 +166,7 @@ func TestPathManager_GetNestedPaths(t *testing.T) {
 		}
 	})
 
-	t.Run("nested state machine directory path", func(t *testing.T) {
+	t.Run("nested state-machine diagram directory path", func(t *testing.T) {
 		expected := filepath.Join(RootDirectoryName, "in-progress", "parent-1.0.0", "nested", "child")
 		result := pm.GetNestedStateMachineDirectoryPath("parent", "1.0.0", LocationInProgress, "child")
 		if result != expected {
@@ -174,7 +174,7 @@ func TestPathManager_GetNestedPaths(t *testing.T) {
 		}
 	})
 
-	t.Run("nested state machine file path", func(t *testing.T) {
+	t.Run("nested state-machine diagram file path", func(t *testing.T) {
 		expected := filepath.Join(RootDirectoryName, "in-progress", "parent-1.0.0", "nested", "child", "child.puml")
 		result := pm.GetNestedStateMachineFilePath("parent", "1.0.0", LocationInProgress, "child")
 		if result != expected {

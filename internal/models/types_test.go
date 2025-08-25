@@ -99,7 +99,7 @@ func TestStateMachine_Creation(t *testing.T) {
 		},
 	}
 
-	sm := StateMachine{
+	sm := StateMachineDiagram{
 		Name:       "test-machine",
 		Version:    "1.0.0",
 		Content:    "@startuml\n[*] --> State1\n@enduml",

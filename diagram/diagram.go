@@ -1,40 +1,40 @@
-// Package statemachine provides functionality for managing UML state machine diagrams in PlantUML format.
+// Package diagram provides functionality for managing UML state-machine diagram diagrams in PlantUML format.
 //
-// This package offers a comprehensive solution for organizing, validating, and managing PlantUML state machine files
+// This package offers a comprehensive solution for organizing, validating, and managing PlantUML state-machine diagram files
 // within a structured directory hierarchy. It supports versioning, validation levels based on deployment status,
-// and cross-references between state machines.
+// and cross-references between state-machine diagrams.
 //
 // # Key Features
 //
-//   - Structured file organization with separate locations for in-progress and production state machines
+//   - Structured file organization with separate locations for in-progress and production state-machine diagrams
 //   - Semantic versioning support with automatic version parsing and comparison
 //   - PlantUML validation with configurable strictness levels
-//   - Reference resolution for cross-dependencies between state machines
+//   - Reference resolution for cross-dependencies between state-machine diagrams
 //   - Safe promotion workflow from development to production
 //   - Thread-safe operations with comprehensive error handling
 //
 // # Basic Usage
 //
-//	// Create a new state machine service
-//	svc, err := statemachine.NewService()
+//	// Create a new state-machine diagram service
+//	svc, err := diagram.NewService()
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //
-//	// Create a state machine
+//	// Create a state-machine diagram
 //	content := `@startuml
 //	[*] --> Idle
 //	Idle --> Active : start()
 //	Active --> Idle : stop()
 //	@enduml`
 //
-//	sm, err := svc.Create("my-machine", "1.0.0", content, statemachine.LocationInProgress)
+//	sm, err := svc.Create("my-machine", "1.0.0", content, diagram.LocationInProgress)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //
 //	// Validate and promote to production
-//	result, err := svc.Validate("my-machine", "1.0.0", statemachine.LocationInProgress)
+//	result, err := svc.Validate("my-machine", "1.0.0", diagram.LocationInProgress)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
@@ -48,7 +48,7 @@
 //
 // # Directory Structure
 //
-// The package organizes state machines in a standardized directory structure:
+// The package organizes state-machine diagrams in a standardized directory structure:
 //
 //	.go-uml-statemachine-parsers/
 //	├── in-progress/
@@ -68,12 +68,12 @@
 //
 // The package supports configuration through environment variables:
 //
-//   - GO_UML_ROOT_DIRECTORY: Root directory for state machines (default: ".go-uml-statemachine-parsers")
+//   - GO_UML_ROOT_DIRECTORY: Root directory for state-machine diagrams (default: ".go-uml-statemachine-parsers")
 //   - GO_UML_VALIDATION_LEVEL: Validation level ("in-progress" or "products")
 //   - GO_UML_BACKUP_ENABLED: Enable backups ("true" or "false")
 //   - GO_UML_MAX_FILE_SIZE: Maximum file size in bytes
 //   - GO_UML_DEBUG_LOGGING: Enable debug logging ("true" or "false")
-package statemachine
+package diagram
 
 import (
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
@@ -93,27 +93,27 @@ const (
 	FileTypePUML = models.FileTypePUML
 )
 
-// Location indicates where the state machine is stored.
+// Location indicates where the state-machine diagram is stored.
 type Location = models.Location
 
-// Location constants for state machine storage locations.
+// Location constants for state-machine diagram storage locations.
 const (
-	// LocationInProgress indicates the state machine is in development/testing phase.
+	// LocationInProgress indicates the state-machine diagram is in development/testing phase.
 	LocationInProgress = models.LocationInProgress
-	// LocationProducts indicates the state machine is production-ready.
+	// LocationProducts indicates the state-machine diagram is production-ready.
 	LocationProducts = models.LocationProducts
-	// LocationNested indicates the state machine is nested within another state machine.
+	// LocationNested indicates the state-machine diagram is nested within another state-machine diagram.
 	LocationNested = models.LocationNested
 )
 
-// ReferenceType indicates the type of reference between state machines.
+// ReferenceType indicates the type of reference between state-machine diagrams.
 type ReferenceType = models.ReferenceType
 
 // Reference type constants.
 const (
-	// ReferenceTypeProduct indicates a reference to a state machine in the products directory.
+	// ReferenceTypeProduct indicates a reference to a state-machine diagram in the products directory.
 	ReferenceTypeProduct = models.ReferenceTypeProduct
-	// ReferenceTypeNested indicates a reference to a nested state machine within the same parent.
+	// ReferenceTypeNested indicates a reference to a nested state-machine diagram within the same parent.
 	ReferenceTypeNested = models.ReferenceTypeNested
 )
 
@@ -123,23 +123,23 @@ type ValidationStrictness = models.ValidationStrictness
 // Validation strictness constants.
 const (
 	// StrictnessInProgress applies strict validation with both errors and warnings.
-	// Used for in-progress state machines to ensure quality before promotion.
+	// Used for in-progress state-machine diagrams to ensure quality before promotion.
 	StrictnessInProgress = models.StrictnessInProgress
 	// StrictnessProducts applies lenient validation with warnings only.
-	// Used for production state machines to allow operational flexibility.
+	// Used for production state-machine diagrams to allow operational flexibility.
 	StrictnessProducts = models.StrictnessProducts
 )
 
-// StateMachine represents a UML state machine with its metadata and content.
-type StateMachine = models.StateMachine
+// StateMachine represents a UML state-machine diagram with its metadata and content.
+type StateMachineDiagram = models.StateMachineDiagram
 
-// Reference represents a reference to another state machine.
+// Reference represents a reference to another state-machine diagram.
 type Reference = models.Reference
 
-// Metadata contains additional information about a state machine.
+// Metadata contains additional information about a state-machine diagram.
 type Metadata = models.Metadata
 
-// ValidationResult contains the outcome of state machine validation.
+// ValidationResult contains the outcome of state-machine diagram validation.
 type ValidationResult = models.ValidationResult
 
 // ValidationError represents a validation error that prevents promotion.
@@ -148,16 +148,16 @@ type ValidationError = models.ValidationError
 // ValidationWarning represents a validation warning that doesn't prevent promotion.
 type ValidationWarning = models.ValidationWarning
 
-// Config represents the configuration for the state machine system.
+// Config represents the configuration for the state-machine diagram system.
 type Config = models.Config
 
-// StateMachineService defines the interface for state machine operations.
+// DiagramService defines the interface for state-machine diagram operations.
 //
-// This interface provides all the functionality needed to manage state machines
+// This interface provides all the functionality needed to manage state-machine diagrams
 // including CRUD operations, validation, promotion, and reference resolution.
-type StateMachineService = models.StateMachineService
+type DiagramService = models.DiagramService
 
-// NewService creates a new StateMachineService with default configuration.
+// NewService creates a new DiagramService with default configuration.
 //
 // This is the recommended way to create a service instance for most use cases.
 // It uses the default configuration and creates all necessary dependencies.
@@ -166,18 +166,18 @@ type StateMachineService = models.StateMachineService
 //
 // Example:
 //
-//	svc, err := statemachine.NewService()
+//	svc, err := diagram.NewService()
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-func NewService() (StateMachineService, error) {
+func NewService() (DiagramService, error) {
 	config := models.DefaultConfig()
 	repo := repository.NewFileSystemRepository(config)
 	validator := validation.NewPlantUMLValidatorWithRepository(repo)
 	return service.NewService(repo, validator, config), nil
 }
 
-// NewServiceWithConfig creates a new StateMachineService with the provided configuration.
+// NewServiceWithConfig creates a new DiagramService with the provided configuration.
 //
 // Use this function when you need custom configuration settings such as a different
 // root directory, validation level, or logging preferences.
@@ -189,16 +189,16 @@ func NewService() (StateMachineService, error) {
 //
 // Example:
 //
-//	config := &statemachine.Config{
+//	config := &diagram.Config{
 //	    RootDirectory:      "custom-directory",
 //	    EnableDebugLogging: true,
 //	    MaxFileSize:        2 * 1024 * 1024, // 2MB
 //	}
-//	svc, err := statemachine.NewServiceWithConfig(config)
+//	svc, err := diagram.NewServiceWithConfig(config)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-func NewServiceWithConfig(config *Config) (StateMachineService, error) {
+func NewServiceWithConfig(config *Config) (DiagramService, error) {
 	if config == nil {
 		config = models.DefaultConfig()
 	}
@@ -207,13 +207,13 @@ func NewServiceWithConfig(config *Config) (StateMachineService, error) {
 	return service.NewService(repo, validator, config), nil
 }
 
-// NewServiceFromEnv creates a new StateMachineService with configuration loaded from environment variables.
+// NewServiceFromEnv creates a new DiagramService with configuration loaded from environment variables.
 //
 // This function reads configuration from environment variables, making it ideal for
 // deployment scenarios where configuration is managed externally.
 //
 // Environment variables:
-//   - GO_UML_ROOT_DIRECTORY: Root directory for state machines
+//   - GO_UML_ROOT_DIRECTORY: Root directory for state-machine diagrams
 //   - GO_UML_VALIDATION_LEVEL: Validation level ("in-progress" or "products")
 //   - GO_UML_BACKUP_ENABLED: Enable backups ("true" or "false")
 //   - GO_UML_MAX_FILE_SIZE: Maximum file size in bytes
@@ -227,11 +227,11 @@ func NewServiceWithConfig(config *Config) (StateMachineService, error) {
 //	os.Setenv("GO_UML_ROOT_DIRECTORY", "my-state-machines")
 //	os.Setenv("GO_UML_DEBUG_LOGGING", "true")
 //
-//	svc, err := statemachine.NewServiceFromEnv()
+//	svc, err := diagram.NewServiceFromEnv()
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-func NewServiceFromEnv() (StateMachineService, error) {
+func NewServiceFromEnv() (DiagramService, error) {
 	config := models.LoadConfigFromEnv()
 	repo := repository.NewFileSystemRepository(config)
 	validator := validation.NewPlantUMLValidatorWithRepository(repo)
@@ -249,9 +249,9 @@ func NewServiceFromEnv() (StateMachineService, error) {
 //
 // Example:
 //
-//	config := statemachine.DefaultConfig()
+//	config := diagram.DefaultConfig()
 //	config.EnableDebugLogging = true
-//	svc, err := statemachine.NewServiceWithConfig(config)
+//	svc, err := diagram.NewServiceWithConfig(config)
 func DefaultConfig() *Config {
 	return models.DefaultConfig()
 }
@@ -265,7 +265,7 @@ func DefaultConfig() *Config {
 //
 // Example:
 //
-//	config := statemachine.LoadConfigFromEnv()
+//	config := diagram.LoadConfigFromEnv()
 //	fmt.Printf("Root directory: %s\n", config.RootDirectory)
 func LoadConfigFromEnv() *Config {
 	return models.LoadConfigFromEnv()

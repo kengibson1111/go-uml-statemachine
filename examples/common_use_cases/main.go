@@ -5,22 +5,22 @@ import (
 	"log"
 	"os"
 
-	"github.com/kengibson1111/go-uml-statemachine-parsers/statemachine"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/diagram"
 )
 
 func main() {
-	fmt.Println("Go UML State Machine - Common Use Cases")
+	fmt.Println("Go UML State-Machine Diagram - Common Use Cases")
 	fmt.Println("=======================================")
 
-	// Use Case 1: Simple state machine creation and management
-	fmt.Println("\n=== Use Case 1: Simple State Machine Management ===")
+	// Use Case 1: Simple state-machine diagram creation and management
+	fmt.Println("\n=== Use Case 1: Simple State-Machine Diagram Management ===")
 	simpleUsageExample()
 
 	// Use Case 2: Environment-based configuration
 	fmt.Println("\n=== Use Case 2: Environment Configuration ===")
 	environmentConfigExample()
 
-	// Use Case 3: State machine with validation workflow
+	// Use Case 3: State-machine diagram with validation workflow
 	fmt.Println("\n=== Use Case 3: Validation Workflow ===")
 	validationWorkflowExample()
 
@@ -39,18 +39,18 @@ func main() {
 	fmt.Println("\n✓ All use cases completed successfully!")
 }
 
-// Use Case 1: Simple state machine creation and management
+// Use Case 1: Simple state-machine diagram creation and management
 func simpleUsageExample() {
 	// Create service with default configuration
-	svc, err := statemachine.NewService()
+	svc, err := diagram.NewService()
 	if err != nil {
 		log.Printf("Error creating service: %v", err)
 		return
 	}
 
-	// Define a simple order processing state machine
+	// Define a simple order processing state-machine diagram
 	orderContent := `@startuml
-title Order Processing State Machine
+title Order Processing State-Machine Diagram
 
 [*] --> Pending : create_order()
 Pending --> Processing : payment_received()
@@ -63,24 +63,24 @@ Cancelled --> [*]
 
 @enduml`
 
-	// Create the state machine
-	sm, err := svc.Create(statemachine.FileTypePUML, "order-processing", "1.0.0", orderContent, statemachine.LocationInProgress)
+	// Create the state-machine diagram
+	sm, err := svc.Create(diagram.FileTypePUML, "order-processing", "1.0.0", orderContent, diagram.LocationInProgress)
 	if err != nil {
-		log.Printf("Error creating state machine: %v", err)
+		log.Printf("Error creating state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created state machine: %s-%s\n", sm.Name, sm.Version)
+	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", sm.Name, sm.Version)
 
 	// Read it back to verify
-	readSM, err := svc.Read(statemachine.FileTypePUML, "order-processing", "1.0.0", statemachine.LocationInProgress)
+	readSM, err := svc.Read(diagram.FileTypePUML, "order-processing", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
-		log.Printf("Error reading state machine: %v", err)
+		log.Printf("Error reading state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Verified state machine exists (content length: %d)\n", len(readSM.Content))
+	fmt.Printf("✓ Verified state-machine diagram exists (content length: %d)\n", len(readSM.Content))
 
 	// Clean up
-	err = svc.Delete(statemachine.FileTypePUML, "order-processing", "1.0.0", statemachine.LocationInProgress)
+	err = svc.Delete(diagram.FileTypePUML, "order-processing", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not clean up: %v", err)
 	}
@@ -94,34 +94,34 @@ func environmentConfigExample() {
 	os.Setenv("GO_UML_MAX_FILE_SIZE", "2097152") // 2MB
 
 	// Create service from environment
-	svc, err := statemachine.NewServiceFromEnv()
+	svc, err := diagram.NewServiceFromEnv()
 	if err != nil {
 		log.Printf("Error creating service from env: %v", err)
 		return
 	}
 
 	// Show the loaded configuration
-	config := statemachine.LoadConfigFromEnv()
+	config := diagram.LoadConfigFromEnv()
 	fmt.Printf("✓ Loaded configuration from environment:\n")
 	fmt.Printf("  - Root Directory: %s\n", config.RootDirectory)
 	fmt.Printf("  - Debug Logging: %t\n", config.EnableDebugLogging)
 	fmt.Printf("  - Max File Size: %d bytes\n", config.MaxFileSize)
 
-	// Create a simple state machine to test the configuration
+	// Create a simple state-machine diagram to test the configuration
 	content := `@startuml
 [*] --> Test
 Test --> [*]
 @enduml`
 
-	_, err = svc.Create(statemachine.FileTypePUML, "env-test", "1.0.0", content, statemachine.LocationInProgress)
+	_, err = svc.Create(diagram.FileTypePUML, "env-test", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
-		log.Printf("Error creating test state machine: %v", err)
+		log.Printf("Error creating test state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created test state machine in custom directory\n")
+	fmt.Printf("✓ Created test state-machine diagram in custom directory\n")
 
 	// Clean up
-	err = svc.Delete(statemachine.FileTypePUML, "env-test", "1.0.0", statemachine.LocationInProgress)
+	err = svc.Delete(diagram.FileTypePUML, "env-test", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not clean up: %v", err)
 	}
@@ -132,15 +132,15 @@ Test --> [*]
 	os.Unsetenv("GO_UML_MAX_FILE_SIZE")
 }
 
-// Use Case 3: State machine with validation workflow
+// Use Case 3: State-machine diagram with validation workflow
 func validationWorkflowExample() {
-	svc, err := statemachine.NewService()
+	svc, err := diagram.NewService()
 	if err != nil {
 		log.Printf("Error creating service: %v", err)
 		return
 	}
 
-	// Create a user authentication state machine
+	// Create a user authentication state-machine diagram
 	authContent := `@startuml
 title User Authentication
 
@@ -155,18 +155,18 @@ Locked --> Idle : unlock_timeout()
 
 @enduml`
 
-	// Create the state machine
-	sm, err := svc.Create(statemachine.FileTypePUML, "user-auth", "1.0.0", authContent, statemachine.LocationInProgress)
+	// Create the state-machine diagram
+	sm, err := svc.Create(diagram.FileTypePUML, "user-auth", "1.0.0", authContent, diagram.LocationInProgress)
 	if err != nil {
-		log.Printf("Error creating state machine: %v", err)
+		log.Printf("Error creating state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created state machine: %s-%s\n", sm.Name, sm.Version)
+	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", sm.Name, sm.Version)
 
-	// Validate the state machine
-	result, err := svc.Validate(statemachine.FileTypePUML, "user-auth", "1.0.0", statemachine.LocationInProgress)
+	// Validate the state-machine diagram
+	result, err := svc.Validate(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
-		log.Printf("Error validating state machine: %v", err)
+		log.Printf("Error validating state-machine diagram: %v", err)
 		return
 	}
 
@@ -191,14 +191,14 @@ Locked --> Idle : unlock_timeout()
 
 	// Attempt promotion if validation passes
 	if result.IsValid && !result.HasErrors() {
-		err = svc.Promote(statemachine.FileTypePUML, "user-auth", "1.0.0")
+		err = svc.Promote(diagram.FileTypePUML, "user-auth", "1.0.0")
 		if err != nil {
-			log.Printf("Error promoting state machine: %v", err)
+			log.Printf("Error promoting state-machine diagram: %v", err)
 		} else {
 			fmt.Printf("✓ Successfully promoted to products\n")
 
 			// Clean up from products
-			err = svc.Delete(statemachine.FileTypePUML, "user-auth", "1.0.0", statemachine.LocationProducts)
+			err = svc.Delete(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationProducts)
 			if err != nil {
 				log.Printf("Warning: Could not clean up from products: %v", err)
 			}
@@ -207,7 +207,7 @@ Locked --> Idle : unlock_timeout()
 		fmt.Printf("⚠ Skipping promotion due to validation issues\n")
 
 		// Clean up from in-progress
-		err = svc.Delete(statemachine.FileTypePUML, "user-auth", "1.0.0", statemachine.LocationInProgress)
+		err = svc.Delete(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Warning: Could not clean up from in-progress: %v", err)
 		}
@@ -216,7 +216,7 @@ Locked --> Idle : unlock_timeout()
 
 // Use Case 4: Reference management and dependencies
 func referenceManagementExample() {
-	svc, err := statemachine.NewService()
+	svc, err := diagram.NewService()
 	if err != nil {
 		log.Printf("Error creating service: %v", err)
 		return
@@ -234,7 +234,7 @@ Authenticated --> [*]
 
 @enduml`
 
-	baseSM, err := svc.Create(statemachine.FileTypePUML, "base-auth", "1.0.0", baseAuthContent, statemachine.LocationInProgress)
+	baseSM, err := svc.Create(diagram.FileTypePUML, "base-auth", "1.0.0", baseAuthContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating base auth: %v", err)
 		return
@@ -242,14 +242,14 @@ Authenticated --> [*]
 	fmt.Printf("✓ Created base component: %s-%s\n", baseSM.Name, baseSM.Version)
 
 	// Validate and promote the base component
-	result, err := svc.Validate(statemachine.FileTypePUML, "base-auth", "1.0.0", statemachine.LocationInProgress)
+	result, err := svc.Validate(diagram.FileTypePUML, "base-auth", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating base auth: %v", err)
 		return
 	}
 
 	if result.IsValid && !result.HasErrors() {
-		err = svc.Promote(statemachine.FileTypePUML, "base-auth", "1.0.0")
+		err = svc.Promote(diagram.FileTypePUML, "base-auth", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting base auth: %v", err)
 			return
@@ -277,7 +277,7 @@ Authenticated --> [*]
 
 @enduml`
 
-	complexSM, err := svc.Create(statemachine.FileTypePUML, "complex-auth", "1.0.0", complexAuthContent, statemachine.LocationInProgress)
+	complexSM, err := svc.Create(diagram.FileTypePUML, "complex-auth", "1.0.0", complexAuthContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating complex auth: %v", err)
 		return
@@ -296,13 +296,13 @@ Authenticated --> [*]
 	}
 
 	// Clean up
-	svc.Delete(statemachine.FileTypePUML, "complex-auth", "1.0.0", statemachine.LocationInProgress)
-	svc.Delete(statemachine.FileTypePUML, "base-auth", "1.0.0", statemachine.LocationProducts)
+	svc.Delete(diagram.FileTypePUML, "complex-auth", "1.0.0", diagram.LocationInProgress)
+	svc.Delete(diagram.FileTypePUML, "base-auth", "1.0.0", diagram.LocationProducts)
 }
 
 // Use Case 5: Error handling and recovery
 func errorHandlingExample() {
-	svc, err := statemachine.NewService()
+	svc, err := diagram.NewService()
 	if err != nil {
 		log.Printf("Error creating service: %v", err)
 		return
@@ -310,48 +310,48 @@ func errorHandlingExample() {
 
 	fmt.Printf("✓ Demonstrating various error scenarios:\n")
 
-	// 1. Try to read non-existent state machine
-	_, err = svc.Read(statemachine.FileTypePUML, "non-existent", "1.0.0", statemachine.LocationInProgress)
+	// 1. Try to read non-existent state-machine diagram
+	_, err = svc.Read(diagram.FileTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Printf("  ✓ Expected error for non-existent read: File not found\n")
 	}
 
 	// 2. Try to create with invalid parameters
-	_, err = svc.Create(statemachine.FileTypePUML, "", "1.0.0", "content", statemachine.LocationInProgress)
+	_, err = svc.Create(diagram.FileTypePUML, "", "1.0.0", "content", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Printf("  ✓ Expected error for empty name: Validation failed\n")
 	}
 
-	// 3. Create a state machine, then try to create duplicate
+	// 3. Create a state-machine diagram, then try to create duplicate
 	content := `@startuml
 [*] --> Test
 @enduml`
 
-	_, err = svc.Create(statemachine.FileTypePUML, "test-duplicate", "1.0.0", content, statemachine.LocationInProgress)
+	_, err = svc.Create(diagram.FileTypePUML, "test-duplicate", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
-		log.Printf("Error creating test state machine: %v", err)
+		log.Printf("Error creating test state-machine diagram: %v", err)
 		return
 	}
 
-	_, err = svc.Create(statemachine.FileTypePUML, "test-duplicate", "1.0.0", content, statemachine.LocationInProgress)
+	_, err = svc.Create(diagram.FileTypePUML, "test-duplicate", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		fmt.Printf("  ✓ Expected error for duplicate creation: Already exists\n")
 	}
 
-	// 4. Try to promote non-existent state machine
-	err = svc.Promote(statemachine.FileTypePUML, "non-existent", "1.0.0")
+	// 4. Try to promote non-existent state-machine diagram
+	err = svc.Promote(diagram.FileTypePUML, "non-existent", "1.0.0")
 	if err != nil {
 		fmt.Printf("  ✓ Expected error for non-existent promotion: File not found\n")
 	}
 
-	// 5. Try to delete non-existent state machine
-	err = svc.Delete(statemachine.FileTypePUML, "non-existent", "1.0.0", statemachine.LocationInProgress)
+	// 5. Try to delete non-existent state-machine diagram
+	err = svc.Delete(diagram.FileTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Printf("  ✓ Expected error for non-existent deletion: File not found\n")
 	}
 
 	// Clean up
-	err = svc.Delete(statemachine.FileTypePUML, "test-duplicate", "1.0.0", statemachine.LocationInProgress)
+	err = svc.Delete(diagram.FileTypePUML, "test-duplicate", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not clean up: %v", err)
 	}
@@ -359,13 +359,13 @@ func errorHandlingExample() {
 
 // Use Case 6: Batch operations
 func batchOperationsExample() {
-	svc, err := statemachine.NewService()
+	svc, err := diagram.NewService()
 	if err != nil {
 		log.Printf("Error creating service: %v", err)
 		return
 	}
 
-	// Create multiple state machines
+	// Create multiple state-machine diagrams
 	stateMachines := []struct {
 		name    string
 		version string
@@ -403,12 +403,12 @@ InTransit --> Delivered : deliver()
 		},
 	}
 
-	fmt.Printf("✓ Creating %d state machines:\n", len(stateMachines))
+	fmt.Printf("✓ Creating %d state-machine diagrams:\n", len(stateMachines))
 
-	// Create all state machines
+	// Create all state-machine diagrams
 	created := []string{}
 	for _, sm := range stateMachines {
-		_, err := svc.Create(statemachine.FileTypePUML, sm.name, sm.version, sm.content, statemachine.LocationInProgress)
+		_, err := svc.Create(diagram.FileTypePUML, sm.name, sm.version, sm.content, diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Error creating %s: %v", sm.name, err)
 			continue
@@ -417,24 +417,24 @@ InTransit --> Delivered : deliver()
 		fmt.Printf("  ✓ Created: %s-%s\n", sm.name, sm.version)
 	}
 
-	// List all in-progress state machines
-	allSMs, err := svc.ListAll(statemachine.FileTypePUML, statemachine.LocationInProgress)
+	// List all in-progress state-machine diagrams
+	allSMs, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
 	if err != nil {
-		log.Printf("Error listing state machines: %v", err)
+		log.Printf("Error listing state-machine diagrams: %v", err)
 		return
 	}
 
-	fmt.Printf("✓ Found %d state machines in in-progress:\n", len(allSMs))
+	fmt.Printf("✓ Found %d state-machine diagrams in in-progress:\n", len(allSMs))
 	for _, sm := range allSMs {
 		fmt.Printf("  - %s-%s (created: %s)\n",
 			sm.Name, sm.Version, sm.Metadata.CreatedAt.Format("2006-01-02 15:04:05"))
 	}
 
-	// Validate all created state machines
-	fmt.Printf("✓ Validating all state machines:\n")
+	// Validate all created state-machine diagrams
+	fmt.Printf("✓ Validating all state-machine diagrams:\n")
 	validCount := 0
 	for _, sm := range stateMachines {
-		result, err := svc.Validate(statemachine.FileTypePUML, sm.name, sm.version, statemachine.LocationInProgress)
+		result, err := svc.Validate(diagram.FileTypePUML, sm.name, sm.version, diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Error validating %s: %v", sm.name, err)
 			continue
@@ -449,12 +449,12 @@ InTransit --> Delivered : deliver()
 		}
 	}
 
-	fmt.Printf("✓ %d out of %d state machines are valid\n", validCount, len(stateMachines))
+	fmt.Printf("✓ %d out of %d state-machine diagrams are valid\n", validCount, len(stateMachines))
 
-	// Clean up all created state machines
-	fmt.Printf("✓ Cleaning up created state machines:\n")
+	// Clean up all created state-machine diagrams
+	fmt.Printf("✓ Cleaning up created state-machine diagrams:\n")
 	for _, sm := range stateMachines {
-		err := svc.Delete(statemachine.FileTypePUML, sm.name, sm.version, statemachine.LocationInProgress)
+		err := svc.Delete(diagram.FileTypePUML, sm.name, sm.version, diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Warning: Could not delete %s: %v", sm.name, err)
 		} else {

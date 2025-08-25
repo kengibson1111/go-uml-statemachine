@@ -1,14 +1,14 @@
 # Go UML State Machine Parsers
 
-A Go module for managing UML state machine diagrams in PlantUML format. This library provides functionality to read, write, validate, and organize PlantUML files within a structured directory hierarchy with support for versioning, validation levels, and cross-references between state machines.
+A Go module for managing UML state-machine diagrams. This library provides functionality to read, write, validate, and organize files within a structured directory hierarchy with support for versioning, validation levels, and cross-references between state-machine diagrams.
 
 ## Features
 
-- **Structured File Organization**: Automatic directory management with separate locations for in-progress and production-ready state machines
+- **Structured File Organization**: Automatic directory management with separate locations for in-progress and production-ready state-machine diagrams
 - **Version Management**: Semantic versioning support with automatic version parsing and comparison
 - **PlantUML Validation**: Configurable validation with different strictness levels based on deployment status
-- **Reference Resolution**: Support for cross-references between state machines with automatic dependency resolution
-- **Promotion Workflow**: Safe promotion of state machines from in-progress to production with validation checks
+- **Reference Resolution**: Support for cross-references between state-machine diagrams with automatic dependency resolution
+- **Promotion Workflow**: Safe promotion of state-machine diagrams from in-progress to production with validation checks
 - **Thread-Safe Operations**: Concurrent access protection with mutex locks
 - **Comprehensive Error Handling**: Detailed error messages with context information
 - **Configurable Logging**: Debug and info level logging with component-specific prefixes
@@ -28,35 +28,35 @@ import (
     "fmt"
     "log"
 
-    "github.com/kengibson1111/go-uml-statemachine-parsers/statemachine"
+    "github.com/kengibson1111/go-uml-statemachine-parsers/diagram"
 )
 
 func main() {
-    // Create a new state machine service
-    svc, err := statemachine.NewService()
+    // Create a new state-machine diagram service
+    svc, err := diagram.NewService()
     if err != nil {
         log.Fatal(err)
     }
     
-    // Create a new state machine
+    // Create a new state-machine diagram
     content := `@startuml
     [*] --> Idle
     Idle --> Active : start()
     Active --> Idle : stop()
     @enduml`
     
-    sm, err := svc.Create(statemachine.FileTypePUML, "my-machine", "1.0.0", content, statemachine.LocationInProgress)
+    sm, err := svc.Create(diagram.FileTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
     if err != nil {
         log.Fatal(err)
     }
     
-    fmt.Printf("Created state machine: %s-%s\n", sm.Name, sm.Version)
+    fmt.Printf("Created state-machine diagram: %s-%s\n", sm.Name, sm.Version)
 }
 ```
 
 ## Directory Structure
 
-The module organizes state machines in a standardized directory structure:
+The module organizes state-machine diagrams in a standardized directory structure:
 
 **Windows:**
 
@@ -103,7 +103,7 @@ The module organizes state machines in a standardized directory structure:
 ### Default Configuration
 
 ```go
-config := statemachine.DefaultConfig()
+config := diagram.DefaultConfig()
 // Uses:
 // - RootDirectory: ".go-uml-statemachine-parsers"
 // - ValidationLevel: StrictnessInProgress
@@ -116,7 +116,7 @@ config := statemachine.DefaultConfig()
 
 The module supports configuration through environment variables:
 
-- `GO_UML_ROOT_DIRECTORY`: Root directory for state machines
+- `GO_UML_ROOT_DIRECTORY`: Root directory for state-machine diagrams
 - `GO_UML_VALIDATION_LEVEL`: Validation level (`in-progress` or `products`)
 - `GO_UML_BACKUP_ENABLED`: Enable backups (`true` or `false`)
 - `GO_UML_MAX_FILE_SIZE`: Maximum file size in bytes
@@ -124,55 +124,55 @@ The module supports configuration through environment variables:
 
 ```go
 // Load configuration from environment
-config := statemachine.LoadConfigFromEnv()
+config := diagram.LoadConfigFromEnv()
 
 // Or merge with existing config
-config := statemachine.DefaultConfig()
+config := diagram.DefaultConfig()
 config.MergeWithEnv()
 ```
 
 ## Core Operations
 
-### Creating State Machines
+### Creating State-Machine Diagrams
 
 ```go
 // Create in in-progress location
-sm, err := svc.Create(statemachine.FileTypePUML, "user-auth", "1.0.0", plantUMLContent, statemachine.LocationInProgress)
+sm, err := svc.Create(diagram.FileTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationInProgress)
 
 // Create in products location (for direct production deployment)
-sm, err := svc.Create(statemachine.FileTypePUML, "user-auth", "1.0.0", plantUMLContent, statemachine.LocationProducts)
+sm, err := svc.Create(diagram.FileTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationProducts)
 ```
 
-### Reading State Machines
+### Reading State-Machine Diagrams
 
 ```go
-sm, err := svc.Read(statemachine.FileTypePUML, "user-auth", "1.0.0", statemachine.LocationInProgress)
+sm, err := svc.Read(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
 if err != nil {
-    log.Printf("Error reading state machine: %v", err)
+    log.Printf("Error reading state-machine diagram: %v", err)
 }
 ```
 
-### Updating State Machines
+### Updating State-Machine Diagrams
 
 ```go
 sm.Content = updatedPlantUMLContent
 err := svc.Update(sm)
 ```
 
-### Deleting State Machines
+### Deleting State-Machine Diagrams
 
 ```go
-err := svc.Delete(statemachine.FileTypePUML, "user-auth", "1.0.0", statemachine.LocationInProgress)
+err := svc.Delete(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
 ```
 
-### Listing State Machines
+### Listing State-Machine Diagrams
 
 ```go
-// List all in-progress state machines
-inProgressSMs, err := svc.ListAll(statemachine.FileTypePUML, statemachine.LocationInProgress)
+// List all in-progress state-machine diagrams
+inProgressSMs, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
 
-// List all production state machines
-productSMs, err := svc.ListAll(statemachine.FileTypePUML, statemachine.LocationProducts)
+// List all production state-machine diagrams
+productSMs, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationProducts)
 ```
 
 ## Validation
@@ -186,7 +186,7 @@ The module supports two validation strictness levels:
 - Used for development and testing
 
 ```go
-result, err := svc.Validate(statemachine.FileTypePUML, "user-auth", "1.0.0", statemachine.LocationInProgress)
+result, err := svc.Validate(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
 if result.HasErrors() {
     fmt.Println("Validation failed with errors:")
     for _, err := range result.Errors {
@@ -198,16 +198,16 @@ if result.HasErrors() {
 ### Products Validation
 
 - Returns warnings only (no blocking errors)
-- Used for production state machines
+- Used for production state-machine diagrams
 - More lenient to allow operational flexibility
 
 ## Promotion Workflow
 
-Move state machines from in-progress to products with validation:
+Move state-machine diagrams from in-progress to products with validation:
 
 ```go
 // Promotes only if validation passes
-err := svc.Promote(statemachine.FileTypePUML, "user-auth", "1.0.0")
+err := svc.Promote(diagram.FileTypePUML, "user-auth", "1.0.0")
 if err != nil {
     log.Printf("Promotion failed: %v", err)
 }
@@ -215,19 +215,19 @@ if err != nil {
 
 The promotion process:
 
-1. Validates the state machine exists in in-progress
+1. Validates the state-machine diagram exists in in-progress
 2. Checks for conflicts in products directory
-3. Validates the state machine content
+3. Validates the state-machine diagram content
 4. Performs atomic move operation
 5. Includes rollback capability on failure
 
 ## References and Dependencies
 
-State machines can reference other state machines:
+State-machine diagrams can reference other state-machine diagrams:
 
 ### Product References
 
-Reference state machines in the products directory:
+Reference state-machine diagrams in the products directory:
 
 **Windows:**
 
@@ -253,7 +253,7 @@ base-auth --> TwoFactor : success
 
 ### Nested References
 
-Reference state machines within the same parent directory:
+Reference state-machine diagrams within the same parent directory:
 
 **Windows:**
 
@@ -295,14 +295,14 @@ for _, ref := range sm.References {
 The module provides comprehensive error handling with context:
 
 ```go
-sm, err := svc.Read(statemachine.FileTypePUML, "non-existent", "1.0.0", statemachine.LocationInProgress)
+sm, err := svc.Read(diagram.FileTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     // Error includes context about the operation, component, and parameters
     fmt.Printf("Error: %v\n", err)
     return
 }
 
-// Use the state machine
+// Use the state-machine diagram
 fmt.Printf("Content: %s\n", sm.Content)
 ```
 
@@ -312,7 +312,7 @@ The module includes examples organized into two categories:
 
 ### Public API Examples (examples/)
 
-These examples use the public `statemachine` package and demonstrate how external users would interact with the module. **These are the recommended examples for learning how to use the module.**
+These examples use the public `diagram` package and demonstrate how external users would interact with the module. **These are the recommended examples for learning how to use the module.**
 
 ### Internal Examples (internal/examples/)
 
@@ -505,7 +505,7 @@ go run main.go
 
 #### Reference Validation Demo (Internal)
 
-Demonstrates reference resolution and validation between state machines.
+Demonstrates reference resolution and validation between state-machine diagrams.
 
 **Windows Command Prompt:**
 
@@ -537,13 +537,13 @@ The module includes comprehensive tests for both internal components and the pub
 **Windows:**
 
 ```cmd
-go test .\internal\... .\statemachine\...
+go test .\internal\... .\diagram\...
 ```
 
 **Linux/macOS:**
 
 ```bash
-go test ./internal/... ./statemachine/...
+go test ./internal/... ./diagram/...
 ```
 
 **Alternative (includes informational messages for example directories):**
@@ -565,13 +565,13 @@ go test ./...
 **Windows:**
 
 ```cmd
-go test -v .\internal\... .\statemachine\...
+go test -v .\internal\... .\diagram\...
 ```
 
 **Linux/macOS:**
 
 ```bash
-go test -v ./internal/... ./statemachine/...
+go test -v ./internal/... ./diagram/...
 ```
 
 ### Run Public API Tests Only
@@ -579,13 +579,13 @@ go test -v ./internal/... ./statemachine/...
 **Windows:**
 
 ```cmd
-go test -v .\statemachine\
+go test -v .\diagram\
 ```
 
 **Linux/macOS:**
 
 ```bash
-go test -v ./statemachine/
+go test -v ./diagram/
 ```
 
 ### Run Integration Tests
@@ -606,7 +606,7 @@ go test ./internal/integration/...
 
 The test suite includes:
 
-- **Public API Tests** (`statemachine/statemachine_test.go`) - Tests all public functions and integration scenarios
+- **Public API Tests** (`diagram/diagram_test.go`) - Tests all public functions and integration scenarios
 - **Unit Tests** - Individual component tests in each internal package (`internal/*/`)
 - **Integration Tests** (`internal/integration/`) - End-to-end workflow tests using internal packages
 - **Error Handling Tests** - Comprehensive error scenario coverage
@@ -615,32 +615,32 @@ The test suite includes:
 
 The module provides the following main interfaces:
 
-### StateMachineService Interface
+### DiagramService Interface
 
 ```go
-import "github.com/kengibson1111/go-uml-statemachine-parsers/statemachine"
+import "github.com/kengibson1111/go-uml-statemachine-parsers/diagram"
 
-type StateMachineService interface {
+type DiagramService interface {
     // CRUD operations
-    Create(fileType FileType, name, version string, content string, location Location) (*StateMachine, error)
-    Read(fileType FileType, name, version string, location Location) (*StateMachine, error)
-    Update(sm *StateMachine) error
+    Create(fileType FileType, name, version string, content string, location Location) (*diagram, error)
+    Read(fileType FileType, name, version string, location Location) (*diagram, error)
+    Update(sm *diagram) error
     Delete(fileType FileType, name, version string, location Location) error
 
     // Business operations
     Promote(fileType FileType, name, version string) error
     Validate(fileType FileType, name, version string, location Location) (*ValidationResult, error)
-    ListAll(fileType FileType, location Location) ([]StateMachine, error)
+    ListAll(fileType FileType, location Location) ([]diagram, error)
 
     // Reference operations
-    ResolveReferences(sm *StateMachine) error
+    ResolveReferences(sm *diagram) error
 }
 ```
 
 ### Core Types
 
 ```go
-import "github.com/kengibson1111/go-uml-statemachine-parsers/statemachine"
+import "github.com/kengibson1111/go-uml-statemachine-parsers/diagram"
 
 // FileType indicates the type of file being processed
 type FileType int
@@ -648,8 +648,8 @@ const (
     FileTypePUML FileType = iota // PlantUML files
 )
 
-// StateMachine represents a UML state machine
-type StateMachine struct {
+// diagram represents a UML state-machine diagram
+type diagram struct {
     Name       string
     Version    string
     Content    string
@@ -678,11 +678,11 @@ type ValidationResult struct {
 ## Best Practices
 
 1. **Version Management**: Use semantic versioning (e.g., "1.0.0", "1.2.3")
-2. **Content Validation**: Always validate state machines before promotion
-3. **Reference Management**: Resolve references after creating state machines with dependencies
+2. **Content Validation**: Always validate state-machine diagrams before promotion
+3. **Reference Management**: Resolve references after creating state-machine diagrams with dependencies
 4. **Error Handling**: Check and handle all error conditions appropriately
 5. **Configuration**: Use environment variables for deployment-specific settings
-6. **Testing**: Test state machine content with both strictness levels
+6. **Testing**: Test state-machine diagram content with both strictness levels
 
 ## Troubleshooting
 
@@ -694,16 +694,16 @@ type ValidationResult struct {
 
 - **Validation Failures**
   - Verify PlantUML syntax is correct
-  - Check that all referenced state machines exist
+  - Check that all referenced state-machine diagrams exist
   - Ensure proper @startuml/@enduml tags
 
 - **Reference Resolution Errors**
-  - Verify referenced state machines exist in the expected locations
+  - Verify referenced state-machine diagrams exist in the expected locations
   - Check that product references use correct version numbers
   - Ensure nested references are in the correct directory structure
 
 - **Promotion Failures**
-  - Validate the state machine passes all validation checks
+  - Validate the state-machine diagram passes all validation checks
   - Ensure no conflicting directories exist in products
   - Check file system permissions for move operations
 

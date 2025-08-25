@@ -48,9 +48,9 @@ func TestNewService(t *testing.T) {
 
 			if svc != nil {
 				// Verify the service implements the interface
-				_, ok := svc.(models.StateMachineService)
+				_, ok := svc.(models.DiagramService)
 				if !ok {
-					t.Error("NewService() does not implement StateMachineService interface")
+					t.Error("NewService() does not implement DiagramService interface")
 				}
 
 				// Verify internal state (access through type assertion for testing)
@@ -92,9 +92,9 @@ func TestNewServiceWithDefaults(t *testing.T) {
 	}
 
 	// Verify the service implements the interface
-	_, ok := svc.(models.StateMachineService)
+	_, ok := svc.(models.DiagramService)
 	if !ok {
-		t.Error("NewServiceWithDefaults() does not implement StateMachineService interface")
+		t.Error("NewServiceWithDefaults() does not implement DiagramService interface")
 	}
 
 	// Verify internal state
@@ -160,7 +160,7 @@ func TestService_Create(t *testing.T) {
 					}
 					return false, nil // doesn't exist in products either
 				}
-				repo.writeStateMachineFunc = func(sm *models.StateMachine) error {
+				repo.writeStateMachineFunc = func(sm *models.StateMachineDiagram) error {
 					return nil
 				}
 			},
@@ -291,7 +291,7 @@ func TestService_Read(t *testing.T) {
 		setupMock   func(*mockRepository)
 		wantErr     bool
 		wantErrType models.ErrorType
-		wantResult  *models.StateMachine
+		wantResult  *models.StateMachineDiagram
 	}{
 		{
 			name:      "successful read",
@@ -299,8 +299,8 @@ func TestService_Read(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
-					return &models.StateMachine{
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+					return &models.StateMachineDiagram{
 						Name:     name,
 						Version:  version,
 						Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -309,7 +309,7 @@ func TestService_Read(t *testing.T) {
 				}
 			},
 			wantErr: false,
-			wantResult: &models.StateMachine{
+			wantResult: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -340,7 +340,7 @@ func TestService_Read(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 					return nil, errors.New("file not found")
 				}
 			},
@@ -405,14 +405,14 @@ func TestService_Read(t *testing.T) {
 func TestService_Update(t *testing.T) {
 	tests := []struct {
 		name        string
-		input       *models.StateMachine
+		input       *models.StateMachineDiagram
 		setupMock   func(*mockRepository)
 		wantErr     bool
 		wantErrType models.ErrorType
 	}{
 		{
 			name: "successful update",
-			input: &models.StateMachine{
+			input: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Updated\n@enduml",
@@ -422,14 +422,14 @@ func TestService_Update(t *testing.T) {
 				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					return true, nil // exists
 				}
-				repo.writeStateMachineFunc = func(sm *models.StateMachine) error {
+				repo.writeStateMachineFunc = func(sm *models.StateMachineDiagram) error {
 					return nil
 				}
 			},
 			wantErr: false,
 		},
 		{
-			name:        "nil state machine validation",
+			name:        "nil state-machine diagram validation",
 			input:       nil,
 			setupMock:   func(repo *mockRepository) {},
 			wantErr:     true,
@@ -437,7 +437,7 @@ func TestService_Update(t *testing.T) {
 		},
 		{
 			name: "empty name validation",
-			input: &models.StateMachine{
+			input: &models.StateMachineDiagram{
 				Name:     "",
 				Version:  "1.0.0",
 				Content:  "content",
@@ -449,7 +449,7 @@ func TestService_Update(t *testing.T) {
 		},
 		{
 			name: "empty version validation",
-			input: &models.StateMachine{
+			input: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "",
 				Content:  "content",
@@ -461,7 +461,7 @@ func TestService_Update(t *testing.T) {
 		},
 		{
 			name: "empty content validation",
-			input: &models.StateMachine{
+			input: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Content:  "",
@@ -472,8 +472,8 @@ func TestService_Update(t *testing.T) {
 			wantErrType: models.ErrorTypeValidation,
 		},
 		{
-			name: "state machine does not exist",
-			input: &models.StateMachine{
+			name: "state-machine diagram does not exist",
+			input: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Content:  "content",
@@ -567,7 +567,7 @@ func TestService_Delete(t *testing.T) {
 			wantErrType: models.ErrorTypeValidation,
 		},
 		{
-			name:      "state machine does not exist",
+			name:      "state-machine diagram does not exist",
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
@@ -644,7 +644,7 @@ func TestService_Promote(t *testing.T) {
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				// State machine exists in in-progress
+				// State-machine diagram exists in in-progress
 				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					if location == models.LocationInProgress {
 						return true, nil
@@ -655,9 +655,9 @@ func TestService_Promote(t *testing.T) {
 					return false, nil
 				}
 
-				// Read state machine for validation
-				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
-					return &models.StateMachine{
+				// Read state-machine diagram for validation
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+					return &models.StateMachineDiagram{
 						Name:     name,
 						Version:  version,
 						Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -666,7 +666,7 @@ func TestService_Promote(t *testing.T) {
 				}
 
 				// Validation passes
-				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					return &models.ValidationResult{
 						IsValid:  true,
 						Errors:   []models.ValidationError{},
@@ -719,7 +719,7 @@ func TestService_Promote(t *testing.T) {
 			wantErrType: models.ErrorTypeValidation,
 		},
 		{
-			name:      "state machine does not exist in in-progress",
+			name:      "state-machine diagram does not exist in in-progress",
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
@@ -753,7 +753,7 @@ func TestService_Promote(t *testing.T) {
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				// State machine exists in in-progress
+				// State-machine diagram exists in in-progress
 				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					if location == models.LocationInProgress {
 						return true, nil
@@ -761,9 +761,9 @@ func TestService_Promote(t *testing.T) {
 					return false, nil
 				}
 
-				// Read state machine for validation
-				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
-					return &models.StateMachine{
+				// Read state-machine diagram for validation
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+					return &models.StateMachineDiagram{
 						Name:     name,
 						Version:  version,
 						Content:  "invalid plantuml",
@@ -772,7 +772,7 @@ func TestService_Promote(t *testing.T) {
 				}
 
 				// Validation fails with errors
-				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					result := &models.ValidationResult{
 						IsValid: false,
 						Errors: []models.ValidationError{
@@ -791,7 +791,7 @@ func TestService_Promote(t *testing.T) {
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				// State machine exists in in-progress
+				// State-machine diagram exists in in-progress
 				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					if location == models.LocationInProgress {
 						return true, nil
@@ -799,9 +799,9 @@ func TestService_Promote(t *testing.T) {
 					return false, nil
 				}
 
-				// Read state machine for validation
-				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
-					return &models.StateMachine{
+				// Read state-machine diagram for validation
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+					return &models.StateMachineDiagram{
 						Name:     name,
 						Version:  version,
 						Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -810,7 +810,7 @@ func TestService_Promote(t *testing.T) {
 				}
 
 				// Validation passes
-				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					return &models.ValidationResult{
 						IsValid:  true,
 						Errors:   []models.ValidationError{},
@@ -876,7 +876,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				// Initial setup - state machine exists in in-progress
+				// Initial setup - state-machine diagram exists in in-progress
 				initialCallCount := 0
 				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					initialCallCount++
@@ -897,9 +897,9 @@ func TestService_PromoteWithRollback(t *testing.T) {
 					return false, nil
 				}
 
-				// Read state machine for validation
-				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
-					return &models.StateMachine{
+				// Read state-machine diagram for validation
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+					return &models.StateMachineDiagram{
 						Name:     name,
 						Version:  version,
 						Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -908,7 +908,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 				}
 
 				// Validation passes
-				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					return &models.ValidationResult{
 						IsValid:  true,
 						Errors:   []models.ValidationError{},
@@ -936,7 +936,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				// Initial setup - state machine exists in in-progress
+				// Initial setup - state-machine diagram exists in in-progress
 				initialCallCount := 0
 				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					initialCallCount++
@@ -957,9 +957,9 @@ func TestService_PromoteWithRollback(t *testing.T) {
 					return false, nil
 				}
 
-				// Read state machine for validation
-				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
-					return &models.StateMachine{
+				// Read state-machine diagram for validation
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+					return &models.StateMachineDiagram{
 						Name:     name,
 						Version:  version,
 						Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -968,7 +968,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 				}
 
 				// Validation passes
-				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					return &models.ValidationResult{
 						IsValid:  true,
 						Errors:   []models.ValidationError{},
@@ -1025,7 +1025,7 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 		name           string
 		inputName      string
 		inputVer       string
-		validationFunc func(*models.StateMachine, models.ValidationStrictness) (*models.ValidationResult, error)
+		validationFunc func(*models.StateMachineDiagram, models.ValidationStrictness) (*models.ValidationResult, error)
 		wantErr        bool
 		wantErrType    models.ErrorType
 	}{
@@ -1033,7 +1033,7 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 			name:      "validation passes with warnings only",
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
-			validationFunc: func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+			validationFunc: func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 				return &models.ValidationResult{
 					IsValid: true,
 					Errors:  []models.ValidationError{},
@@ -1048,7 +1048,7 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 			name:      "validation fails with errors and warnings",
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
-			validationFunc: func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+			validationFunc: func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 				return &models.ValidationResult{
 					IsValid: false,
 					Errors: []models.ValidationError{
@@ -1066,7 +1066,7 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 			name:      "validation error during validation process",
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
-			validationFunc: func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+			validationFunc: func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 				return nil, errors.New("validation process failed")
 			},
 			wantErr:     true,
@@ -1087,8 +1087,8 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 				return false, nil
 			}
 
-			repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
-				return &models.StateMachine{
+			repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+				return &models.StateMachineDiagram{
 					Name:     name,
 					Version:  version,
 					Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -1172,15 +1172,15 @@ func TestService_Validate(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
-					return &models.StateMachine{
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+					return &models.StateMachineDiagram{
 						Name:     name,
 						Version:  version,
 						Content:  "@startuml\n[*] --> Idle\n@enduml",
 						Location: location,
 					}, nil
 				}
-				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					if strictness != models.StrictnessInProgress {
 						t.Errorf("Expected StrictnessInProgress but got %v", strictness)
 					}
@@ -1204,15 +1204,15 @@ func TestService_Validate(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationProducts,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
-					return &models.StateMachine{
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+					return &models.StateMachineDiagram{
 						Name:     name,
 						Version:  version,
 						Content:  "@startuml\n[*] --> Idle\n@enduml",
 						Location: location,
 					}, nil
 				}
-				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					if strictness != models.StrictnessProducts {
 						t.Errorf("Expected StrictnessProducts but got %v", strictness)
 					}
@@ -1253,12 +1253,12 @@ func TestService_Validate(t *testing.T) {
 			wantErrType: models.ErrorTypeValidation,
 		},
 		{
-			name:      "state machine not found",
+			name:      "state-machine diagram not found",
 			inputName: "test-sm",
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 					return nil, errors.New("file not found")
 				}
 			},
@@ -1271,15 +1271,15 @@ func TestService_Validate(t *testing.T) {
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
-				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
-					return &models.StateMachine{
+				repo.readStateMachineFunc = func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+					return &models.StateMachineDiagram{
 						Name:     name,
 						Version:  version,
 						Content:  "invalid content",
 						Location: location,
 					}, nil
 				}
-				validator.validateFunc = func(sm *models.StateMachine, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					return nil, errors.New("validation engine error")
 				}
 			},
@@ -1351,8 +1351,8 @@ func TestService_ListAll(t *testing.T) {
 			name:     "successful list in-progress",
 			inputLoc: models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
-					return []models.StateMachine{
+				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
+					return []models.StateMachineDiagram{
 						{
 							Name:     "sm1",
 							Version:  "1.0.0",
@@ -1375,8 +1375,8 @@ func TestService_ListAll(t *testing.T) {
 			name:     "successful list products",
 			inputLoc: models.LocationProducts,
 			setupMock: func(repo *mockRepository) {
-				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
-					return []models.StateMachine{
+				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
+					return []models.StateMachineDiagram{
 						{
 							Name:     "prod-sm",
 							Version:  "1.0.0",
@@ -1393,8 +1393,8 @@ func TestService_ListAll(t *testing.T) {
 			name:     "empty list",
 			inputLoc: models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
-					return []models.StateMachine{}, nil
+				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
+					return []models.StateMachineDiagram{}, nil
 				}
 			},
 			wantErr:   false,
@@ -1404,7 +1404,7 @@ func TestService_ListAll(t *testing.T) {
 			name:     "repository error",
 			inputLoc: models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
+				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
 					return nil, errors.New("directory read error")
 				}
 			},
@@ -1453,10 +1453,10 @@ func TestService_ListAll(t *testing.T) {
 					t.Errorf("ListAll() count = %v, want %v", len(result), tt.wantCount)
 				}
 
-				// Verify all returned state machines have the correct location
+				// Verify all returned state-machine diagrams have the correct location
 				for _, sm := range result {
 					if sm.Location != tt.inputLoc {
-						t.Errorf("ListAll() state machine location = %v, want %v", sm.Location, tt.inputLoc)
+						t.Errorf("ListAll() state-machine diagram location = %v, want %v", sm.Location, tt.inputLoc)
 					}
 				}
 			}
@@ -1467,14 +1467,14 @@ func TestService_ListAll(t *testing.T) {
 func TestService_ResolveReferences(t *testing.T) {
 	tests := []struct {
 		name        string
-		input       *models.StateMachine
+		input       *models.StateMachineDiagram
 		setupMock   func(*mockRepository)
 		wantErr     bool
 		wantErrType models.ErrorType
 	}{
 		{
 			name: "successful resolve no references",
-			input: &models.StateMachine{
+			input: &models.StateMachineDiagram{
 				Name:       "test-sm",
 				Version:    "1.0.0",
 				Content:    "@startuml\n[*] --> Idle\n@enduml",
@@ -1486,7 +1486,7 @@ func TestService_ResolveReferences(t *testing.T) {
 		},
 		{
 			name: "successful resolve product reference",
-			input: &models.StateMachine{
+			input: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -1511,7 +1511,7 @@ func TestService_ResolveReferences(t *testing.T) {
 		},
 		{
 			name: "successful resolve nested reference",
-			input: &models.StateMachine{
+			input: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -1536,7 +1536,7 @@ func TestService_ResolveReferences(t *testing.T) {
 		},
 		{
 			name: "successful resolve multiple references",
-			input: &models.StateMachine{
+			input: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -1571,7 +1571,7 @@ func TestService_ResolveReferences(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:        "nil state machine validation",
+			name:        "nil state-machine diagram validation",
 			input:       nil,
 			setupMock:   func(repo *mockRepository) {},
 			wantErr:     true,
@@ -1579,7 +1579,7 @@ func TestService_ResolveReferences(t *testing.T) {
 		},
 		{
 			name: "product reference not found",
-			input: &models.StateMachine{
+			input: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -1602,7 +1602,7 @@ func TestService_ResolveReferences(t *testing.T) {
 		},
 		{
 			name: "nested reference not found",
-			input: &models.StateMachine{
+			input: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -1624,7 +1624,7 @@ func TestService_ResolveReferences(t *testing.T) {
 		},
 		{
 			name: "repository error checking product reference",
-			input: &models.StateMachine{
+			input: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -1647,7 +1647,7 @@ func TestService_ResolveReferences(t *testing.T) {
 		},
 		{
 			name: "repository error checking nested reference",
-			input: &models.StateMachine{
+			input: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
@@ -1730,13 +1730,13 @@ func TestService_ResolveReferences(t *testing.T) {
 func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 	tests := []struct {
 		name         string
-		stateMachine *models.StateMachine
+		stateMachine *models.StateMachineDiagram
 		reference    models.Reference
 		expectedPath string
 	}{
 		{
 			name: "product reference path building",
-			stateMachine: &models.StateMachine{
+			stateMachine: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Location: models.LocationInProgress,
@@ -1750,7 +1750,7 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 		},
 		{
 			name: "nested reference path building in-progress",
-			stateMachine: &models.StateMachine{
+			stateMachine: &models.StateMachineDiagram{
 				Name:     "main-sm",
 				Version:  "3.0.0",
 				Location: models.LocationInProgress,
@@ -1763,7 +1763,7 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 		},
 		{
 			name: "nested reference path building products",
-			stateMachine: &models.StateMachine{
+			stateMachine: &models.StateMachineDiagram{
 				Name:     "prod-sm",
 				Version:  "1.5.0",
 				Location: models.LocationProducts,
@@ -1791,8 +1791,8 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			// Create a state machine with the test reference
-			sm := &models.StateMachine{
+			// Create a state-machine diagram with the test reference
+			sm := &models.StateMachineDiagram{
 				Name:       tt.stateMachine.Name,
 				Version:    tt.stateMachine.Version,
 				Location:   tt.stateMachine.Location,
@@ -1875,9 +1875,9 @@ func TestNewServiceFromEnv(t *testing.T) {
 			}
 
 			// Verify the service implements the interface
-			_, ok := svc.(models.StateMachineService)
+			_, ok := svc.(models.DiagramService)
 			if !ok {
-				t.Error("NewServiceFromEnv() did not return a StateMachineService")
+				t.Error("NewServiceFromEnv() did not return a DiagramService")
 			}
 		})
 	}
@@ -1958,9 +1958,9 @@ func TestNewServiceWithEnvOverrides(t *testing.T) {
 			}
 
 			// Verify the service implements the interface
-			_, ok := svc.(models.StateMachineService)
+			_, ok := svc.(models.DiagramService)
 			if !ok {
-				t.Error("NewServiceWithEnvOverrides() did not return a StateMachineService")
+				t.Error("NewServiceWithEnvOverrides() did not return a DiagramService")
 			}
 		})
 	}

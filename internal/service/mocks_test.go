@@ -16,7 +16,7 @@ type mockRepository struct {
 	directoryExistsFunc    func(path string) (bool, error)
 }
 
-func (m *mockRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+func (m *mockRepository) ReadDiagram(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	if m.readStateMachineFunc != nil {
 		return m.readStateMachineFunc(fileType, name, version, location)
 	}
@@ -37,21 +37,21 @@ func (m *mockRepository) Exists(fileType models.FileType, name, version string, 
 	return false, nil
 }
 
-func (m *mockRepository) WriteStateMachine(diag *models.StateMachineDiagram) error {
+func (m *mockRepository) WriteDiagram(diag *models.StateMachineDiagram) error {
 	if m.writeStateMachineFunc != nil {
 		return m.writeStateMachineFunc(diag)
 	}
 	return nil
 }
 
-func (m *mockRepository) MoveStateMachine(fileType models.FileType, name, version string, from, to models.Location) error {
+func (m *mockRepository) MoveDiagram(fileType models.FileType, name, version string, from, to models.Location) error {
 	if m.moveStateMachineFunc != nil {
 		return m.moveStateMachineFunc(fileType, name, version, from, to)
 	}
 	return nil
 }
 
-func (m *mockRepository) DeleteStateMachine(fileType models.FileType, name, version string, location models.Location) error {
+func (m *mockRepository) DeleteDiagram(fileType models.FileType, name, version string, location models.Location) error {
 	if m.deleteStateMachineFunc != nil {
 		return m.deleteStateMachineFunc(fileType, name, version, location)
 	}

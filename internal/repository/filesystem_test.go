@@ -40,8 +40,8 @@ func (th *TestHelper) Cleanup() {
 	os.RemoveAll(th.tempDir)
 }
 
-// CreateTestStateMachine creates a test state-machine diagram
-func (th *TestHelper) CreateTestStateMachine(name, version string, location models.Location) *models.StateMachineDiagram {
+// CreateTestDiagram creates a test state-machine diagram
+func (th *TestHelper) CreateTestDiagram(name, version string, location models.Location) *models.StateMachineDiagram {
 	content := `@startuml
 [*] --> Idle
 Idle --> Active : start
@@ -91,7 +91,7 @@ func TestNewFileSystemRepository(t *testing.T) {
 	}
 }
 
-func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
+func TestFileSystemRepository_WriteDiagram(t *testing.T) {
 	th := NewTestHelper(t)
 	defer th.Cleanup()
 
@@ -103,12 +103,12 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 	}{
 		{
 			name:        "valid in-progress state-machine diagram",
-			diagram:     th.CreateTestStateMachine("test-diag", "1.0.0", models.LocationInProgress),
+			diagram:     th.CreateTestDiagram("test-diag", "1.0.0", models.LocationInProgress),
 			expectError: false,
 		},
 		{
 			name:        "valid products state-machine diagram",
-			diagram:     th.CreateTestStateMachine("test-diag", "1.0.0", models.LocationProducts),
+			diagram:     th.CreateTestDiagram("test-diag", "1.0.0", models.LocationProducts),
 			expectError: false,
 		},
 		{
@@ -143,7 +143,7 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := th.repo.WriteStateMachine(tt.diagram)
+			err := th.repo.WriteDiagram(tt.diagram)
 
 			if tt.expectError {
 				if err == nil {
@@ -163,7 +163,7 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 				}
 
 				// Verify file was created
-				filePath := th.repo.pathManager.GetStateMachineFilePathWithFileType(
+				filePath := th.repo.pathManager.GetDiagramFilePathWithFileType(
 					tt.diagram.Name,
 					tt.diagram.Version,
 					tt.diagram.Location,
@@ -188,13 +188,13 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 	}
 }
 
-func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
+func TestFileSystemRepository_ReadDiagram(t *testing.T) {
 	th := NewTestHelper(t)
 	defer th.Cleanup()
 
 	// Create a test state-machine diagram first
-	testDiag := th.CreateTestStateMachine("test-read", "1.0.0", models.LocationInProgress)
-	err := th.repo.WriteStateMachine(testDiag)
+	testDiag := th.CreateTestDiagram("test-read", "1.0.0", models.LocationInProgress)
+	err := th.repo.WriteDiagram(testDiag)
 	if err != nil {
 		t.Fatalf("Failed to create test state-machine diagram: %v", err)
 	}
@@ -242,7 +242,7 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			diag, err := th.repo.ReadStateMachine(models.FileTypePUML, tt.diagName, tt.version, tt.location)
+			diag, err := th.repo.ReadDiagram(models.FileTypePUML, tt.diagName, tt.version, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -291,8 +291,8 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 	defer th.Cleanup()
 
 	// Create a test state-machine diagram first
-	testDiag := th.CreateTestStateMachine("test-exists", "1.0.0", models.LocationInProgress)
-	err := th.repo.WriteStateMachine(testDiag)
+	testDiag := th.CreateTestDiagram("test-exists", "1.0.0", models.LocationInProgress)
+	err := th.repo.WriteDiagram(testDiag)
 	if err != nil {
 		t.Fatalf("Failed to create test state-machine diagram: %v", err)
 	}
@@ -490,13 +490,13 @@ func TestFileSystemRepository_DirectoryExists(t *testing.T) {
 	}
 }
 
-func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
+func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 	th := NewTestHelper(t)
 	defer th.Cleanup()
 
 	// Create a test state-machine diagram in in-progress
-	testDiag := th.CreateTestStateMachine("test-move", "1.0.0", models.LocationInProgress)
-	err := th.repo.WriteStateMachine(testDiag)
+	testDiag := th.CreateTestDiagram("test-move", "1.0.0", models.LocationInProgress)
+	err := th.repo.WriteDiagram(testDiag)
 	if err != nil {
 		t.Fatalf("Failed to create test state-machine diagram: %v", err)
 	}
@@ -558,7 +558,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := th.repo.MoveStateMachine(models.FileTypePUML, tt.diagName, tt.version, tt.from, tt.to)
+			err := th.repo.MoveDiagram(models.FileTypePUML, tt.diagName, tt.version, tt.from, tt.to)
 
 			if tt.expectError {
 				if err == nil {
@@ -596,7 +596,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 				}
 
 				// Verify content is preserved
-				diagram, err := th.repo.ReadStateMachine(models.FileTypePUML, tt.diagName, tt.version, tt.to)
+				diagram, err := th.repo.ReadDiagram(models.FileTypePUML, tt.diagName, tt.version, tt.to)
 				if err != nil {
 					t.Errorf("Error reading moved state-machine diagram: %v", err)
 				}
@@ -608,7 +608,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 	}
 }
 
-func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
+func TestFileSystemRepository_DeleteDiagram(t *testing.T) {
 	th := NewTestHelper(t)
 	defer th.Cleanup()
 
@@ -662,14 +662,14 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Setup test state-machine diagram if needed
 			if tt.setupDiag {
-				testDiag := th.CreateTestStateMachine(tt.diagName, tt.version, tt.location)
-				err := th.repo.WriteStateMachine(testDiag)
+				testDiag := th.CreateTestDiagram(tt.diagName, tt.version, tt.location)
+				err := th.repo.WriteDiagram(testDiag)
 				if err != nil {
 					t.Fatalf("Failed to create test state-machine diagram: %v", err)
 				}
 			}
 
-			err := th.repo.DeleteStateMachine(models.FileTypePUML, tt.diagName, tt.version, tt.location)
+			err := th.repo.DeleteDiagram(models.FileTypePUML, tt.diagName, tt.version, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -707,14 +707,14 @@ func TestFileSystemRepository_ListStateMachines(t *testing.T) {
 
 	// Create multiple test state-machine diagrams
 	testDiagrams := []*models.StateMachineDiagram{
-		th.CreateTestStateMachine("diag1", "1.0.0", models.LocationInProgress),
-		th.CreateTestStateMachine("diag2", "1.1.0", models.LocationInProgress),
-		th.CreateTestStateMachine("diag3", "2.0.0", models.LocationProducts),
+		th.CreateTestDiagram("diag1", "1.0.0", models.LocationInProgress),
+		th.CreateTestDiagram("diag2", "1.1.0", models.LocationInProgress),
+		th.CreateTestDiagram("diag3", "2.0.0", models.LocationProducts),
 	}
 
 	// Write the state-machine diagrams
 	for _, diag := range testDiagrams {
-		err := th.repo.WriteStateMachine(diag)
+		err := th.repo.WriteDiagram(diag)
 		if err != nil {
 			t.Fatalf("Failed to create test state-machine diagram %s: %v", diag.Name, err)
 		}
@@ -781,10 +781,10 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	defer th.Cleanup()
 
 	// Test a complete workflow: create -> read -> move -> delete
-	testDiag := th.CreateTestStateMachine("integration-test", "1.0.0", models.LocationInProgress)
+	testDiag := th.CreateTestDiagram("integration-test", "1.0.0", models.LocationInProgress)
 
 	// 1. Write state-machine diagram
-	err := th.repo.WriteStateMachine(testDiag)
+	err := th.repo.WriteDiagram(testDiag)
 	if err != nil {
 		t.Fatalf("Failed to write state-machine diagram: %v", err)
 	}
@@ -799,7 +799,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 3. Read it back
-	readDiag, err := th.repo.ReadStateMachine(models.FileTypePUML, testDiag.Name, testDiag.Version, testDiag.Location)
+	readDiag, err := th.repo.ReadDiagram(models.FileTypePUML, testDiag.Name, testDiag.Version, testDiag.Location)
 	if err != nil {
 		t.Fatalf("Failed to read state-machine diagram: %v", err)
 	}
@@ -817,7 +817,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 5. Move to products
-	err = th.repo.MoveStateMachine(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationInProgress, models.LocationProducts)
+	err = th.repo.MoveDiagram(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationInProgress, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to move state-machine diagram: %v", err)
 	}
@@ -841,7 +841,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 8. Delete from products
-	err = th.repo.DeleteStateMachine(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
+	err = th.repo.DeleteDiagram(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to delete state-machine diagram: %v", err)
 	}

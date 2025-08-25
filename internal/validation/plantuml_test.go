@@ -233,7 +233,7 @@ func TestPlantUMLValidator_ValidateReferences_NoReferences(t *testing.T) {
 	}
 
 	if len(diag.References) != 0 {
-		t.Error("StateMachine should have no references")
+		t.Error("StateMachineDiagram should have no references")
 	}
 }
 
@@ -263,7 +263,7 @@ func TestPlantUMLValidator_ValidateReferences_ProductReference(t *testing.T) {
 	}
 
 	if len(diag.References) != 1 {
-		t.Errorf("StateMachine should have 1 reference, got %d", len(diag.References))
+		t.Errorf("StateMachineDiagram should have 1 reference, got %d", len(diag.References))
 	}
 
 	ref := diag.References[0]
@@ -304,7 +304,7 @@ func TestPlantUMLValidator_ValidateReferences_NestedReference(t *testing.T) {
 	}
 
 	if len(diag.References) != 1 {
-		t.Errorf("StateMachine should have 1 reference, got %d", len(diag.References))
+		t.Errorf("StateMachineDiagram should have 1 reference, got %d", len(diag.References))
 	}
 
 	ref := diag.References[0]
@@ -419,7 +419,7 @@ func TestPlantUMLValidator_ValidateReferences_MultipleReferences(t *testing.T) {
 	}
 
 	if len(diag.References) != 3 {
-		t.Errorf("StateMachine should have 3 references, got %d", len(diag.References))
+		t.Errorf("StateMachineDiagram should have 3 references, got %d", len(diag.References))
 	}
 
 	// Check that we have both product and nested references
@@ -517,7 +517,7 @@ func (m *MockRepository) AddStateMachine(diag *models.StateMachineDiagram) {
 	m.existsMap[key] = true
 }
 
-func (m *MockRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+func (m *MockRepository) ReadDiagram(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	key := fmt.Sprintf("%s-%s-%s", name, version, location.String())
 	if diag, exists := m.diagrams[key]; exists {
 		return diag, nil
@@ -534,11 +534,11 @@ func (m *MockRepository) Exists(fileType models.FileType, name, version string, 
 func (m *MockRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
 	return nil, nil
 }
-func (m *MockRepository) WriteStateMachine(diag *models.StateMachineDiagram) error { return nil }
-func (m *MockRepository) MoveStateMachine(fileType models.FileType, name, version string, from, to models.Location) error {
+func (m *MockRepository) WriteDiagram(diag *models.StateMachineDiagram) error { return nil }
+func (m *MockRepository) MoveDiagram(fileType models.FileType, name, version string, from, to models.Location) error {
 	return nil
 }
-func (m *MockRepository) DeleteStateMachine(fileType models.FileType, name, version string, location models.Location) error {
+func (m *MockRepository) DeleteDiagram(fileType models.FileType, name, version string, location models.Location) error {
 	return nil
 }
 func (m *MockRepository) CreateDirectory(path string) error         { return nil }

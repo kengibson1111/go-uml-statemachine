@@ -85,7 +85,7 @@ func (pm *PathManager) GetStateMachineFilePath(name, version string, location Lo
 }
 
 // GetStateMachineFilePathWithFileType returns the full file path for a state-machine diagram with file type
-func (pm *PathManager) GetStateMachineFilePathWithFileType(name, version string, location Location, fileType FileType) string {
+func (pm *PathManager) GetDiagramFilePathWithFileType(name, version string, location Location, fileType FileType) string {
 	dirPath := pm.GetStateMachineDirectoryPathWithFileType(name, version, location, fileType)
 	if location == LocationNested {
 		// Nested state-machine diagrams don't include version in filename

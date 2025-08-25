@@ -52,8 +52,8 @@ func NewFileSystemRepository(config *models.Config) *FileSystemRepository {
 	return repo
 }
 
-// ReadStateMachine reads a state-machine diagram from the file system
-func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+// ReadDiagram reads a state-machine diagram from the file system
+func (r *FileSystemRepository) ReadDiagram(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	// Create operation logger with context
 	opLogger := r.logger.WithFields(map[string]interface{}{
 		"operation": "ReadStateMachine",
@@ -89,7 +89,7 @@ func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, 
 	opLogger.Debug("Input validation passed")
 
 	// Get the file path
-	filePath := r.pathManager.GetStateMachineFilePathWithFileType(name, version, location, fileType)
+	filePath := r.pathManager.GetDiagramFilePathWithFileType(name, version, location, fileType)
 	opLogger.WithField("filePath", filePath).Debug("Resolved file path")
 
 	// Check if file exists
@@ -155,7 +155,7 @@ func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, 
 		return nil, infoErr
 	}
 
-	// Create StateMachine object
+	// Create StateMachineDiagram object
 	opLogger.Debug("Creating state-machine diagram object")
 	diag := &models.StateMachineDiagram{
 		Name:     name,
@@ -181,8 +181,8 @@ func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, 
 	return diag, nil
 }
 
-// WriteStateMachine writes a state-machine diagram to the file system
-func (r *FileSystemRepository) WriteStateMachine(diag *models.StateMachineDiagram) error {
+// WriteDiagram writes a state-machine diagram to the file system
+func (r *FileSystemRepository) WriteDiagram(diag *models.StateMachineDiagram) error {
 	if diag == nil {
 		return models.NewStateMachineError(models.ErrorTypeValidation, "state-machine diagram cannot be nil", nil)
 	}
@@ -207,7 +207,7 @@ func (r *FileSystemRepository) WriteStateMachine(diag *models.StateMachineDiagra
 
 	// Get directory and file paths
 	dirPath := r.pathManager.GetStateMachineDirectoryPathWithFileType(diag.Name, diag.Version, diag.Location, diag.FileType)
-	filePath := r.pathManager.GetStateMachineFilePathWithFileType(diag.Name, diag.Version, diag.Location, diag.FileType)
+	filePath := r.pathManager.GetDiagramFilePathWithFileType(diag.Name, diag.Version, diag.Location, diag.FileType)
 
 	// Create directory if it doesn't exist
 	if err := r.CreateDirectory(dirPath); err != nil {
@@ -237,7 +237,7 @@ func (r *FileSystemRepository) Exists(fileType models.FileType, name, version st
 	}
 
 	// Get the file path
-	filePath := r.pathManager.GetStateMachineFilePathWithFileType(name, version, location, fileType)
+	filePath := r.pathManager.GetDiagramFilePathWithFileType(name, version, location, fileType)
 
 	// Check if file exists
 	_, err := os.Stat(filePath)
@@ -297,8 +297,8 @@ func (r *FileSystemRepository) DirectoryExists(path string) (bool, error) {
 		WithContext("path", path)
 }
 
-// MoveStateMachine moves a state-machine diagram from one location to another
-func (r *FileSystemRepository) MoveStateMachine(fileType models.FileType, name, version string, from, to models.Location) error {
+// MoveDiagram moves a state-machine diagram from one location to another
+func (r *FileSystemRepository) MoveDiagram(fileType models.FileType, name, version string, from, to models.Location) error {
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
 		return err
@@ -361,8 +361,8 @@ func (r *FileSystemRepository) MoveStateMachine(fileType models.FileType, name, 
 	return nil
 }
 
-// DeleteStateMachine deletes a state-machine diagram and its directory
-func (r *FileSystemRepository) DeleteStateMachine(fileType models.FileType, name, version string, location models.Location) error {
+// DeleteDiagram deletes a state-machine diagram and its directory
+func (r *FileSystemRepository) DeleteDiagram(fileType models.FileType, name, version string, location models.Location) error {
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
 		return err
@@ -442,7 +442,7 @@ func (r *FileSystemRepository) ListStateMachines(fileType models.FileType, locat
 		}
 
 		// Try to read the state-machine diagram
-		diag, err := r.ReadStateMachine(fileType, pathInfo.Name, pathInfo.Version, location)
+		diag, err := r.ReadDiagram(fileType, pathInfo.Name, pathInfo.Version, location)
 		if err != nil {
 			// Skip state-machine diagrams that can't be read, but continue processing others
 			continue

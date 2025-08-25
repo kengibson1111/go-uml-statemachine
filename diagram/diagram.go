@@ -130,7 +130,7 @@ const (
 	StrictnessProducts = models.StrictnessProducts
 )
 
-// StateMachine represents a UML state-machine diagram with its metadata and content.
+// StateMachineDiagram represents a UML state-machine diagram with its metadata and content.
 type StateMachineDiagram = models.StateMachineDiagram
 
 // Reference represents a reference to another state-machine diagram.

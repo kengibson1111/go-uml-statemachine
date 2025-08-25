@@ -76,7 +76,7 @@ func TestReferenceType_String(t *testing.T) {
 	}
 }
 
-func TestStateMachine_Creation(t *testing.T) {
+func TestStateMachineDiagram_Creation(t *testing.T) {
 	now := time.Now()
 	metadata := Metadata{
 		CreatedAt:  now,

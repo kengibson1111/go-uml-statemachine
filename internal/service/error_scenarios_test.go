@@ -36,28 +36,28 @@ func (m *MockErrorRepository) Exists(fileType models.FileType, name, version str
 	return m.existsResult, nil
 }
 
-func (m *MockErrorRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+func (m *MockErrorRepository) ReadDiagram(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	if m.shouldFailRead {
 		return nil, errors.New("mock read error")
 	}
 	return m.readResult, nil
 }
 
-func (m *MockErrorRepository) WriteStateMachine(diag *models.StateMachineDiagram) error {
+func (m *MockErrorRepository) WriteDiagram(diag *models.StateMachineDiagram) error {
 	if m.shouldFailWrite {
 		return errors.New("mock write error")
 	}
 	return nil
 }
 
-func (m *MockErrorRepository) MoveStateMachine(fileType models.FileType, name, version string, from, to models.Location) error {
+func (m *MockErrorRepository) MoveDiagram(fileType models.FileType, name, version string, from, to models.Location) error {
 	if m.shouldFailMove {
 		return errors.New("mock move error")
 	}
 	return nil
 }
 
-func (m *MockErrorRepository) DeleteStateMachine(fileType models.FileType, name, version string, location models.Location) error {
+func (m *MockErrorRepository) DeleteDiagram(fileType models.FileType, name, version string, location models.Location) error {
 	if m.shouldFailDelete {
 		return errors.New("mock delete error")
 	}

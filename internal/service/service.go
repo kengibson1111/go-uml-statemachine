@@ -195,7 +195,7 @@ func (s *service) Create(fileType models.FileType, name, version string, content
 
 	// Write the state-machine diagram to disk
 	opLogger.Debug("Writing state-machine diagram to disk")
-	if err := s.repo.WriteStateMachine(diag); err != nil {
+	if err := s.repo.WriteDiagram(diag); err != nil {
 		wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
 			"failed to write state-machine diagram").
 			WithContext("name", name).
@@ -250,7 +250,7 @@ func (s *service) Read(fileType models.FileType, name, version string, location 
 
 	// Read the state-machine diagram from repository
 	opLogger.Debug("Reading state-machine diagram from repository")
-	diag, err := s.repo.ReadStateMachine(fileType, name, version, location)
+	diag, err := s.repo.ReadDiagram(fileType, name, version, location)
 	if err != nil {
 		wrappedErr := models.WrapError(err, models.ErrorTypeFileNotFound,
 			"failed to read state-machine diagram").
@@ -307,7 +307,7 @@ func (s *service) Update(diag *models.StateMachineDiagram) error {
 	diag.Metadata.ModifiedAt = time.Now()
 
 	// Write the updated state-machine diagram to disk
-	if err := s.repo.WriteStateMachine(diag); err != nil {
+	if err := s.repo.WriteDiagram(diag); err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to update state-machine diagram", err).
 			WithContext("name", diag.Name).
@@ -349,7 +349,7 @@ func (s *service) Delete(fileType models.FileType, name, version string, locatio
 	}
 
 	// Delete the state-machine diagram from repository
-	if err := s.repo.DeleteStateMachine(fileType, name, version, location); err != nil {
+	if err := s.repo.DeleteDiagram(fileType, name, version, location); err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to delete state-machine diagram", err).
 			WithContext("name", name).
@@ -404,7 +404,7 @@ func (s *service) Promote(fileType models.FileType, name, version string) error 
 	}
 
 	// Step 3: Read the state-machine diagram for validation
-	diagram, err := s.repo.ReadStateMachine(fileType, name, version, models.LocationInProgress)
+	diagram, err := s.repo.ReadDiagram(fileType, name, version, models.LocationInProgress)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to read state-machine diagram for validation", err).
@@ -443,7 +443,7 @@ func (s *service) Promote(fileType models.FileType, name, version string) error 
 // performAtomicPromotion performs the actual move operation with rollback capability
 func (s *service) performAtomicPromotion(fileType models.FileType, name, version string) error {
 	// Step 1: Attempt to move the state-machine diagram
-	err := s.repo.MoveStateMachine(fileType, name, version, models.LocationInProgress, models.LocationProducts)
+	err := s.repo.MoveDiagram(fileType, name, version, models.LocationInProgress, models.LocationProducts)
 	if err != nil {
 		// If move fails, no rollback needed since nothing was changed
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
@@ -498,7 +498,7 @@ func (s *service) performAtomicPromotion(fileType models.FileType, name, version
 func (s *service) attemptRollback(fileType models.FileType, name, version string) {
 	// This is a best-effort rollback - we don't return errors from here
 	// as we're already in an error state
-	rollbackErr := s.repo.MoveStateMachine(fileType, name, version, models.LocationProducts, models.LocationInProgress)
+	rollbackErr := s.repo.MoveDiagram(fileType, name, version, models.LocationProducts, models.LocationInProgress)
 	if rollbackErr != nil {
 		// Log the rollback failure but don't return it - the original error is more important
 		// In a real implementation, this would be logged to a proper logging system
@@ -520,7 +520,7 @@ func (s *service) Validate(fileType models.FileType, name, version string, locat
 	}
 
 	// Read the state-machine diagram from repository
-	diagram, err := s.repo.ReadStateMachine(fileType, name, version, location)
+	diagram, err := s.repo.ReadDiagram(fileType, name, version, location)
 	if err != nil {
 		return nil, models.NewStateMachineError(models.ErrorTypeFileNotFound,
 			"failed to read state-machine diagram for validation", err).

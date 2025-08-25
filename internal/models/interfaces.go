@@ -3,14 +3,14 @@ package models
 // Repository interface defines the contract for data persistence operations
 type Repository interface {
 	// Read operations
-	ReadStateMachine(fileType FileType, name, version string, location Location) (*StateMachineDiagram, error)
+	ReadDiagram(fileType FileType, name, version string, location Location) (*StateMachineDiagram, error)
 	ListStateMachines(fileType FileType, location Location) ([]StateMachineDiagram, error)
 	Exists(fileType FileType, name, version string, location Location) (bool, error)
 
 	// Write operations
-	WriteStateMachine(diag *StateMachineDiagram) error
-	MoveStateMachine(fileType FileType, name, version string, from, to Location) error
-	DeleteStateMachine(fileType FileType, name, version string, location Location) error
+	WriteDiagram(diag *StateMachineDiagram) error
+	MoveDiagram(fileType FileType, name, version string, from, to Location) error
+	DeleteDiagram(fileType FileType, name, version string, location Location) error
 
 	// Directory operations
 	CreateDirectory(path string) error

@@ -45,7 +45,7 @@ func main() {
     Active --> Idle : stop()
     @enduml`
     
-    sm, err := svc.Create("my-machine", "1.0.0", content, statemachine.LocationInProgress)
+    sm, err := svc.Create(statemachine.FileTypePUML, "my-machine", "1.0.0", content, statemachine.LocationInProgress)
     if err != nil {
         log.Fatal(err)
     }
@@ -63,17 +63,19 @@ The module organizes state machines in a standardized directory structure:
 ```text
 .go-uml-statemachine-parsers\
 ├── in-progress\
-│   └── {name}-{version}\
-│       ├── {name}-{version}.puml
-│       └── nested\
-│           └── {nested-name}\
-│               └── {nested-name}.puml
+│   └── puml\
+│       └── {name}-{version}\
+│           ├── {name}-{version}.puml
+│           └── nested\
+│               └── {nested-name}\
+│                   └── {nested-name}.puml
 └── products\
-    └── {name}-{version}\
-        ├── {name}-{version}.puml
-        └── nested\
-            └── {nested-name}\
-                └── {nested-name}.puml
+    └── puml\
+        └── {name}-{version}\
+            ├── {name}-{version}.puml
+            └── nested\
+                └── {nested-name}\
+                    └── {nested-name}.puml
 ```
 
 **Linux/macOS:**
@@ -81,17 +83,19 @@ The module organizes state machines in a standardized directory structure:
 ```text
 .go-uml-statemachine-parsers/
 ├── in-progress/
-│   └── {name}-{version}/
-│       ├── {name}-{version}.puml
-│       └── nested/
-│           └── {nested-name}/
-│               └── {nested-name}.puml
+│   └── puml/
+│       └── {name}-{version}/
+│           ├── {name}-{version}.puml
+│           └── nested/
+│               └── {nested-name}/
+│                   └── {nested-name}.puml
 └── products/
-    └── {name}-{version}/
-        ├── {name}-{version}.puml
-        └── nested/
-            └── {nested-name}/
-                └── {nested-name}.puml
+    └── puml/
+        └── {name}-{version}/
+            ├── {name}-{version}.puml
+            └── nested/
+                └── {nested-name}/
+                    └── {nested-name}.puml
 ```
 
 ## Configuration
@@ -133,16 +137,16 @@ config.MergeWithEnv()
 
 ```go
 // Create in in-progress location
-sm, err := svc.Create("user-auth", "1.0.0", plantUMLContent, statemachine.LocationInProgress)
+sm, err := svc.Create(statemachine.FileTypePUML, "user-auth", "1.0.0", plantUMLContent, statemachine.LocationInProgress)
 
 // Create in products location (for direct production deployment)
-sm, err := svc.Create("user-auth", "1.0.0", plantUMLContent, statemachine.LocationProducts)
+sm, err := svc.Create(statemachine.FileTypePUML, "user-auth", "1.0.0", plantUMLContent, statemachine.LocationProducts)
 ```
 
 ### Reading State Machines
 
 ```go
-sm, err := svc.Read("user-auth", "1.0.0", statemachine.LocationInProgress)
+sm, err := svc.Read(statemachine.FileTypePUML, "user-auth", "1.0.0", statemachine.LocationInProgress)
 if err != nil {
     log.Printf("Error reading state machine: %v", err)
 }
@@ -158,17 +162,17 @@ err := svc.Update(sm)
 ### Deleting State Machines
 
 ```go
-err := svc.Delete("user-auth", "1.0.0", statemachine.LocationInProgress)
+err := svc.Delete(statemachine.FileTypePUML, "user-auth", "1.0.0", statemachine.LocationInProgress)
 ```
 
 ### Listing State Machines
 
 ```go
 // List all in-progress state machines
-inProgressSMs, err := svc.ListAll(statemachine.LocationInProgress)
+inProgressSMs, err := svc.ListAll(statemachine.FileTypePUML, statemachine.LocationInProgress)
 
 // List all production state machines
-productSMs, err := svc.ListAll(statemachine.LocationProducts)
+productSMs, err := svc.ListAll(statemachine.FileTypePUML, statemachine.LocationProducts)
 ```
 
 ## Validation
@@ -182,7 +186,7 @@ The module supports two validation strictness levels:
 - Used for development and testing
 
 ```go
-result, err := svc.Validate("user-auth", "1.0.0", statemachine.LocationInProgress)
+result, err := svc.Validate(statemachine.FileTypePUML, "user-auth", "1.0.0", statemachine.LocationInProgress)
 if result.HasErrors() {
     fmt.Println("Validation failed with errors:")
     for _, err := range result.Errors {
@@ -203,7 +207,7 @@ Move state machines from in-progress to products with validation:
 
 ```go
 // Promotes only if validation passes
-err := svc.Promote("user-auth", "1.0.0")
+err := svc.Promote(statemachine.FileTypePUML, "user-auth", "1.0.0")
 if err != nil {
     log.Printf("Promotion failed: %v", err)
 }
@@ -229,7 +233,7 @@ Reference state machines in the products directory:
 
 ```plantuml
 @startuml
-!include products\base-auth-1.0.0\base-auth-1.0.0.puml
+!include products\puml\base-auth-1.0.0\base-auth-1.0.0.puml
 
 [*] --> base-auth
 base-auth --> TwoFactor : success
@@ -240,7 +244,7 @@ base-auth --> TwoFactor : success
 
 ```plantuml
 @startuml
-!include products/base-auth-1.0.0/base-auth-1.0.0.puml
+!include products/puml/base-auth-1.0.0/base-auth-1.0.0.puml
 
 [*] --> base-auth
 base-auth --> TwoFactor : success
@@ -291,7 +295,7 @@ for _, ref := range sm.References {
 The module provides comprehensive error handling with context:
 
 ```go
-sm, err := svc.Read("non-existent", "1.0.0", statemachine.LocationInProgress)
+sm, err := svc.Read(statemachine.FileTypePUML, "non-existent", "1.0.0", statemachine.LocationInProgress)
 if err != nil {
     // Error includes context about the operation, component, and parameters
     fmt.Printf("Error: %v\n", err)
@@ -618,15 +622,15 @@ import "github.com/kengibson1111/go-uml-statemachine-parsers/statemachine"
 
 type StateMachineService interface {
     // CRUD operations
-    Create(name, version string, content string, location Location) (*StateMachine, error)
-    Read(name, version string, location Location) (*StateMachine, error)
+    Create(fileType FileType, name, version string, content string, location Location) (*StateMachine, error)
+    Read(fileType FileType, name, version string, location Location) (*StateMachine, error)
     Update(sm *StateMachine) error
-    Delete(name, version string, location Location) error
+    Delete(fileType FileType, name, version string, location Location) error
 
     // Business operations
-    Promote(name, version string) error
-    Validate(name, version string, location Location) (*ValidationResult, error)
-    ListAll(location Location) ([]StateMachine, error)
+    Promote(fileType FileType, name, version string) error
+    Validate(fileType FileType, name, version string, location Location) (*ValidationResult, error)
+    ListAll(fileType FileType, location Location) ([]StateMachine, error)
 
     // Reference operations
     ResolveReferences(sm *StateMachine) error
@@ -638,6 +642,12 @@ type StateMachineService interface {
 ```go
 import "github.com/kengibson1111/go-uml-statemachine-parsers/statemachine"
 
+// FileType indicates the type of file being processed
+type FileType int
+const (
+    FileTypePUML FileType = iota // PlantUML files
+)
+
 // StateMachine represents a UML state machine
 type StateMachine struct {
     Name       string
@@ -645,6 +655,7 @@ type StateMachine struct {
     Content    string
     References []Reference
     Location   Location
+    FileType   FileType
     Metadata   Metadata
 }
 

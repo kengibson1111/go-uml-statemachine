@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/kengibson1111/go-uml-statemachine/internal/models"
-	"github.com/kengibson1111/go-uml-statemachine/internal/validation"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/validation"
 )
 
 func main() {

@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kengibson1111/go-uml-statemachine/internal/logging"
-	"github.com/kengibson1111/go-uml-statemachine/internal/models"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/logging"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 )
 
 // service implements the StateMachineService interface

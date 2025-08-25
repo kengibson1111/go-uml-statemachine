@@ -135,8 +135,8 @@ func TestDefaultConfig(t *testing.T) {
 	}
 
 	// Verify default values
-	if config.RootDirectory != ".go-uml-statemachine" {
-		t.Errorf("DefaultConfig().RootDirectory = %q, want %q", config.RootDirectory, ".go-uml-statemachine")
+	if config.RootDirectory != ".go-uml-statemachine-parsers" {
+		t.Errorf("DefaultConfig().RootDirectory = %q, want %q", config.RootDirectory, ".go-uml-statemachine-parsers")
 	}
 	if config.ValidationLevel != StrictnessInProgress {
 		t.Errorf("DefaultConfig().ValidationLevel = %v, want %v", config.ValidationLevel, StrictnessInProgress)
@@ -185,7 +185,7 @@ func TestLoadConfigFromEnv(t *testing.T) {
 			name:    "no environment variables",
 			envVars: map[string]string{},
 			expected: &Config{
-				RootDirectory:      ".go-uml-statemachine",
+				RootDirectory:      ".go-uml-statemachine-parsers",
 				ValidationLevel:    StrictnessInProgress,
 				BackupEnabled:      false,
 				MaxFileSize:        1024 * 1024,
@@ -215,7 +215,7 @@ func TestLoadConfigFromEnv(t *testing.T) {
 				"GO_UML_VALIDATION_LEVEL": "in-progress",
 			},
 			expected: &Config{
-				RootDirectory:      ".go-uml-statemachine",
+				RootDirectory:      ".go-uml-statemachine-parsers",
 				ValidationLevel:    StrictnessInProgress,
 				BackupEnabled:      false,
 				MaxFileSize:        1024 * 1024,

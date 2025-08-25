@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kengibson1111/go-uml-statemachine/internal/models"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 )
 
 func TestNewPlantUMLValidator(t *testing.T) {

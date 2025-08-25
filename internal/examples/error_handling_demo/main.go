@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kengibson1111/go-uml-statemachine/internal/logging"
-	"github.com/kengibson1111/go-uml-statemachine/internal/models"
-	"github.com/kengibson1111/go-uml-statemachine/internal/repository"
-	"github.com/kengibson1111/go-uml-statemachine/internal/service"
-	"github.com/kengibson1111/go-uml-statemachine/internal/validation"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/logging"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/repository"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/service"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/validation"
 )
 
 func main() {

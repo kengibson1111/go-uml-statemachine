@@ -1,4 +1,4 @@
-# Go UML State Machine
+# Go UML State Machine Parsers
 
 A Go module for managing UML state machine diagrams in PlantUML format. This library provides functionality to read, write, validate, and organize PlantUML files within a structured directory hierarchy with support for versioning, validation levels, and cross-references between state machines.
 
@@ -16,7 +16,7 @@ A Go module for managing UML state machine diagrams in PlantUML format. This lib
 ## Installation
 
 ```cmd
-go get github.com/kengibson1111/go-uml-statemachine
+go get github.com/kengibson1111/go-uml-statemachine-parsers
 ```
 
 ## Quick Start
@@ -28,7 +28,7 @@ import (
     "fmt"
     "log"
 
-    "github.com/kengibson1111/go-uml-statemachine/statemachine"
+    "github.com/kengibson1111/go-uml-statemachine-parsers/statemachine"
 )
 
 func main() {
@@ -61,7 +61,7 @@ The module organizes state machines in a standardized directory structure:
 **Windows:**
 
 ```text
-.go-uml-statemachine\
+.go-uml-statemachine-parsers\
 ├── in-progress\
 │   └── {name}-{version}\
 │       ├── {name}-{version}.puml
@@ -79,7 +79,7 @@ The module organizes state machines in a standardized directory structure:
 **Linux/macOS:**
 
 ```text
-.go-uml-statemachine/
+.go-uml-statemachine-parsers/
 ├── in-progress/
 │   └── {name}-{version}/
 │       ├── {name}-{version}.puml
@@ -101,7 +101,7 @@ The module organizes state machines in a standardized directory structure:
 ```go
 config := statemachine.DefaultConfig()
 // Uses:
-// - RootDirectory: ".go-uml-statemachine"
+// - RootDirectory: ".go-uml-statemachine-parsers"
 // - ValidationLevel: StrictnessInProgress
 // - BackupEnabled: false
 // - MaxFileSize: 1MB
@@ -614,7 +614,7 @@ The module provides the following main interfaces:
 ### StateMachineService Interface
 
 ```go
-import "github.com/kengibson1111/go-uml-statemachine/statemachine"
+import "github.com/kengibson1111/go-uml-statemachine-parsers/statemachine"
 
 type StateMachineService interface {
     // CRUD operations
@@ -636,7 +636,7 @@ type StateMachineService interface {
 ### Core Types
 
 ```go
-import "github.com/kengibson1111/go-uml-statemachine/statemachine"
+import "github.com/kengibson1111/go-uml-statemachine-parsers/statemachine"
 
 // StateMachine represents a UML state machine
 type StateMachine struct {

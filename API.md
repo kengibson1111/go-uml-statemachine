@@ -7,7 +7,7 @@ This document provides comprehensive API documentation for the Go UML State Mach
 The `statemachine` package provides functionality for managing UML state machine diagrams in PlantUML format with structured file organization, versioning, validation, and cross-references.
 
 ```go
-import "github.com/kengibson1111/go-uml-statemachine"
+import "github.com/kengibson1111/go-uml-statemachine-parsers"
 ```
 
 ## Core Types
@@ -101,7 +101,7 @@ Represents the configuration for the state machine system.
 
 ```go
 type Config struct {
-    RootDirectory      string               // Root directory (default: ".go-uml-statemachine")
+    RootDirectory      string               // Root directory (default: ".go-uml-statemachine-parsers")
     ValidationLevel    ValidationStrictness // Default validation level
     BackupEnabled      bool                 // Whether to create backups
     MaxFileSize        int64                // Maximum file size in bytes
@@ -212,7 +212,7 @@ func DefaultConfig() *Config
 ```
 
 **Default Values:**
-- RootDirectory: ".go-uml-statemachine"
+- RootDirectory: ".go-uml-statemachine-parsers"
 - ValidationLevel: StrictnessInProgress
 - BackupEnabled: false
 - MaxFileSize: 1MB

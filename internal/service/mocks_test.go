@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/kengibson1111/go-uml-statemachine/internal/models"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 )
 
 // mockRepository is a mock implementation of the Repository interface for testing

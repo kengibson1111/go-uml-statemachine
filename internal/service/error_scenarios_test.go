@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/kengibson1111/go-uml-statemachine/internal/models"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 )
 
 // MockRepository for testing error scenarios

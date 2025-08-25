@@ -8,8 +8,8 @@ import (
 func TestDefaultConfig(t *testing.T) {
 	config := DefaultConfig()
 
-	if config.RootDirectory != ".go-uml-statemachine" {
-		t.Errorf("Expected RootDirectory to be '.go-uml-statemachine', got %s", config.RootDirectory)
+	if config.RootDirectory != ".go-uml-statemachine-parsers" {
+		t.Errorf("Expected RootDirectory to be '.go-uml-statemachine-parsers', got %s", config.RootDirectory)
 	}
 
 	if config.ValidationLevel != StrictnessInProgress {
@@ -57,7 +57,7 @@ func TestLoadConfigFromEnv(t *testing.T) {
 			validationLevel:         "",
 			backupEnabled:           "",
 			maxFileSize:             "",
-			expectedRootDirectory:   ".go-uml-statemachine",
+			expectedRootDirectory:   ".go-uml-statemachine-parsers",
 			expectedValidationLevel: StrictnessInProgress,
 			expectedBackupEnabled:   false,
 			expectedMaxFileSize:     1024 * 1024,
@@ -79,7 +79,7 @@ func TestLoadConfigFromEnv(t *testing.T) {
 			validationLevel:         "in-progress",
 			backupEnabled:           "",
 			maxFileSize:             "",
-			expectedRootDirectory:   ".go-uml-statemachine",
+			expectedRootDirectory:   ".go-uml-statemachine-parsers",
 			expectedValidationLevel: StrictnessInProgress,
 			expectedBackupEnabled:   false,
 			expectedMaxFileSize:     1024 * 1024,
@@ -90,7 +90,7 @@ func TestLoadConfigFromEnv(t *testing.T) {
 			validationLevel:         "products",
 			backupEnabled:           "",
 			maxFileSize:             "",
-			expectedRootDirectory:   ".go-uml-statemachine",
+			expectedRootDirectory:   ".go-uml-statemachine-parsers",
 			expectedValidationLevel: StrictnessProducts,
 			expectedBackupEnabled:   false,
 			expectedMaxFileSize:     1024 * 1024,
@@ -101,7 +101,7 @@ func TestLoadConfigFromEnv(t *testing.T) {
 			validationLevel:         "PRODUCTS",
 			backupEnabled:           "",
 			maxFileSize:             "",
-			expectedRootDirectory:   ".go-uml-statemachine",
+			expectedRootDirectory:   ".go-uml-statemachine-parsers",
 			expectedValidationLevel: StrictnessProducts,
 			expectedBackupEnabled:   false,
 			expectedMaxFileSize:     1024 * 1024,
@@ -112,7 +112,7 @@ func TestLoadConfigFromEnv(t *testing.T) {
 			validationLevel:         "",
 			backupEnabled:           "true",
 			maxFileSize:             "",
-			expectedRootDirectory:   ".go-uml-statemachine",
+			expectedRootDirectory:   ".go-uml-statemachine-parsers",
 			expectedValidationLevel: StrictnessInProgress,
 			expectedBackupEnabled:   true,
 			expectedMaxFileSize:     1024 * 1024,
@@ -123,7 +123,7 @@ func TestLoadConfigFromEnv(t *testing.T) {
 			validationLevel:         "",
 			backupEnabled:           "false",
 			maxFileSize:             "",
-			expectedRootDirectory:   ".go-uml-statemachine",
+			expectedRootDirectory:   ".go-uml-statemachine-parsers",
 			expectedValidationLevel: StrictnessInProgress,
 			expectedBackupEnabled:   false,
 			expectedMaxFileSize:     1024 * 1024,
@@ -134,7 +134,7 @@ func TestLoadConfigFromEnv(t *testing.T) {
 			validationLevel:         "",
 			backupEnabled:           "",
 			maxFileSize:             "2097152",
-			expectedRootDirectory:   ".go-uml-statemachine",
+			expectedRootDirectory:   ".go-uml-statemachine-parsers",
 			expectedValidationLevel: StrictnessInProgress,
 			expectedBackupEnabled:   false,
 			expectedMaxFileSize:     2097152,

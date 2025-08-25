@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/kengibson1111/go-uml-statemachine/internal/logging"
-	"github.com/kengibson1111/go-uml-statemachine/internal/models"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/logging"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 )
 
 // PlantUMLValidator implements the Validator interface for PlantUML syntax validation

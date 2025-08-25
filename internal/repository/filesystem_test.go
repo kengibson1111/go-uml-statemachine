@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kengibson1111/go-uml-statemachine/internal/models"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 )
 
 // TestHelper provides utilities for testing
@@ -17,7 +17,7 @@ type TestHelper struct {
 
 // NewTestHelper creates a new test helper with a temporary directory
 func NewTestHelper(t *testing.T) *TestHelper {
-	tempDir, err := os.MkdirTemp("", "go-uml-statemachine-test-*")
+	tempDir, err := os.MkdirTemp("", "go-uml-statemachine-parsers-test-*")
 	if err != nil {
 		t.Fatalf("Failed to create temp directory: %v", err)
 	}

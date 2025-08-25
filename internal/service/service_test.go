@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kengibson1111/go-uml-statemachine/internal/models"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 )
 
 func TestNewService(t *testing.T) {
@@ -68,7 +68,7 @@ func TestNewService(t *testing.T) {
 					if s.config == nil {
 						t.Error("NewService() should use default config when nil is provided")
 					}
-					if s.config.RootDirectory != ".go-uml-statemachine" {
+					if s.config.RootDirectory != ".go-uml-statemachine-parsers" {
 						t.Error("NewService() should use default root directory")
 					}
 				} else {
@@ -110,7 +110,7 @@ func TestNewServiceWithDefaults(t *testing.T) {
 	if s.config == nil {
 		t.Error("NewServiceWithDefaults() should set default config")
 	}
-	if s.config.RootDirectory != ".go-uml-statemachine" {
+	if s.config.RootDirectory != ".go-uml-statemachine-parsers" {
 		t.Error("NewServiceWithDefaults() should use default root directory")
 	}
 	if s.config.ValidationLevel != models.StrictnessInProgress {

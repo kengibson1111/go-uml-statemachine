@@ -62,7 +62,7 @@ func DefaultLoggerConfig() *LoggerConfig {
 	return &LoggerConfig{
 		Level:        LogLevelInfo,
 		Output:       os.Stdout,
-		Prefix:       "[go-uml-statemachine]",
+		Prefix:       "[go-uml-statemachine-parsers]",
 		EnableCaller: true,
 	}
 }

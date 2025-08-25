@@ -50,7 +50,7 @@
 //
 // The package organizes state machines in a standardized directory structure:
 //
-//	.go-uml-statemachine/
+//	.go-uml-statemachine-parsers/
 //	├── in-progress/
 //	│   └── {name}-{version}/
 //	│       ├── {name}-{version}.puml
@@ -68,7 +68,7 @@
 //
 // The package supports configuration through environment variables:
 //
-//   - GO_UML_ROOT_DIRECTORY: Root directory for state machines (default: ".go-uml-statemachine")
+//   - GO_UML_ROOT_DIRECTORY: Root directory for state machines (default: ".go-uml-statemachine-parsers")
 //   - GO_UML_VALIDATION_LEVEL: Validation level ("in-progress" or "products")
 //   - GO_UML_BACKUP_ENABLED: Enable backups ("true" or "false")
 //   - GO_UML_MAX_FILE_SIZE: Maximum file size in bytes
@@ -76,10 +76,10 @@
 package statemachine
 
 import (
-	"github.com/kengibson1111/go-uml-statemachine/internal/models"
-	"github.com/kengibson1111/go-uml-statemachine/internal/repository"
-	"github.com/kengibson1111/go-uml-statemachine/internal/service"
-	"github.com/kengibson1111/go-uml-statemachine/internal/validation"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/repository"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/service"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/validation"
 )
 
 // Re-export key types for public API
@@ -232,7 +232,7 @@ func NewServiceFromEnv() (StateMachineService, error) {
 // DefaultConfig returns a configuration with default values.
 //
 // Default values:
-//   - RootDirectory: ".go-uml-statemachine"
+//   - RootDirectory: ".go-uml-statemachine-parsers"
 //   - ValidationLevel: StrictnessInProgress
 //   - BackupEnabled: false
 //   - MaxFileSize: 1MB

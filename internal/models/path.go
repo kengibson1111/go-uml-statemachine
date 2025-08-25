@@ -9,7 +9,7 @@ import (
 
 const (
 	// RootDirectoryName is the top-level directory for state machines
-	RootDirectoryName = ".go-uml-statemachine"
+	RootDirectoryName = ".go-uml-statemachine-parsers"
 
 	// PlantUMLExtension is the file extension for PlantUML files
 	PlantUMLExtension = ".puml"

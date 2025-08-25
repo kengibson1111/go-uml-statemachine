@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/kengibson1111/go-uml-statemachine/internal/models"
-	"github.com/kengibson1111/go-uml-statemachine/internal/repository"
-	"github.com/kengibson1111/go-uml-statemachine/internal/service"
-	"github.com/kengibson1111/go-uml-statemachine/internal/validation"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/repository"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/service"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/validation"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 
 	// Create configuration with custom settings
 	config := &models.Config{
-		RootDirectory:      ".go-uml-statemachine",
+		RootDirectory:      ".go-uml-statemachine-parsers",
 		ValidationLevel:    models.StrictnessInProgress,
 		BackupEnabled:      true,
 		MaxFileSize:        2 * 1024 * 1024, // 2MB

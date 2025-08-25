@@ -42,8 +42,8 @@ func TestDefaultLoggerConfig(t *testing.T) {
 		t.Errorf("DefaultLoggerConfig() Output = %v, want %v", config.Output, os.Stdout)
 	}
 
-	if config.Prefix != "[go-uml-statemachine]" {
-		t.Errorf("DefaultLoggerConfig() Prefix = %v, want %v", config.Prefix, "[go-uml-statemachine]")
+	if config.Prefix != "[go-uml-statemachine-parsers]" {
+		t.Errorf("DefaultLoggerConfig() Prefix = %v, want %v", config.Prefix, "[go-uml-statemachine-parsers]")
 	}
 
 	if !config.EnableCaller {

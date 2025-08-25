@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/kengibson1111/go-uml-statemachine/statemachine"
+	"github.com/kengibson1111/go-uml-statemachine-parsers/statemachine"
 )
 
 func main() {

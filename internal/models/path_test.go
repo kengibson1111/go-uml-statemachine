@@ -74,28 +74,28 @@ func TestPathManager_GetStateMachineDirectoryPath(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		smName   string
+		diagName string
 		version  string
 		location Location
 		expected string
 	}{
 		{
 			name:     "in-progress state-machine diagram",
-			smName:   "user-auth",
+			diagName: "user-auth",
 			version:  "1.0.0",
 			location: LocationInProgress,
 			expected: filepath.Join(RootDirectoryName, "in-progress", "user-auth-1.0.0"),
 		},
 		{
 			name:     "products state-machine diagram",
-			smName:   "payment-flow",
+			diagName: "payment-flow",
 			version:  "2.1.0",
 			location: LocationProducts,
 			expected: filepath.Join(RootDirectoryName, "products", "payment-flow-2.1.0"),
 		},
 		{
 			name:     "nested state-machine diagram",
-			smName:   "child-diagram",
+			diagName: "child-diagram",
 			version:  "1.0.0",
 			location: LocationNested,
 			expected: filepath.Join(RootDirectoryName, "child-diagram"),
@@ -104,7 +104,7 @@ func TestPathManager_GetStateMachineDirectoryPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := pm.GetStateMachineDirectoryPath(tt.smName, tt.version, tt.location)
+			result := pm.GetStateMachineDirectoryPath(tt.diagName, tt.version, tt.location)
 			if result != tt.expected {
 				t.Errorf("GetStateMachineDirectoryPath() = %v, want %v", result, tt.expected)
 			}
@@ -117,28 +117,28 @@ func TestPathManager_GetStateMachineFilePath(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		smName   string
+		diagName string
 		version  string
 		location Location
 		expected string
 	}{
 		{
 			name:     "in-progress state-machine diagram file",
-			smName:   "user-auth",
+			diagName: "user-auth",
 			version:  "1.0.0",
 			location: LocationInProgress,
 			expected: filepath.Join(RootDirectoryName, "in-progress", "user-auth-1.0.0", "user-auth-1.0.0.puml"),
 		},
 		{
 			name:     "products state-machine diagram file",
-			smName:   "payment-flow",
+			diagName: "payment-flow",
 			version:  "2.1.0",
 			location: LocationProducts,
 			expected: filepath.Join(RootDirectoryName, "products", "payment-flow-2.1.0", "payment-flow-2.1.0.puml"),
 		},
 		{
 			name:     "nested state-machine diagram file",
-			smName:   "child-diagram",
+			diagName: "child-diagram",
 			version:  "1.0.0",
 			location: LocationNested,
 			expected: filepath.Join(RootDirectoryName, "child-diagram", "child-diagram.puml"),
@@ -147,7 +147,7 @@ func TestPathManager_GetStateMachineFilePath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := pm.GetStateMachineFilePath(tt.smName, tt.version, tt.location)
+			result := pm.GetStateMachineFilePath(tt.diagName, tt.version, tt.location)
 			if result != tt.expected {
 				t.Errorf("GetStateMachineFilePath() = %v, want %v", result, tt.expected)
 			}
@@ -242,64 +242,64 @@ func TestPathManager_ValidateName(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		smName    string
+		diagName  string
 		wantError bool
 		errorType ErrorType
 	}{
 		{
 			name:      "valid name",
-			smName:    "user-auth",
+			diagName:  "user-auth",
 			wantError: false,
 		},
 		{
 			name:      "valid name with numbers",
-			smName:    "user-auth-v2",
+			diagName:  "user-auth-v2",
 			wantError: false,
 		},
 		{
 			name:      "valid name with underscores",
-			smName:    "user_auth_system",
+			diagName:  "user_auth_system",
 			wantError: false,
 		},
 		{
 			name:      "empty name",
-			smName:    "",
+			diagName:  "",
 			wantError: true,
 			errorType: ErrorTypeValidation,
 		},
 		{
 			name:      "name starting with hyphen",
-			smName:    "-invalid",
+			diagName:  "-invalid",
 			wantError: true,
 			errorType: ErrorTypeValidation,
 		},
 		{
 			name:      "name with spaces",
-			smName:    "user auth",
+			diagName:  "user auth",
 			wantError: true,
 			errorType: ErrorTypeValidation,
 		},
 		{
 			name:      "name with special characters",
-			smName:    "user@auth",
+			diagName:  "user@auth",
 			wantError: true,
 			errorType: ErrorTypeValidation,
 		},
 		{
 			name:      "reserved name - nested",
-			smName:    "nested",
+			diagName:  "nested",
 			wantError: true,
 			errorType: ErrorTypeValidation,
 		},
 		{
 			name:      "reserved name - CON (Windows)",
-			smName:    "CON",
+			diagName:  "CON",
 			wantError: true,
 			errorType: ErrorTypeValidation,
 		},
 		{
 			name:      "name too long",
-			smName:    strings.Repeat("a", 101),
+			diagName:  strings.Repeat("a", 101),
 			wantError: true,
 			errorType: ErrorTypeValidation,
 		},
@@ -307,7 +307,7 @@ func TestPathManager_ValidateName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := pm.ValidateName(tt.smName)
+			err := pm.ValidateName(tt.diagName)
 			if tt.wantError {
 				if err == nil {
 					t.Errorf("ValidateName() expected error but got none")

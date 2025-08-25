@@ -201,7 +201,7 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		smName      string
+		diagName    string
 		version     string
 		location    models.Location
 		expectError bool
@@ -209,14 +209,14 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 	}{
 		{
 			name:        "existing state-machine diagram",
-			smName:      "test-read",
+			diagName:    "test-read",
 			version:     "1.0.0",
 			location:    models.LocationInProgress,
 			expectError: false,
 		},
 		{
 			name:        "non-existent state-machine diagram",
-			smName:      "non-existent",
+			diagName:    "non-existent",
 			version:     "1.0.0",
 			location:    models.LocationInProgress,
 			expectError: true,
@@ -224,7 +224,7 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 		},
 		{
 			name:        "empty name",
-			smName:      "",
+			diagName:    "",
 			version:     "1.0.0",
 			location:    models.LocationInProgress,
 			expectError: true,
@@ -232,7 +232,7 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 		},
 		{
 			name:        "missing version for non-nested",
-			smName:      "test-read",
+			diagName:    "test-read",
 			version:     "",
 			location:    models.LocationInProgress,
 			expectError: true,
@@ -242,7 +242,7 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			diag, err := th.repo.ReadStateMachine(models.FileTypePUML, tt.smName, tt.version, tt.location)
+			diag, err := th.repo.ReadStateMachine(models.FileTypePUML, tt.diagName, tt.version, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -266,8 +266,8 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 					return
 				}
 
-				if diag.Name != tt.smName {
-					t.Errorf("Expected name %s, got %s", tt.smName, diag.Name)
+				if diag.Name != tt.diagName {
+					t.Errorf("Expected name %s, got %s", tt.diagName, diag.Name)
 				}
 
 				if diag.Version != tt.version {
@@ -299,7 +299,7 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		smName       string
+		diagName     string
 		version      string
 		location     models.Location
 		expectExists bool
@@ -308,7 +308,7 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 	}{
 		{
 			name:         "existing state-machine diagram",
-			smName:       "test-exists",
+			diagName:     "test-exists",
 			version:      "1.0.0",
 			location:     models.LocationInProgress,
 			expectExists: true,
@@ -316,7 +316,7 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 		},
 		{
 			name:         "non-existent state-machine diagram",
-			smName:       "non-existent",
+			diagName:     "non-existent",
 			version:      "1.0.0",
 			location:     models.LocationInProgress,
 			expectExists: false,
@@ -324,7 +324,7 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 		},
 		{
 			name:        "empty name",
-			smName:      "",
+			diagName:    "",
 			version:     "1.0.0",
 			location:    models.LocationInProgress,
 			expectError: true,
@@ -334,7 +334,7 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			exists, err := th.repo.Exists(models.FileTypePUML, tt.smName, tt.version, tt.location)
+			exists, err := th.repo.Exists(models.FileTypePUML, tt.diagName, tt.version, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -503,7 +503,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		smName      string
+		diagName    string
 		version     string
 		from        models.Location
 		to          models.Location
@@ -512,7 +512,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 	}{
 		{
 			name:        "valid move from in-progress to products",
-			smName:      "test-move",
+			diagName:    "test-move",
 			version:     "1.0.0",
 			from:        models.LocationInProgress,
 			to:          models.LocationProducts,
@@ -520,7 +520,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 		},
 		{
 			name:        "empty name",
-			smName:      "",
+			diagName:    "",
 			version:     "1.0.0",
 			from:        models.LocationInProgress,
 			to:          models.LocationProducts,
@@ -529,7 +529,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 		},
 		{
 			name:        "empty version",
-			smName:      "test-move",
+			diagName:    "test-move",
 			version:     "",
 			from:        models.LocationInProgress,
 			to:          models.LocationProducts,
@@ -538,7 +538,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 		},
 		{
 			name:        "same source and destination",
-			smName:      "test-move",
+			diagName:    "test-move",
 			version:     "1.0.0",
 			from:        models.LocationInProgress,
 			to:          models.LocationInProgress,
@@ -547,7 +547,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 		},
 		{
 			name:        "non-existent source",
-			smName:      "non-existent",
+			diagName:    "non-existent",
 			version:     "1.0.0",
 			from:        models.LocationInProgress,
 			to:          models.LocationProducts,
@@ -558,7 +558,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := th.repo.MoveStateMachine(models.FileTypePUML, tt.smName, tt.version, tt.from, tt.to)
+			err := th.repo.MoveStateMachine(models.FileTypePUML, tt.diagName, tt.version, tt.from, tt.to)
 
 			if tt.expectError {
 				if err == nil {
@@ -578,7 +578,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 				}
 
 				// Verify source no longer exists
-				sourceExists, err := th.repo.Exists(models.FileTypePUML, tt.smName, tt.version, tt.from)
+				sourceExists, err := th.repo.Exists(models.FileTypePUML, tt.diagName, tt.version, tt.from)
 				if err != nil {
 					t.Errorf("Error checking source existence: %v", err)
 				}
@@ -587,7 +587,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 				}
 
 				// Verify destination exists
-				destExists, err := th.repo.Exists(models.FileTypePUML, tt.smName, tt.version, tt.to)
+				destExists, err := th.repo.Exists(models.FileTypePUML, tt.diagName, tt.version, tt.to)
 				if err != nil {
 					t.Errorf("Error checking destination existence: %v", err)
 				}
@@ -596,7 +596,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 				}
 
 				// Verify content is preserved
-				diagram, err := th.repo.ReadStateMachine(models.FileTypePUML, tt.smName, tt.version, tt.to)
+				diagram, err := th.repo.ReadStateMachine(models.FileTypePUML, tt.diagName, tt.version, tt.to)
 				if err != nil {
 					t.Errorf("Error reading moved state-machine diagram: %v", err)
 				}
@@ -615,7 +615,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 	tests := []struct {
 		name        string
 		setupSM     bool
-		smName      string
+		diagName    string
 		version     string
 		location    models.Location
 		expectError bool
@@ -624,7 +624,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 		{
 			name:        "delete existing state-machine diagram",
 			setupSM:     true,
-			smName:      "test-delete",
+			diagName:    "test-delete",
 			version:     "1.0.0",
 			location:    models.LocationInProgress,
 			expectError: false,
@@ -632,7 +632,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 		{
 			name:        "delete non-existent state-machine diagram",
 			setupSM:     false,
-			smName:      "non-existent",
+			diagName:    "non-existent",
 			version:     "1.0.0",
 			location:    models.LocationInProgress,
 			expectError: true,
@@ -641,7 +641,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 		{
 			name:        "empty name",
 			setupSM:     false,
-			smName:      "",
+			diagName:    "",
 			version:     "1.0.0",
 			location:    models.LocationInProgress,
 			expectError: true,
@@ -650,7 +650,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 		{
 			name:        "missing version for non-nested",
 			setupSM:     false,
-			smName:      "test-delete",
+			diagName:    "test-delete",
 			version:     "",
 			location:    models.LocationInProgress,
 			expectError: true,
@@ -662,14 +662,14 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Setup test state-machine diagram if needed
 			if tt.setupSM {
-				testSM := th.CreateTestStateMachine(tt.smName, tt.version, tt.location)
+				testSM := th.CreateTestStateMachine(tt.diagName, tt.version, tt.location)
 				err := th.repo.WriteStateMachine(testSM)
 				if err != nil {
 					t.Fatalf("Failed to create test state-machine diagram: %v", err)
 				}
 			}
 
-			err := th.repo.DeleteStateMachine(models.FileTypePUML, tt.smName, tt.version, tt.location)
+			err := th.repo.DeleteStateMachine(models.FileTypePUML, tt.diagName, tt.version, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -689,7 +689,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 				}
 
 				// Verify state-machine diagram no longer exists
-				exists, err := th.repo.Exists(models.FileTypePUML, tt.smName, tt.version, tt.location)
+				exists, err := th.repo.Exists(models.FileTypePUML, tt.diagName, tt.version, tt.location)
 				if err != nil {
 					t.Errorf("Error checking existence after delete: %v", err)
 				}

@@ -205,7 +205,7 @@ func NewServiceFromEnv() (DiagramService, error)
 
 **Example:**
 ```go
-os.Setenv("GO_UML_ROOT_DIRECTORY", "my-state-machines")
+os.Setenv("GO_UML_ROOT_DIRECTORY", "my-diagrams")
 os.Setenv("GO_UML_DEBUG_LOGGING", "true")
 
 svc, err := diagram.NewServiceFromEnv()

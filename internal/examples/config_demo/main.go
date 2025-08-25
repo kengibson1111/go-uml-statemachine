@@ -21,7 +21,7 @@ func main() {
 
 	// Demo 2: Configuration from environment variables
 	fmt.Println("\n2. Setting environment variables...")
-	os.Setenv("GO_UML_ROOT_DIRECTORY", "C:\\my-state-machines")
+	os.Setenv("GO_UML_ROOT_DIRECTORY", "C:\\my-diagrams")
 	os.Setenv("GO_UML_VALIDATION_LEVEL", "products")
 	os.Setenv("GO_UML_BACKUP_ENABLED", "true")
 	os.Setenv("GO_UML_MAX_FILE_SIZE", "2097152")

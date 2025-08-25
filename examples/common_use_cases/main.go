@@ -89,7 +89,7 @@ Cancelled --> [*]
 // Use Case 2: Environment-based configuration
 func environmentConfigExample() {
 	// Set some environment variables for demonstration
-	os.Setenv("GO_UML_ROOT_DIRECTORY", ".demo-state-machines")
+	os.Setenv("GO_UML_ROOT_DIRECTORY", ".demo-diagrams")
 	os.Setenv("GO_UML_DEBUG_LOGGING", "true")
 	os.Setenv("GO_UML_MAX_FILE_SIZE", "2097152") // 2MB
 

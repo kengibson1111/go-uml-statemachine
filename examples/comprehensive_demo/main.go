@@ -63,7 +63,7 @@ func demonstrateServiceCreation() {
 
 	// Custom configuration
 	config := &diagram.Config{
-		RootDirectory:      ".demo-statemachines",
+		RootDirectory:      ".demo-diagrams",
 		EnableDebugLogging: false,           // Keep logs clean for demo
 		MaxFileSize:        2 * 1024 * 1024, // 2MB
 		BackupEnabled:      true,
@@ -514,7 +514,7 @@ func demonstrateEnvironmentConfiguration() {
 	originalRootDir := os.Getenv("GO_UML_ROOT_DIRECTORY")
 	originalDebugLogging := os.Getenv("GO_UML_DEBUG_LOGGING")
 
-	os.Setenv("GO_UML_ROOT_DIRECTORY", ".env-demo-statemachines")
+	os.Setenv("GO_UML_ROOT_DIRECTORY", ".env-demo-diagrams")
 	os.Setenv("GO_UML_DEBUG_LOGGING", "false")   // Keep demo clean
 	os.Setenv("GO_UML_MAX_FILE_SIZE", "5242880") // 5MB
 

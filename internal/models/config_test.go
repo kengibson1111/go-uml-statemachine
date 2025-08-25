@@ -141,11 +141,11 @@ func TestLoadConfigFromEnv(t *testing.T) {
 		},
 		{
 			name:                    "all custom values",
-			rootDirectory:           "D:\\state-machines",
+			rootDirectory:           "D:\\diagrams",
 			validationLevel:         "products",
 			backupEnabled:           "true",
 			maxFileSize:             "5242880",
-			expectedRootDirectory:   "D:\\state-machines",
+			expectedRootDirectory:   "D:\\diagrams",
 			expectedValidationLevel: StrictnessProducts,
 			expectedBackupEnabled:   true,
 			expectedMaxFileSize:     5242880,

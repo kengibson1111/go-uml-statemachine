@@ -105,46 +105,46 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 	fixture := testFixtures[0] // user-auth
 
 	t.Run("Create state-machine diagram in in-progress", func(t *testing.T) {
-		sm, err := svc.Create(models.FileTypePUML, fixture.Name, fixture.Version, fixture.Content, models.LocationInProgress)
+		diag, err := svc.Create(models.FileTypePUML, fixture.Name, fixture.Version, fixture.Content, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to create state-machine diagram: %v", err)
 		}
 
-		if sm.Name != fixture.Name {
-			t.Errorf("Expected name %s, got %s", fixture.Name, sm.Name)
+		if diag.Name != fixture.Name {
+			t.Errorf("Expected name %s, got %s", fixture.Name, diag.Name)
 		}
-		if sm.Version != fixture.Version {
-			t.Errorf("Expected version %s, got %s", fixture.Version, sm.Version)
+		if diag.Version != fixture.Version {
+			t.Errorf("Expected version %s, got %s", fixture.Version, diag.Version)
 		}
-		if sm.Location != models.LocationInProgress {
-			t.Errorf("Expected location %s, got %s", models.LocationInProgress.String(), sm.Location.String())
+		if diag.Location != models.LocationInProgress {
+			t.Errorf("Expected location %s, got %s", models.LocationInProgress.String(), diag.Location.String())
 		}
 	})
 
 	t.Run("Read state-machine diagram from in-progress", func(t *testing.T) {
-		sm, err := svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
+		diagram, err := svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to read state-machine diagram: %v", err)
 		}
 
-		if sm.Content != fixture.Content {
-			t.Errorf("Content mismatch. Expected:\n%s\nGot:\n%s", fixture.Content, sm.Content)
+		if diagram.Content != fixture.Content {
+			t.Errorf("Content mismatch. Expected:\n%s\nGot:\n%s", fixture.Content, diagram.Content)
 		}
 	})
 
 	t.Run("Update state-machine diagram content", func(t *testing.T) {
 		// Read the current state-machine diagram
-		sm, err := svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
+		diag, err := svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to read state-machine diagram for update: %v", err)
 		}
 
 		// Update content
 		updatedContent := fixture.Content + "\n' Updated content"
-		sm.Content = updatedContent
+		diag.Content = updatedContent
 
 		// Update the state-machine diagram
-		err = svc.Update(sm)
+		err = svc.Update(diag)
 		if err != nil {
 			t.Fatalf("Failed to update state-machine diagram: %v", err)
 		}
@@ -172,14 +172,14 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 	})
 
 	t.Run("List state-machine diagrams in in-progress", func(t *testing.T) {
-		stateMachines, err := svc.ListAll(models.FileTypePUML, models.LocationInProgress)
+		diagrams, err := svc.ListAll(models.FileTypePUML, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to list state-machine diagrams: %v", err)
 		}
 
 		found := false
-		for _, sm := range stateMachines {
-			if sm.Name == fixture.Name && sm.Version == fixture.Version {
+		for _, diag := range diagrams {
+			if diag.Name == fixture.Name && diag.Version == fixture.Version {
 				found = true
 				break
 			}
@@ -197,13 +197,13 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		}
 
 		// Verify it exists in products
-		sm, err := svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
+		diagram, err := svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
 		if err != nil {
 			t.Fatalf("Failed to read promoted state-machine diagram: %v", err)
 		}
 
-		if sm.Location != models.LocationProducts {
-			t.Errorf("Expected location %s, got %s", models.LocationProducts.String(), sm.Location.String())
+		if diagram.Location != models.LocationProducts {
+			t.Errorf("Expected location %s, got %s", models.LocationProducts.String(), diagram.Location.String())
 		}
 
 		// Verify it no longer exists in in-progress
@@ -214,14 +214,14 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 	})
 
 	t.Run("List state-machine diagrams in products", func(t *testing.T) {
-		stateMachines, err := svc.ListAll(models.FileTypePUML, models.LocationProducts)
+		diagrams, err := svc.ListAll(models.FileTypePUML, models.LocationProducts)
 		if err != nil {
 			t.Fatalf("Failed to list state-machine diagrams in products: %v", err)
 		}
 
 		found := false
-		for _, sm := range stateMachines {
-			if sm.Name == fixture.Name && sm.Version == fixture.Version {
+		for _, diag := range diagrams {
+			if diag.Name == fixture.Name && diag.Version == fixture.Version {
 				found = true
 				break
 			}
@@ -292,14 +292,14 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 	})
 
 	t.Run("Update non-existent state-machine diagram", func(t *testing.T) {
-		sm := &models.StateMachineDiagram{
+		diag := &models.StateMachineDiagram{
 			Name:     "non-existent",
 			Version:  "1.0.0",
 			Content:  "@startuml\n[*] --> Test\n@enduml",
 			Location: models.LocationInProgress,
 		}
 
-		err := svc.Update(sm)
+		err := svc.Update(diag)
 		if err == nil {
 			t.Errorf("Should not be able to update non-existent state-machine diagram")
 		}
@@ -448,19 +448,19 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 		}
 
 		// Verify all state-machine diagrams were created
-		stateMachines, err := svc.ListAll(models.FileTypePUML, models.LocationInProgress)
+		diagrams, err := svc.ListAll(models.FileTypePUML, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to list state-machine diagrams: %v", err)
 		}
 
 		t.Logf("Created %d state-machine diagrams successfully: %v", len(successList), successList)
-		t.Logf("Found %d state-machine diagrams in listing", len(stateMachines))
+		t.Logf("Found %d state-machine diagrams in listing", len(diagrams))
 		t.Logf("Had %d errors: %v", len(errorList), errorList)
 
-		if len(stateMachines) != len(testFixtures) {
-			t.Errorf("Expected %d state-machine diagrams, got %d", len(testFixtures), len(stateMachines))
-			for _, sm := range stateMachines {
-				t.Logf("Found state-machine diagram: %s-%s", sm.Name, sm.Version)
+		if len(diagrams) != len(testFixtures) {
+			t.Errorf("Expected %d state-machine diagrams, got %d", len(testFixtures), len(diagrams))
+			for _, diag := range diagrams {
+				t.Logf("Found state-machine diagram: %s-%s", diag.Name, diag.Version)
 			}
 		}
 	})
@@ -482,11 +482,11 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				sm, err := svc.Read(models.FileTypePUML, "concurrent-read-test", fixture.Version, models.LocationInProgress)
+				diag, err := svc.Read(models.FileTypePUML, "concurrent-read-test", fixture.Version, models.LocationInProgress)
 				if err != nil {
 					errors <- err
 				} else {
-					results <- sm
+					results <- diag
 				}
 			}()
 		}
@@ -503,10 +503,10 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 		// Verify all reads returned the same content
 		var firstContent string
 		resultCount := 0
-		for sm := range results {
+		for diag := range results {
 			if firstContent == "" {
-				firstContent = sm.Content
-			} else if sm.Content != firstContent {
+				firstContent = diag.Content
+			} else if diag.Content != firstContent {
 				t.Errorf("Concurrent reads returned different content")
 			}
 			resultCount++
@@ -656,20 +656,20 @@ func TestReferenceResolutionWorkflow(t *testing.T) {
 
 	t.Run("Test reference resolution", func(t *testing.T) {
 		// Read the main workflow
-		sm, err := svc.Read(models.FileTypePUML, "main-workflow", "1.0.0", models.LocationInProgress)
+		diagram, err := svc.Read(models.FileTypePUML, "main-workflow", "1.0.0", models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to read main-workflow: %v", err)
 		}
 
 		// Try to resolve references - this will parse them first and then resolve
-		err = svc.ResolveReferences(sm)
+		err = svc.ResolveReferences(diagram)
 
 		// Verify references were parsed (even if resolution failed)
-		if len(sm.References) == 0 {
+		if len(diagram.References) == 0 {
 			t.Errorf("Expected references to be parsed, but found none")
 		} else {
-			t.Logf("Found %d references", len(sm.References))
-			for _, ref := range sm.References {
+			t.Logf("Found %d references", len(diagram.References))
+			for _, ref := range diagram.References {
 				t.Logf("Reference: %s-%s (type: %s)", ref.Name, ref.Version, ref.Type.String())
 			}
 		}
@@ -677,7 +677,7 @@ func TestReferenceResolutionWorkflow(t *testing.T) {
 		// Check for the product reference
 		foundProductRef := false
 		foundNestedRef := false
-		for _, ref := range sm.References {
+		for _, ref := range diagram.References {
 			if ref.Type == models.ReferenceTypeProduct && ref.Name == "user-auth" && ref.Version == "1.0.0" {
 				foundProductRef = true
 			}
@@ -817,12 +817,12 @@ func TestFileSystemEdgeCases(t *testing.T) {
 		}
 
 		// Verify we can read it back
-		sm, err := svc.Read(models.FileTypePUML, "large-content-test", "1.0.0", models.LocationInProgress)
+		diagram, err := svc.Read(models.FileTypePUML, "large-content-test", "1.0.0", models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to read large content state-machine diagram: %v", err)
 		}
 
-		if sm.Content != largeContent {
+		if diagram.Content != largeContent {
 			t.Errorf("Large content was not preserved correctly")
 		}
 	})
@@ -836,12 +836,12 @@ func TestFileSystemEdgeCases(t *testing.T) {
 		}
 
 		// Verify we can read it back correctly
-		sm, err := svc.Read(models.FileTypePUML, "special-chars-test", "1.0.0", models.LocationInProgress)
+		diagram, err := svc.Read(models.FileTypePUML, "special-chars-test", "1.0.0", models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to read special characters state-machine diagram: %v", err)
 		}
 
-		if sm.Content != specialContent {
+		if diagram.Content != specialContent {
 			t.Errorf("Special characters were not preserved correctly")
 		}
 	})
@@ -921,11 +921,11 @@ func TestVersionHandling(t *testing.T) {
 
 			if tt.valid && err == nil {
 				// Verify we can read it back
-				sm, err := svc.Read(models.FileTypePUML, testName, tt.version, models.LocationInProgress)
+				diag, err := svc.Read(models.FileTypePUML, testName, tt.version, models.LocationInProgress)
 				if err != nil {
 					t.Errorf("Failed to read back state-machine diagram with version %s: %v", tt.version, err)
-				} else if sm.Version != tt.version {
-					t.Errorf("Version mismatch: expected %s, got %s", tt.version, sm.Version)
+				} else if diag.Version != tt.version {
+					t.Errorf("Version mismatch: expected %s, got %s", tt.version, diag.Version)
 				}
 			}
 		})

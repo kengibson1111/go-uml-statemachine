@@ -283,18 +283,18 @@ Error --> Idle : reset()
 @enduml`
 
 	// Test Create
-	sm, err := svc.Create(FileTypePUML, "test-integration", "1.0.0", content, LocationInProgress)
+	diag, err := svc.Create(FileTypePUML, "test-integration", "1.0.0", content, LocationInProgress)
 	if err != nil {
 		t.Fatalf("Create() failed: %v", err)
 	}
-	if sm == nil {
+	if diag == nil {
 		t.Fatal("Create() returned nil state-machine diagram")
 	}
-	if sm.Name != "test-integration" {
-		t.Errorf("Created state-machine diagram name = %q, want %q", sm.Name, "test-integration")
+	if diag.Name != "test-integration" {
+		t.Errorf("Created state-machine diagram name = %q, want %q", diag.Name, "test-integration")
 	}
-	if sm.Version != "1.0.0" {
-		t.Errorf("Created state-machine diagram version = %q, want %q", sm.Version, "1.0.0")
+	if diag.Version != "1.0.0" {
+		t.Errorf("Created state-machine diagram version = %q, want %q", diag.Version, "1.0.0")
 	}
 
 	// Test Read
@@ -316,13 +316,13 @@ Error --> Idle : reset()
 	}
 
 	// Test ListAll
-	stateMachines, err := svc.ListAll(FileTypePUML, LocationInProgress)
+	diagrams, err := svc.ListAll(FileTypePUML, LocationInProgress)
 	if err != nil {
 		t.Fatalf("ListAll() failed: %v", err)
 	}
 	found := false
-	for _, sm := range stateMachines {
-		if sm.Name == "test-integration" && sm.Version == "1.0.0" {
+	for _, diag := range diagrams {
+		if diag.Name == "test-integration" && diag.Version == "1.0.0" {
 			found = true
 			break
 		}
@@ -356,13 +356,13 @@ Error --> Idle : reset()
 		}
 
 		// Verify promotion
-		productSMs, err := svc.ListAll(FileTypePUML, LocationProducts)
+		productDiagrams, err := svc.ListAll(FileTypePUML, LocationProducts)
 		if err != nil {
 			t.Fatalf("ListAll(LocationProducts) failed: %v", err)
 		}
 		found = false
-		for _, sm := range productSMs {
-			if sm.Name == "test-integration" && sm.Version == "1.0.0" {
+		for _, diag := range productDiagrams {
+			if diag.Name == "test-integration" && diag.Version == "1.0.0" {
 				found = true
 				break
 			}

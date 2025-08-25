@@ -1454,9 +1454,9 @@ func TestService_ListAll(t *testing.T) {
 				}
 
 				// Verify all returned state-machine diagrams have the correct location
-				for _, sm := range result {
-					if sm.Location != tt.inputLoc {
-						t.Errorf("ListAll() state-machine diagram location = %v, want %v", sm.Location, tt.inputLoc)
+				for _, diag := range result {
+					if diag.Location != tt.inputLoc {
+						t.Errorf("ListAll() state-machine diagram location = %v, want %v", diag.Location, tt.inputLoc)
 					}
 				}
 			}
@@ -1730,13 +1730,13 @@ func TestService_ResolveReferences(t *testing.T) {
 func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 	tests := []struct {
 		name         string
-		stateMachine *models.StateMachineDiagram
+		diagram      *models.StateMachineDiagram
 		reference    models.Reference
 		expectedPath string
 	}{
 		{
 			name: "product reference path building",
-			stateMachine: &models.StateMachineDiagram{
+			diagram: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "1.0.0",
 				Location: models.LocationInProgress,
@@ -1750,7 +1750,7 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 		},
 		{
 			name: "nested reference path building in-progress",
-			stateMachine: &models.StateMachineDiagram{
+			diagram: &models.StateMachineDiagram{
 				Name:     "main-sm",
 				Version:  "3.0.0",
 				Location: models.LocationInProgress,
@@ -1763,7 +1763,7 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 		},
 		{
 			name: "nested reference path building products",
-			stateMachine: &models.StateMachineDiagram{
+			diagram: &models.StateMachineDiagram{
 				Name:     "prod-sm",
 				Version:  "1.5.0",
 				Location: models.LocationProducts,
@@ -1792,26 +1792,26 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 			svc := NewService(repo, validator, nil)
 
 			// Create a state-machine diagram with the test reference
-			sm := &models.StateMachineDiagram{
-				Name:       tt.stateMachine.Name,
-				Version:    tt.stateMachine.Version,
-				Location:   tt.stateMachine.Location,
+			diag := &models.StateMachineDiagram{
+				Name:       tt.diagram.Name,
+				Version:    tt.diagram.Version,
+				Location:   tt.diagram.Location,
 				References: []models.Reference{tt.reference},
 			}
 
-			err := svc.ResolveReferences(sm)
+			err := svc.ResolveReferences(diag)
 
 			if err != nil {
 				t.Errorf("ResolveReferences() unexpected error: %v", err)
 				return
 			}
 
-			if len(sm.References) != 1 {
-				t.Errorf("ResolveReferences() expected 1 reference but got %d", len(sm.References))
+			if len(diag.References) != 1 {
+				t.Errorf("ResolveReferences() expected 1 reference but got %d", len(diag.References))
 				return
 			}
 
-			actualPath := sm.References[0].Path
+			actualPath := diag.References[0].Path
 			if actualPath != tt.expectedPath {
 				t.Errorf("ResolveReferences() path = %v, want %v", actualPath, tt.expectedPath)
 			}

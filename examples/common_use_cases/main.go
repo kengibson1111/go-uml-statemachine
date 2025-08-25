@@ -64,12 +64,12 @@ Cancelled --> [*]
 @enduml`
 
 	// Create the state-machine diagram
-	sm, err := svc.Create(diagram.FileTypePUML, "order-processing", "1.0.0", orderContent, diagram.LocationInProgress)
+	diag, err := svc.Create(diagram.FileTypePUML, "order-processing", "1.0.0", orderContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", sm.Name, sm.Version)
+	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", diag.Name, diag.Version)
 
 	// Read it back to verify
 	readSM, err := svc.Read(diagram.FileTypePUML, "order-processing", "1.0.0", diagram.LocationInProgress)
@@ -156,12 +156,12 @@ Locked --> Idle : unlock_timeout()
 @enduml`
 
 	// Create the state-machine diagram
-	sm, err := svc.Create(diagram.FileTypePUML, "user-auth", "1.0.0", authContent, diagram.LocationInProgress)
+	diag, err := svc.Create(diagram.FileTypePUML, "user-auth", "1.0.0", authContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", sm.Name, sm.Version)
+	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", diag.Name, diag.Version)
 
 	// Validate the state-machine diagram
 	result, err := svc.Validate(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
@@ -366,7 +366,7 @@ func batchOperationsExample() {
 	}
 
 	// Create multiple state-machine diagrams
-	stateMachines := []struct {
+	diagrams := []struct {
 		name    string
 		version string
 		content string
@@ -403,62 +403,62 @@ InTransit --> Delivered : deliver()
 		},
 	}
 
-	fmt.Printf("✓ Creating %d state-machine diagrams:\n", len(stateMachines))
+	fmt.Printf("✓ Creating %d state-machine diagrams:\n", len(diagrams))
 
 	// Create all state-machine diagrams
 	created := []string{}
-	for _, sm := range stateMachines {
-		_, err := svc.Create(diagram.FileTypePUML, sm.name, sm.version, sm.content, diagram.LocationInProgress)
+	for _, diag := range diagrams {
+		_, err := svc.Create(diagram.FileTypePUML, diag.name, diag.version, diag.content, diagram.LocationInProgress)
 		if err != nil {
-			log.Printf("Error creating %s: %v", sm.name, err)
+			log.Printf("Error creating %s: %v", diag.name, err)
 			continue
 		}
-		created = append(created, sm.name+"-"+sm.version)
-		fmt.Printf("  ✓ Created: %s-%s\n", sm.name, sm.version)
+		created = append(created, diag.name+"-"+diag.version)
+		fmt.Printf("  ✓ Created: %s-%s\n", diag.name, diag.version)
 	}
 
 	// List all in-progress state-machine diagrams
-	allSMs, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
+	allDiagrams, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error listing state-machine diagrams: %v", err)
 		return
 	}
 
-	fmt.Printf("✓ Found %d state-machine diagrams in in-progress:\n", len(allSMs))
-	for _, sm := range allSMs {
+	fmt.Printf("✓ Found %d state-machine diagrams in in-progress:\n", len(allDiagrams))
+	for _, diag := range allDiagrams {
 		fmt.Printf("  - %s-%s (created: %s)\n",
-			sm.Name, sm.Version, sm.Metadata.CreatedAt.Format("2006-01-02 15:04:05"))
+			diag.Name, diag.Version, diag.Metadata.CreatedAt.Format("2006-01-02 15:04:05"))
 	}
 
 	// Validate all created state-machine diagrams
 	fmt.Printf("✓ Validating all state-machine diagrams:\n")
 	validCount := 0
-	for _, sm := range stateMachines {
-		result, err := svc.Validate(diagram.FileTypePUML, sm.name, sm.version, diagram.LocationInProgress)
+	for _, diag := range diagrams {
+		result, err := svc.Validate(diagram.FileTypePUML, diag.name, diag.version, diagram.LocationInProgress)
 		if err != nil {
-			log.Printf("Error validating %s: %v", sm.name, err)
+			log.Printf("Error validating %s: %v", diag.name, err)
 			continue
 		}
 
 		if result.IsValid && !result.HasErrors() {
 			validCount++
-			fmt.Printf("  ✓ %s-%s: Valid\n", sm.name, sm.version)
+			fmt.Printf("  ✓ %s-%s: Valid\n", diag.name, diag.version)
 		} else {
 			fmt.Printf("  ⚠ %s-%s: Invalid (%d errors, %d warnings)\n",
-				sm.name, sm.version, len(result.Errors), len(result.Warnings))
+				diag.name, diag.version, len(result.Errors), len(result.Warnings))
 		}
 	}
 
-	fmt.Printf("✓ %d out of %d state-machine diagrams are valid\n", validCount, len(stateMachines))
+	fmt.Printf("✓ %d out of %d state-machine diagrams are valid\n", validCount, len(diagrams))
 
 	// Clean up all created state-machine diagrams
 	fmt.Printf("✓ Cleaning up created state-machine diagrams:\n")
-	for _, sm := range stateMachines {
-		err := svc.Delete(diagram.FileTypePUML, sm.name, sm.version, diagram.LocationInProgress)
+	for _, diag := range diagrams {
+		err := svc.Delete(diagram.FileTypePUML, diag.name, diag.version, diagram.LocationInProgress)
 		if err != nil {
-			log.Printf("Warning: Could not delete %s: %v", sm.name, err)
+			log.Printf("Warning: Could not delete %s: %v", diag.name, err)
 		} else {
-			fmt.Printf("  ✓ Deleted: %s-%s\n", sm.name, sm.version)
+			fmt.Printf("  ✓ Deleted: %s-%s\n", diag.name, diag.version)
 		}
 	}
 }

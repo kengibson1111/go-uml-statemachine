@@ -36,12 +36,12 @@ func main() {
 Test --> [*]
 @enduml`
 
-	sm, err := svc.Create(diagram.FileTypePUML, "api-test", "1.0.0", content, diagram.LocationInProgress)
+	diag, err := svc.Create(diagram.FileTypePUML, "api-test", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", sm.Name, sm.Version)
+	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", diag.Name, diag.Version)
 
 	// Clean up
 	err = svc.Delete(diagram.FileTypePUML, "api-test", "1.0.0", diagram.LocationInProgress)

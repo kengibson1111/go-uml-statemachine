@@ -78,16 +78,16 @@ type mockValidator struct {
 	validateReferencesFunc func(sm *models.StateMachineDiagram) (*models.ValidationResult, error)
 }
 
-func (m *mockValidator) Validate(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+func (m *mockValidator) Validate(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 	if m.validateFunc != nil {
-		return m.validateFunc(sm, strictness)
+		return m.validateFunc(diag, strictness)
 	}
 	return &models.ValidationResult{IsValid: true}, nil
 }
 
-func (m *mockValidator) ValidateReferences(sm *models.StateMachineDiagram) (*models.ValidationResult, error) {
+func (m *mockValidator) ValidateReferences(diag *models.StateMachineDiagram) (*models.ValidationResult, error) {
 	if m.validateReferencesFunc != nil {
-		return m.validateReferencesFunc(sm)
+		return m.validateReferencesFunc(diag)
 	}
 	return &models.ValidationResult{IsValid: true}, nil
 }

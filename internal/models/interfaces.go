@@ -19,8 +19,8 @@ type Repository interface {
 
 // Validator interface defines the contract for state-machine diagram validation
 type Validator interface {
-	Validate(sm *StateMachineDiagram, strictness ValidationStrictness) (*ValidationResult, error)
-	ValidateReferences(sm *StateMachineDiagram) (*ValidationResult, error)
+	Validate(diagram *StateMachineDiagram, strictness ValidationStrictness) (*ValidationResult, error)
+	ValidateReferences(diagram *StateMachineDiagram) (*ValidationResult, error)
 }
 
 // DiagramService interface defines the contract for business operations
@@ -37,5 +37,5 @@ type DiagramService interface {
 	ListAll(fileType FileType, location Location) ([]StateMachineDiagram, error)
 
 	// Reference operations
-	ResolveReferences(sm *StateMachineDiagram) error
+	ResolveReferences(diagram *StateMachineDiagram) error
 }

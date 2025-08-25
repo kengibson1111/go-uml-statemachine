@@ -142,7 +142,7 @@ type DiagramService interface {
     ListAll(fileType FileType, location Location) ([]diagram, error)
 
     // Reference operations
-    ResolveReferences(sm *diagram) error
+    ResolveReferences(diagram *diagram) error
 }
 ```
 
@@ -275,7 +275,7 @@ Idle --> Active : start()
 Active --> Idle : stop()
 @enduml`
 
-sm, err := svc.Create(diagram.FileTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
+diag, err := svc.Create(diagram.FileTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -305,11 +305,11 @@ Read(fileType FileType, name, version string, location Location) (*diagram, erro
 
 **Example:**
 ```go
-sm, err := svc.Read(diagram.FileTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
+diag, err := svc.Read(diagram.FileTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
-fmt.Printf("Content: %s\n", sm.Content)
+fmt.Printf("Content: %s\n", diagram.Content)
 ```
 
 #### Update
@@ -333,7 +333,7 @@ Update(sm *diagram) error
 
 **Example:**
 ```go
-sm.Content = updatedPlantUMLContent
+diagram.Content = updatedPlantUMLContent
 err := svc.Update(sm)
 if err != nil {
     log.Fatal(err)
@@ -469,8 +469,8 @@ if err != nil {
     log.Fatal(err)
 }
 
-for _, sm := range diagrams {
-    fmt.Printf("- %s-%s\n", sm.Name, sm.Version)
+for _, diag := range diagrams {
+    fmt.Printf("- %s-%s\n", diag.Name, diag.Version)
 }
 ```
 
@@ -481,7 +481,7 @@ for _, sm := range diagrams {
 Resolves all references in a state-machine diagram.
 
 ```go
-ResolveReferences(sm *diagram) error
+ResolveReferences(diagram *diagram) error
 ```
 
 **Parameters:**
@@ -501,12 +501,12 @@ ResolveReferences(sm *diagram) error
 
 **Example:**
 ```go
-err := svc.ResolveReferences(sm)
+err := svc.ResolveReferences(diagram)
 if err != nil {
     log.Fatal(err)
 }
 
-for _, ref := range sm.References {
+for _, ref := range diagram.References {
     fmt.Printf("Reference: %s (type: %s, path: %s)\n", 
         ref.Name, ref.Type.String(), ref.Path)
 }
@@ -542,7 +542,7 @@ Errors include context information such as:
 ### Example Error Handling
 
 ```go
-sm, err := svc.Read("non-existent", "1.0.0", diagram.LocationInProgress)
+diag, err := svc.Read("non-existent", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     // Check if it's a specific error type
     if smErr, ok := err.(*models.diagramError); ok {

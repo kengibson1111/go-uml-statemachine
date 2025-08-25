@@ -93,14 +93,14 @@ type MockErrorValidator struct {
 	referencesResult             *models.ValidationResult
 }
 
-func (m *MockErrorValidator) Validate(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+func (m *MockErrorValidator) Validate(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 	if m.shouldFailValidate {
 		return nil, errors.New("mock validation error")
 	}
 	return m.validationResult, nil
 }
 
-func (m *MockErrorValidator) ValidateReferences(sm *models.StateMachineDiagram) (*models.ValidationResult, error) {
+func (m *MockErrorValidator) ValidateReferences(diag *models.StateMachineDiagram) (*models.ValidationResult, error) {
 	if m.shouldFailValidateReferences {
 		return nil, errors.New("mock reference validation error")
 	}

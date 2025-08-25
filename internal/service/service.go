@@ -181,7 +181,7 @@ func (s *service) Create(fileType models.FileType, name, version string, content
 
 	// Create the state-machine diagram object
 	opLogger.Debug("Creating state-machine diagram object")
-	sm := &models.StateMachineDiagram{
+	diag := &models.StateMachineDiagram{
 		Name:     name,
 		Version:  version,
 		Content:  content,
@@ -195,7 +195,7 @@ func (s *service) Create(fileType models.FileType, name, version string, content
 
 	// Write the state-machine diagram to disk
 	opLogger.Debug("Writing state-machine diagram to disk")
-	if err := s.repo.WriteStateMachine(sm); err != nil {
+	if err := s.repo.WriteStateMachine(diag); err != nil {
 		wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
 			"failed to write state-machine diagram").
 			WithContext("name", name).
@@ -209,7 +209,7 @@ func (s *service) Create(fileType models.FileType, name, version string, content
 	}
 
 	opLogger.Info("State-machine diagram created successfully")
-	return sm, nil
+	return diag, nil
 }
 
 // Read retrieves a state-machine diagram by name, version, and location
@@ -250,7 +250,7 @@ func (s *service) Read(fileType models.FileType, name, version string, location 
 
 	// Read the state-machine diagram from repository
 	opLogger.Debug("Reading state-machine diagram from repository")
-	sm, err := s.repo.ReadStateMachine(fileType, name, version, location)
+	diag, err := s.repo.ReadStateMachine(fileType, name, version, location)
 	if err != nil {
 		wrappedErr := models.WrapError(err, models.ErrorTypeFileNotFound,
 			"failed to read state-machine diagram").
@@ -263,56 +263,56 @@ func (s *service) Read(fileType models.FileType, name, version string, location 
 		return nil, wrappedErr
 	}
 
-	opLogger.WithField("contentLength", len(sm.Content)).Info("State-machine diagram read successfully")
-	return sm, nil
+	opLogger.WithField("contentLength", len(diag.Content)).Info("State-machine diagram read successfully")
+	return diag, nil
 }
 
 // Update modifies an existing state-machine diagram
-func (s *service) Update(sm *models.StateMachineDiagram) error {
+func (s *service) Update(diag *models.StateMachineDiagram) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	// Validate input parameters
-	if sm == nil {
+	if diag == nil {
 		return models.NewStateMachineError(models.ErrorTypeValidation, "state-machine diagram cannot be nil", nil)
 	}
-	if sm.Name == "" {
+	if diag.Name == "" {
 		return models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil)
 	}
-	if sm.Version == "" {
+	if diag.Version == "" {
 		return models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil)
 	}
-	if sm.Content == "" {
+	if diag.Content == "" {
 		return models.NewStateMachineError(models.ErrorTypeValidation, "content cannot be empty", nil)
 	}
 
 	// Check if state-machine diagram exists
-	exists, err := s.repo.Exists(sm.FileType, sm.Name, sm.Version, sm.Location)
+	exists, err := s.repo.Exists(diag.FileType, diag.Name, diag.Version, diag.Location)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check if state-machine diagram exists", err).
-			WithContext("name", sm.Name).
-			WithContext("version", sm.Version).
-			WithContext("location", sm.Location.String())
+			WithContext("name", diag.Name).
+			WithContext("version", diag.Version).
+			WithContext("location", diag.Location.String())
 	}
 	if !exists {
 		return models.NewStateMachineError(models.ErrorTypeFileNotFound,
 			"state-machine diagram does not exist", nil).
-			WithContext("name", sm.Name).
-			WithContext("version", sm.Version).
-			WithContext("location", sm.Location.String())
+			WithContext("name", diag.Name).
+			WithContext("version", diag.Version).
+			WithContext("location", diag.Location.String())
 	}
 
 	// Update the modified timestamp
-	sm.Metadata.ModifiedAt = time.Now()
+	diag.Metadata.ModifiedAt = time.Now()
 
 	// Write the updated state-machine diagram to disk
-	if err := s.repo.WriteStateMachine(sm); err != nil {
+	if err := s.repo.WriteStateMachine(diag); err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to update state-machine diagram", err).
-			WithContext("name", sm.Name).
-			WithContext("version", sm.Version).
-			WithContext("location", sm.Location.String())
+			WithContext("name", diag.Name).
+			WithContext("version", diag.Version).
+			WithContext("location", diag.Location.String())
 	}
 
 	return nil
@@ -404,7 +404,7 @@ func (s *service) Promote(fileType models.FileType, name, version string) error 
 	}
 
 	// Step 3: Read the state-machine diagram for validation
-	sm, err := s.repo.ReadStateMachine(fileType, name, version, models.LocationInProgress)
+	diagram, err := s.repo.ReadStateMachine(fileType, name, version, models.LocationInProgress)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to read state-machine diagram for validation", err).
@@ -413,7 +413,7 @@ func (s *service) Promote(fileType models.FileType, name, version string) error 
 	}
 
 	// Step 4: Validate the state-machine diagram with in-progress strictness (errors and warnings)
-	validationResult, err := s.validator.Validate(sm, models.StrictnessInProgress)
+	validationResult, err := s.validator.Validate(diagram, models.StrictnessInProgress)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeValidation,
 			"failed to validate state-machine diagram", err).
@@ -520,7 +520,7 @@ func (s *service) Validate(fileType models.FileType, name, version string, locat
 	}
 
 	// Read the state-machine diagram from repository
-	sm, err := s.repo.ReadStateMachine(fileType, name, version, location)
+	diagram, err := s.repo.ReadStateMachine(fileType, name, version, location)
 	if err != nil {
 		return nil, models.NewStateMachineError(models.ErrorTypeFileNotFound,
 			"failed to read state-machine diagram for validation", err).
@@ -536,7 +536,7 @@ func (s *service) Validate(fileType models.FileType, name, version string, locat
 	}
 
 	// Validate the state-machine diagram using the validator
-	validationResult, err := s.validator.Validate(sm, strictness)
+	validationResult, err := s.validator.Validate(diagram, strictness)
 	if err != nil {
 		return nil, models.NewStateMachineError(models.ErrorTypeValidation,
 			"validation failed", err).
@@ -555,30 +555,30 @@ func (s *service) ListAll(fileType models.FileType, location models.Location) ([
 	defer s.mu.RUnlock()
 
 	// Use the repository to list all state-machine diagrams in the specified location
-	stateMachines, err := s.repo.ListStateMachines(fileType, location)
+	diagrams, err := s.repo.ListStateMachines(fileType, location)
 	if err != nil {
 		return nil, models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to list state-machine diagrams", err).
 			WithContext("location", location.String())
 	}
 
-	return stateMachines, nil
+	return diagrams, nil
 }
 
 // ResolveReferences resolves all references in a state-machine diagram
-func (s *service) ResolveReferences(sm *models.StateMachineDiagram) error {
+func (s *service) ResolveReferences(diag *models.StateMachineDiagram) error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	// Validate input parameters
-	if sm == nil {
+	if diag == nil {
 		return models.NewStateMachineError(models.ErrorTypeValidation, "state-machine diagram cannot be nil", nil)
 	}
 
 	// First, parse references from the content if not already done
-	if len(sm.References) == 0 {
+	if len(diag.References) == 0 {
 		// Use the validator to parse references from content
-		validationResult, err := s.validator.ValidateReferences(sm)
+		validationResult, err := s.validator.ValidateReferences(diag)
 		if err != nil {
 			return models.NewStateMachineError(models.ErrorTypeValidation,
 				"failed to parse references from content", err)
@@ -597,13 +597,13 @@ func (s *service) ResolveReferences(sm *models.StateMachineDiagram) error {
 	}
 
 	// If there are still no references after parsing, nothing to resolve
-	if len(sm.References) == 0 {
+	if len(diag.References) == 0 {
 		return nil
 	}
 
 	// Resolve each reference
-	for i := range sm.References {
-		err := s.resolveReference(sm, &sm.References[i])
+	for i := range diag.References {
+		err := s.resolveReference(diag, &diag.References[i])
 		if err != nil {
 			return err // Return the original error from resolveReference
 		}
@@ -613,11 +613,11 @@ func (s *service) ResolveReferences(sm *models.StateMachineDiagram) error {
 }
 
 // resolveReference resolves a single reference within a state-machine diagram
-func (s *service) resolveReference(sm *models.StateMachineDiagram, ref *models.Reference) error {
+func (s *service) resolveReference(diag *models.StateMachineDiagram, ref *models.Reference) error {
 	switch ref.Type {
 	case models.ReferenceTypeProduct:
 		// For product references, check if the referenced state-machine diagram exists in products
-		exists, err := s.repo.Exists(sm.FileType, ref.Name, ref.Version, models.LocationProducts)
+		exists, err := s.repo.Exists(diag.FileType, ref.Name, ref.Version, models.LocationProducts)
 		if err != nil {
 			return models.NewStateMachineError(models.ErrorTypeFileSystem,
 				"failed to check product reference existence", err).
@@ -632,27 +632,27 @@ func (s *service) resolveReference(sm *models.StateMachineDiagram, ref *models.R
 		}
 
 		// Set the resolved path for the reference
-		ref.Path = s.buildProductReferencePath(sm.FileType, ref.Name, ref.Version)
+		ref.Path = s.buildProductReferencePath(diag.FileType, ref.Name, ref.Version)
 
 	case models.ReferenceTypeNested:
 		// For nested references, check if the referenced state-machine diagram exists as a nested item
 		// within the same parent directory as the current state-machine diagram
-		nestedPath := s.buildNestedReferencePath(sm, ref.Name)
+		nestedPath := s.buildNestedReferencePath(diag, ref.Name)
 
 		// Check if the nested reference exists by attempting to read it
 		// Note: For nested references, we don't use version in the path
-		exists, err := s.checkNestedReferenceExists(sm, ref.Name)
+		exists, err := s.checkNestedReferenceExists(diag, ref.Name)
 		if err != nil {
 			return models.NewStateMachineError(models.ErrorTypeFileSystem,
 				"failed to check nested reference existence", err).
 				WithContext("reference_name", ref.Name).
-				WithContext("parent_state_machine", sm.Name)
+				WithContext("parent_state_machine", diag.Name)
 		}
 		if !exists {
 			return models.NewStateMachineError(models.ErrorTypeReferenceResolution,
 				"nested reference not found", nil).
 				WithContext("reference_name", ref.Name).
-				WithContext("parent_state_machine", sm.Name)
+				WithContext("parent_state_machine", diag.Name)
 		}
 
 		// Set the resolved path for the reference
@@ -674,10 +674,10 @@ func (s *service) buildProductReferencePath(fileType models.FileType, name, vers
 }
 
 // buildNestedReferencePath builds the path for a nested reference
-func (s *service) buildNestedReferencePath(sm *models.StateMachineDiagram, refName string) string {
+func (s *service) buildNestedReferencePath(diag *models.StateMachineDiagram, refName string) string {
 	// Nested references are in the format: {location}/{fileType}/{parent-name}-{parent-version}/nested/{ref-name}/{ref-name}.puml
-	locationStr := sm.Location.String()
-	return locationStr + "\\" + sm.FileType.String() + "\\" + sm.Name + "-" + sm.Version + "\\nested\\" + refName + "\\" + refName + ".puml"
+	locationStr := diag.Location.String()
+	return locationStr + "\\" + diag.FileType.String() + "\\" + diag.Name + "-" + diag.Version + "\\nested\\" + refName + "\\" + refName + ".puml"
 }
 
 // checkNestedReferenceExists checks if a nested reference exists within the parent state-machine diagram's directory
@@ -699,8 +699,8 @@ func (s *service) checkNestedReferenceExists(sm *models.StateMachineDiagram, ref
 }
 
 // buildNestedDirectoryPath builds the directory path for a nested reference
-func (s *service) buildNestedDirectoryPath(sm *models.StateMachineDiagram, refName string) string {
+func (s *service) buildNestedDirectoryPath(diag *models.StateMachineDiagram, refName string) string {
 	// Nested directory path: {location}/{fileType}/{parent-name}-{parent-version}/nested/{ref-name}
-	locationStr := sm.Location.String()
-	return locationStr + "\\" + sm.FileType.String() + "\\" + sm.Name + "-" + sm.Version + "\\nested\\" + refName
+	locationStr := diag.Location.String()
+	return locationStr + "\\" + diag.FileType.String() + "\\" + diag.Name + "-" + diag.Version + "\\nested\\" + refName
 }

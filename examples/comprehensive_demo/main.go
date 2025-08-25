@@ -115,12 +115,12 @@ OrderCancelled --> [*]
 
 @enduml`
 
-	sm, err := svc.Create(diagram.FileTypePUML, "ecommerce-order", "1.0.0", content, diagram.LocationInProgress)
+	diag, err := svc.Create(diagram.FileTypePUML, "ecommerce-order", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created: %s-%s\n", sm.Name, sm.Version)
+	fmt.Printf("✓ Created: %s-%s\n", diag.Name, diag.Version)
 
 	// Read
 	fmt.Println("Reading the state-machine diagram...")
@@ -178,12 +178,12 @@ AccountLocked --> Anonymous : unlock_timeout()
 
 @enduml`
 
-	sm, err := svc.Create(diagram.FileTypePUML, "user-session", "1.0.0", content, diagram.LocationInProgress)
+	diag, err := svc.Create(diagram.FileTypePUML, "user-session", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", sm.Name, sm.Version)
+	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", diag.Name, diag.Version)
 
 	// Validate
 	fmt.Println("Validating state-machine diagram...")
@@ -381,16 +381,16 @@ Rejected --> [*]
 
 	// List all in-progress state-machine diagrams
 	fmt.Println("Listing all in-progress state-machine diagrams...")
-	allSMs, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
+	allDiagrams, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error listing state-machine diagrams: %v", err)
 		return
 	}
 
-	fmt.Printf("✓ Found %d state-machine diagrams in in-progress:\n", len(allSMs))
-	for _, sm := range allSMs {
+	fmt.Printf("✓ Found %d state-machine diagrams in in-progress:\n", len(allDiagrams))
+	for _, diag := range allDiagrams {
 		fmt.Printf("  - %s-%s (created: %s)\n",
-			sm.Name, sm.Version, sm.Metadata.CreatedAt.Format("2006-01-02 15:04:05"))
+			diag.Name, diag.Version, diag.Metadata.CreatedAt.Format("2006-01-02 15:04:05"))
 	}
 
 	// Validate all and count valid ones
@@ -539,11 +539,11 @@ title Environment Test
 EnvConfigured --> [*]
 @enduml`
 
-	sm, err := svc.Create(diagram.FileTypePUML, "env-config-test", "1.0.0", content, diagram.LocationInProgress)
+	diag, err := svc.Create(diagram.FileTypePUML, "env-config-test", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating test state-machine diagram: %v", err)
 	} else {
-		fmt.Printf("✓ Created state-machine diagram using environment configuration: %s-%s\n", sm.Name, sm.Version)
+		fmt.Printf("✓ Created state-machine diagram using environment configuration: %s-%s\n", diag.Name, diag.Version)
 
 		// Clean up
 		svc.Delete(diagram.FileTypePUML, "env-config-test", "1.0.0", diagram.LocationInProgress)

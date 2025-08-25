@@ -33,7 +33,7 @@ func NewPlantUMLValidatorWithRepository(repo models.Repository) *PlantUMLValidat
 }
 
 // Validate validates a state-machine diagram according to the specified strictness level
-func (v *PlantUMLValidator) Validate(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+func (v *PlantUMLValidator) Validate(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 	result := &models.ValidationResult{
 		Errors:   []models.ValidationError{},
 		Warnings: []models.ValidationWarning{},
@@ -41,10 +41,10 @@ func (v *PlantUMLValidator) Validate(sm *models.StateMachineDiagram, strictness 
 	}
 
 	// Validate PlantUML structure
-	v.validatePlantUMLStructure(sm.Content, result)
+	v.validatePlantUMLStructure(diag.Content, result)
 
 	// Validate state-machine diagram syntax
-	v.validateStateMachineSyntax(sm.Content, result)
+	v.validateStateMachineSyntax(diag.Content, result)
 
 	// Apply strictness filtering
 	v.applyStrictnessFiltering(result, strictness)
@@ -53,7 +53,7 @@ func (v *PlantUMLValidator) Validate(sm *models.StateMachineDiagram, strictness 
 }
 
 // ValidateReferences validates references in a state-machine diagram
-func (v *PlantUMLValidator) ValidateReferences(sm *models.StateMachineDiagram) (*models.ValidationResult, error) {
+func (v *PlantUMLValidator) ValidateReferences(diag *models.StateMachineDiagram) (*models.ValidationResult, error) {
 	result := &models.ValidationResult{
 		Errors:   []models.ValidationError{},
 		Warnings: []models.ValidationWarning{},
@@ -61,18 +61,18 @@ func (v *PlantUMLValidator) ValidateReferences(sm *models.StateMachineDiagram) (
 	}
 
 	// Parse references from PlantUML content
-	references, err := v.parseReferences(sm.Content)
+	references, err := v.parseReferences(diag.Content)
 	if err != nil {
 		result.AddError("REFERENCE_PARSE_ERROR", "Failed to parse references from content", 1, 1)
 		return result, nil
 	}
 
 	// Update the state-machine diagram with parsed references
-	sm.References = references
+	diag.References = references
 
 	// Validate each reference
 	for _, ref := range references {
-		v.validateReference(ref, sm, result)
+		v.validateReference(ref, diag, result)
 	}
 
 	return result, nil
@@ -168,7 +168,7 @@ func (v *PlantUMLValidator) validateReference(ref models.Reference, sm *models.S
 }
 
 // validateProductReference validates a product reference
-func (v *PlantUMLValidator) validateProductReference(ref models.Reference, sm *models.StateMachineDiagram, result *models.ValidationResult) {
+func (v *PlantUMLValidator) validateProductReference(ref models.Reference, diag *models.StateMachineDiagram, result *models.ValidationResult) {
 	// Product references must have a version
 	if ref.Version == "" {
 		result.AddError("MISSING_REFERENCE_VERSION",
@@ -184,7 +184,7 @@ func (v *PlantUMLValidator) validateProductReference(ref models.Reference, sm *m
 	}
 
 	// Check for self-reference
-	if ref.Name == sm.Name && ref.Version == sm.Version {
+	if ref.Name == diag.Name && ref.Version == diag.Version {
 		result.AddError("SELF_REFERENCE",
 			"State-machine diagram cannot reference itself", 1, 1)
 		return
@@ -199,7 +199,7 @@ func (v *PlantUMLValidator) validateProductReference(ref models.Reference, sm *m
 }
 
 // validateNestedReference validates a nested reference
-func (v *PlantUMLValidator) validateNestedReference(ref models.Reference, sm *models.StateMachineDiagram, result *models.ValidationResult) {
+func (v *PlantUMLValidator) validateNestedReference(ref models.Reference, diag *models.StateMachineDiagram, result *models.ValidationResult) {
 	// Nested references should not have a version
 	if ref.Version != "" {
 		result.AddWarning("UNEXPECTED_NESTED_VERSION",
@@ -207,7 +207,7 @@ func (v *PlantUMLValidator) validateNestedReference(ref models.Reference, sm *mo
 	}
 
 	// Check for self-reference (nested can't reference the parent)
-	if ref.Name == sm.Name {
+	if ref.Name == diag.Name {
 		result.AddError("NESTED_SELF_REFERENCE",
 			fmt.Sprintf("Nested state-machine diagram cannot reference parent '%s'", ref.Name), 1, 1)
 		return
@@ -229,7 +229,7 @@ func (v *PlantUMLValidator) isValidVersion(version string) bool {
 }
 
 // ResolveReferences resolves and validates reference accessibility
-func (v *PlantUMLValidator) ResolveReferences(sm *models.StateMachineDiagram) (*models.ValidationResult, error) {
+func (v *PlantUMLValidator) ResolveReferences(diag *models.StateMachineDiagram) (*models.ValidationResult, error) {
 	result := &models.ValidationResult{
 		Errors:   []models.ValidationError{},
 		Warnings: []models.ValidationWarning{},
@@ -243,25 +243,25 @@ func (v *PlantUMLValidator) ResolveReferences(sm *models.StateMachineDiagram) (*
 	}
 
 	// First parse references if not already done
-	if len(sm.References) == 0 {
-		references, err := v.parseReferences(sm.Content)
+	if len(diag.References) == 0 {
+		references, err := v.parseReferences(diag.Content)
 		if err != nil {
 			result.AddError("REFERENCE_PARSE_ERROR", "Failed to parse references from content", 1, 1)
 			return result, nil
 		}
-		sm.References = references
+		diag.References = references
 	}
 
 	// Resolve each reference
-	for _, ref := range sm.References {
-		v.resolveReference(ref, sm, result)
+	for _, ref := range diag.References {
+		v.resolveReference(ref, diag, result)
 	}
 
 	return result, nil
 }
 
 // resolveReference resolves a single reference and checks its accessibility
-func (v *PlantUMLValidator) resolveReference(ref models.Reference, sm *models.StateMachineDiagram, result *models.ValidationResult) {
+func (v *PlantUMLValidator) resolveReference(ref models.Reference, diag *models.StateMachineDiagram, result *models.ValidationResult) {
 	var targetLocation models.Location
 	var checkVersion string
 
@@ -282,7 +282,7 @@ func (v *PlantUMLValidator) resolveReference(ref models.Reference, sm *models.St
 	}
 
 	// Check if the referenced state-machine diagram exists
-	exists, err := v.repository.Exists(sm.FileType, ref.Name, checkVersion, targetLocation)
+	exists, err := v.repository.Exists(diag.FileType, ref.Name, checkVersion, targetLocation)
 	if err != nil {
 		result.AddWarning("REFERENCE_CHECK_ERROR",
 			fmt.Sprintf("Failed to check existence of reference '%s': %v", ref.Name, err), 1, 1)
@@ -302,7 +302,7 @@ func (v *PlantUMLValidator) resolveReference(ref models.Reference, sm *models.St
 	}
 
 	// Try to read the referenced state-machine diagram to ensure it's accessible
-	referencedSM, err := v.repository.ReadStateMachine(sm.FileType, ref.Name, checkVersion, targetLocation)
+	referencedDiag, err := v.repository.ReadStateMachine(diag.FileType, ref.Name, checkVersion, targetLocation)
 	if err != nil {
 		result.AddWarning("REFERENCE_READ_ERROR",
 			fmt.Sprintf("Referenced state-machine diagram '%s' exists but cannot be read: %v", ref.Name, err), 1, 1)
@@ -310,7 +310,7 @@ func (v *PlantUMLValidator) resolveReference(ref models.Reference, sm *models.St
 	}
 
 	// Additional validation: check for circular references
-	v.checkCircularReference(ref, referencedSM, sm, result, make(map[string]bool))
+	v.checkCircularReference(ref, referencedDiag, diag, result, make(map[string]bool))
 }
 
 // checkCircularReference detects circular references between state-machine diagrams

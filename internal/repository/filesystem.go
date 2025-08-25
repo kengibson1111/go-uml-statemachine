@@ -157,7 +157,7 @@ func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, 
 
 	// Create StateMachine object
 	opLogger.Debug("Creating state-machine diagram object")
-	stateMachine := &models.StateMachineDiagram{
+	diag := &models.StateMachineDiagram{
 		Name:     name,
 		Version:  version,
 		Content:  string(content),
@@ -171,43 +171,43 @@ func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, 
 	}
 
 	// TODO: Parse references from content (will be implemented in validation layer)
-	stateMachine.References = []models.Reference{}
+	diag.References = []models.Reference{}
 
 	opLogger.WithFields(map[string]interface{}{
-		"contentLength": len(stateMachine.Content),
-		"modifiedAt":    stateMachine.Metadata.ModifiedAt,
+		"contentLength": len(diag.Content),
+		"modifiedAt":    diag.Metadata.ModifiedAt,
 	}).Info("State-machine diagram read successfully")
 
-	return stateMachine, nil
+	return diag, nil
 }
 
 // WriteStateMachine writes a state-machine diagram to the file system
-func (r *FileSystemRepository) WriteStateMachine(sm *models.StateMachineDiagram) error {
-	if sm == nil {
+func (r *FileSystemRepository) WriteStateMachine(diag *models.StateMachineDiagram) error {
+	if diag == nil {
 		return models.NewStateMachineError(models.ErrorTypeValidation, "state-machine diagram cannot be nil", nil)
 	}
 
 	// Validate inputs
-	if err := r.pathManager.ValidateName(sm.Name); err != nil {
+	if err := r.pathManager.ValidateName(diag.Name); err != nil {
 		return err
 	}
 
-	if sm.Location != models.LocationNested && sm.Version == "" {
+	if diag.Location != models.LocationNested && diag.Version == "" {
 		return models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state-machine diagrams", nil).
-			WithContext("name", sm.Name).
-			WithContext("location", sm.Location.String())
+			WithContext("name", diag.Name).
+			WithContext("location", diag.Location.String())
 	}
 
 	// Check content size
-	if int64(len(sm.Content)) > r.config.MaxFileSize {
+	if int64(len(diag.Content)) > r.config.MaxFileSize {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem, "content size exceeds maximum allowed", nil).
-			WithContext("contentSize", len(sm.Content)).
+			WithContext("contentSize", len(diag.Content)).
 			WithContext("maxSize", r.config.MaxFileSize)
 	}
 
 	// Get directory and file paths
-	dirPath := r.pathManager.GetStateMachineDirectoryPathWithFileType(sm.Name, sm.Version, sm.Location, sm.FileType)
-	filePath := r.pathManager.GetStateMachineFilePathWithFileType(sm.Name, sm.Version, sm.Location, sm.FileType)
+	dirPath := r.pathManager.GetStateMachineDirectoryPathWithFileType(diag.Name, diag.Version, diag.Location, diag.FileType)
+	filePath := r.pathManager.GetStateMachineFilePathWithFileType(diag.Name, diag.Version, diag.Location, diag.FileType)
 
 	// Create directory if it doesn't exist
 	if err := r.CreateDirectory(dirPath); err != nil {
@@ -215,7 +215,7 @@ func (r *FileSystemRepository) WriteStateMachine(sm *models.StateMachineDiagram)
 	}
 
 	// Write the file
-	if err := os.WriteFile(filePath, []byte(sm.Content), 0644); err != nil {
+	if err := os.WriteFile(filePath, []byte(diag.Content), 0644); err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to write state-machine diagram file", err).
 			WithContext("filePath", filePath)
 	}
@@ -421,7 +421,7 @@ func (r *FileSystemRepository) ListStateMachines(fileType models.FileType, locat
 			WithContext("locationPath", locationPath)
 	}
 
-	var stateMachines []models.StateMachineDiagram
+	var diagrams []models.StateMachineDiagram
 
 	// Process each directory entry
 	for _, entry := range entries {
@@ -442,14 +442,14 @@ func (r *FileSystemRepository) ListStateMachines(fileType models.FileType, locat
 		}
 
 		// Try to read the state-machine diagram
-		sm, err := r.ReadStateMachine(fileType, pathInfo.Name, pathInfo.Version, location)
+		diag, err := r.ReadStateMachine(fileType, pathInfo.Name, pathInfo.Version, location)
 		if err != nil {
 			// Skip state-machine diagrams that can't be read, but continue processing others
 			continue
 		}
 
-		stateMachines = append(stateMachines, *sm)
+		diagrams = append(diagrams, *diag)
 	}
 
-	return stateMachines, nil
+	return diagrams, nil
 }

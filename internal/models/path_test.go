@@ -95,10 +95,10 @@ func TestPathManager_GetStateMachineDirectoryPath(t *testing.T) {
 		},
 		{
 			name:     "nested state-machine diagram",
-			smName:   "child-sm",
+			smName:   "child-diagram",
 			version:  "1.0.0",
 			location: LocationNested,
-			expected: filepath.Join(RootDirectoryName, "child-sm"),
+			expected: filepath.Join(RootDirectoryName, "child-diagram"),
 		},
 	}
 
@@ -138,10 +138,10 @@ func TestPathManager_GetStateMachineFilePath(t *testing.T) {
 		},
 		{
 			name:     "nested state-machine diagram file",
-			smName:   "child-sm",
+			smName:   "child-diagram",
 			version:  "1.0.0",
 			location: LocationNested,
-			expected: filepath.Join(RootDirectoryName, "child-sm", "child-sm.puml"),
+			expected: filepath.Join(RootDirectoryName, "child-diagram", "child-diagram.puml"),
 		},
 	}
 
@@ -349,9 +349,9 @@ func TestPathManager_ParseDirectoryName(t *testing.T) {
 		},
 		{
 			name:    "valid nested directory",
-			dirName: "child-sm",
+			dirName: "child-diagram",
 			want: &PathInfo{
-				Name:     "child-sm",
+				Name:     "child-diagram",
 				Version:  "",
 				IsNested: true,
 			},
@@ -444,9 +444,9 @@ func TestPathManager_ParseFileName(t *testing.T) {
 		},
 		{
 			name:     "valid nested file",
-			fileName: "child-sm.puml",
+			fileName: "child-diagram.puml",
 			want: &PathInfo{
-				Name:     "child-sm",
+				Name:     "child-diagram",
 				Version:  "",
 				IsNested: true,
 			},

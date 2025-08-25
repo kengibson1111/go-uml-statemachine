@@ -16,7 +16,7 @@ func main() {
 
 	// Test 1: State-machine diagram with valid product reference
 	fmt.Println("\n1. Testing valid product reference:")
-	sm1 := &models.StateMachineDiagram{
+	diag1 := &models.StateMachineDiagram{
 		Name:    "main-service",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -28,15 +28,15 @@ Authenticated --> [*]
 @enduml`,
 	}
 
-	result1, err := validator.ValidateReferences(sm1)
+	result1, err := validator.ValidateReferences(diag1)
 	if err != nil {
 		log.Fatalf("Error validating references: %v", err)
 	}
 
 	fmt.Printf("Valid: %t\n", result1.IsValid)
-	fmt.Printf("References found: %d\n", len(sm1.References))
-	if len(sm1.References) > 0 {
-		ref := sm1.References[0]
+	fmt.Printf("References found: %d\n", len(diag1.References))
+	if len(diag1.References) > 0 {
+		ref := diag1.References[0]
 		fmt.Printf("  - Name: %s, Version: %s, Type: %s, Path: %s\n",
 			ref.Name, ref.Version, ref.Type.String(), ref.Path)
 	}
@@ -44,7 +44,7 @@ Authenticated --> [*]
 
 	// Test 2: State-machine diagram with valid nested reference
 	fmt.Println("\n2. Testing valid nested reference:")
-	sm2 := &models.StateMachineDiagram{
+	diag2 := &models.StateMachineDiagram{
 		Name:    "workflow",
 		Version: "2.0.0",
 		Content: `@startuml
@@ -56,15 +56,15 @@ End --> [*]
 @enduml`,
 	}
 
-	result2, err := validator.ValidateReferences(sm2)
+	result2, err := validator.ValidateReferences(diag2)
 	if err != nil {
 		log.Fatalf("Error validating references: %v", err)
 	}
 
 	fmt.Printf("Valid: %t\n", result2.IsValid)
-	fmt.Printf("References found: %d\n", len(sm2.References))
-	if len(sm2.References) > 0 {
-		ref := sm2.References[0]
+	fmt.Printf("References found: %d\n", len(diag2.References))
+	if len(diag2.References) > 0 {
+		ref := diag2.References[0]
 		fmt.Printf("  - Name: %s, Version: %s, Type: %s, Path: %s\n",
 			ref.Name, ref.Version, ref.Type.String(), ref.Path)
 	}
@@ -72,7 +72,7 @@ End --> [*]
 
 	// Test 3: State-machine diagram with invalid version
 	fmt.Println("\n3. Testing invalid product version:")
-	sm3 := &models.StateMachineDiagram{
+	diag3 := &models.StateMachineDiagram{
 		Name:    "test-service",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -81,13 +81,13 @@ End --> [*]
 @enduml`,
 	}
 
-	result3, err := validator.ValidateReferences(sm3)
+	result3, err := validator.ValidateReferences(diag3)
 	if err != nil {
 		log.Fatalf("Error validating references: %v", err)
 	}
 
 	fmt.Printf("Valid: %t\n", result3.IsValid)
-	fmt.Printf("References found: %d\n", len(sm3.References))
+	fmt.Printf("References found: %d\n", len(diag3.References))
 	fmt.Printf("Errors: %d, Warnings: %d\n", len(result3.Errors), len(result3.Warnings))
 	if len(result3.Errors) > 0 {
 		fmt.Printf("  Error: %s - %s\n", result3.Errors[0].Code, result3.Errors[0].Message)
@@ -95,7 +95,7 @@ End --> [*]
 
 	// Test 4: State-machine diagram with self-reference
 	fmt.Println("\n4. Testing self-reference:")
-	sm4 := &models.StateMachineDiagram{
+	diag4 := &models.StateMachineDiagram{
 		Name:    "self-ref",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -104,13 +104,13 @@ End --> [*]
 @enduml`,
 	}
 
-	result4, err := validator.ValidateReferences(sm4)
+	result4, err := validator.ValidateReferences(diag4)
 	if err != nil {
 		log.Fatalf("Error validating references: %v", err)
 	}
 
 	fmt.Printf("Valid: %t\n", result4.IsValid)
-	fmt.Printf("References found: %d\n", len(sm4.References))
+	fmt.Printf("References found: %d\n", len(diag4.References))
 	fmt.Printf("Errors: %d, Warnings: %d\n", len(result4.Errors), len(result4.Warnings))
 	if len(result4.Errors) > 0 {
 		fmt.Printf("  Error: %s - %s\n", result4.Errors[0].Code, result4.Errors[0].Message)
@@ -118,7 +118,7 @@ End --> [*]
 
 	// Test 5: Multiple references
 	fmt.Println("\n5. Testing multiple references:")
-	sm5 := &models.StateMachineDiagram{
+	diag5 := &models.StateMachineDiagram{
 		Name:    "complex-service",
 		Version: "1.0.0",
 		Content: `@startuml
@@ -130,14 +130,14 @@ End --> [*]
 @enduml`,
 	}
 
-	result5, err := validator.ValidateReferences(sm5)
+	result5, err := validator.ValidateReferences(diag5)
 	if err != nil {
 		log.Fatalf("Error validating references: %v", err)
 	}
 
 	fmt.Printf("Valid: %t\n", result5.IsValid)
-	fmt.Printf("References found: %d\n", len(sm5.References))
-	for i, ref := range sm5.References {
+	fmt.Printf("References found: %d\n", len(diag5.References))
+	for i, ref := range diag5.References {
 		fmt.Printf("  %d. Name: %s, Version: %s, Type: %s\n",
 			i+1, ref.Name, ref.Version, ref.Type.String())
 	}

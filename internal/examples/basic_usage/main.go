@@ -44,12 +44,12 @@ Authenticated --> Idle : logout()
 
 	// Example 1: Create a new state-machine diagram in in-progress
 	fmt.Println("\n1. Creating a new state-machine diagram...")
-	sm, err := svc.Create(models.FileTypePUML, "user-auth", "1.0.0", authContent, models.LocationInProgress)
+	diag, err := svc.Create(models.FileTypePUML, "user-auth", "1.0.0", authContent, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", sm.Name, sm.Version)
+	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", diag.Name, diag.Version)
 
 	// Example 2: Read the state-machine diagram back
 	fmt.Println("\n2. Reading the state-machine diagram...")
@@ -87,15 +87,15 @@ Authenticated --> Idle : logout()
 
 	// Example 4: List all state-machine diagrams in in-progress
 	fmt.Println("\n4. Listing all in-progress state-machine diagrams...")
-	stateMachines, err := svc.ListAll(models.FileTypePUML, models.LocationInProgress)
+	diagrams, err := svc.ListAll(models.FileTypePUML, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error listing state-machine diagrams: %v", err)
 		return
 	}
-	fmt.Printf("✓ Found %d state-machine diagram(s) in in-progress:\n", len(stateMachines))
-	for _, sm := range stateMachines {
+	fmt.Printf("✓ Found %d state-machine diagram(s) in in-progress:\n", len(diagrams))
+	for _, diag := range diagrams {
 		fmt.Printf("  - %s-%s (created: %s)\n",
-			sm.Name, sm.Version, sm.Metadata.CreatedAt.Format("2006-01-02 15:04:05"))
+			diag.Name, diag.Version, diag.Metadata.CreatedAt.Format("2006-01-02 15:04:05"))
 	}
 
 	// Example 5: Promote to products (if validation passes)
@@ -113,15 +113,15 @@ Authenticated --> Idle : logout()
 
 	// Example 6: List products
 	fmt.Println("\n6. Listing all product state-machine diagrams...")
-	productSMs, err := svc.ListAll(models.FileTypePUML, models.LocationProducts)
+	productDiagrams, err := svc.ListAll(models.FileTypePUML, models.LocationProducts)
 	if err != nil {
 		log.Printf("Error listing product state-machine diagrams: %v", err)
 		return
 	}
-	fmt.Printf("✓ Found %d state-machine diagram(s) in products:\n", len(productSMs))
-	for _, sm := range productSMs {
+	fmt.Printf("✓ Found %d state-machine diagram(s) in products:\n", len(productDiagrams))
+	for _, diag := range productDiagrams {
 		fmt.Printf("  - %s-%s (created: %s)\n",
-			sm.Name, sm.Version, sm.Metadata.CreatedAt.Format("2006-01-02 15:04:05"))
+			diag.Name, diag.Version, diag.Metadata.CreatedAt.Format("2006-01-02 15:04:05"))
 	}
 
 	fmt.Println("\n✓ Example completed successfully!")

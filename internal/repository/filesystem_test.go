@@ -96,30 +96,30 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 	defer th.Cleanup()
 
 	tests := []struct {
-		name         string
-		stateMachine *models.StateMachineDiagram
-		expectError  bool
-		errorType    models.ErrorType
+		name        string
+		diagram     *models.StateMachineDiagram
+		expectError bool
+		errorType   models.ErrorType
 	}{
 		{
-			name:         "valid in-progress state-machine diagram",
-			stateMachine: th.CreateTestStateMachine("test-sm", "1.0.0", models.LocationInProgress),
-			expectError:  false,
+			name:        "valid in-progress state-machine diagram",
+			diagram:     th.CreateTestStateMachine("test-sm", "1.0.0", models.LocationInProgress),
+			expectError: false,
 		},
 		{
-			name:         "valid products state-machine diagram",
-			stateMachine: th.CreateTestStateMachine("test-sm", "1.0.0", models.LocationProducts),
-			expectError:  false,
+			name:        "valid products state-machine diagram",
+			diagram:     th.CreateTestStateMachine("test-sm", "1.0.0", models.LocationProducts),
+			expectError: false,
 		},
 		{
-			name:         "nil state-machine diagram",
-			stateMachine: nil,
-			expectError:  true,
-			errorType:    models.ErrorTypeValidation,
+			name:        "nil state-machine diagram",
+			diagram:     nil,
+			expectError: true,
+			errorType:   models.ErrorTypeValidation,
 		},
 		{
 			name: "empty name",
-			stateMachine: &models.StateMachineDiagram{
+			diagram: &models.StateMachineDiagram{
 				Name:     "",
 				Version:  "1.0.0",
 				Content:  "test content",
@@ -130,7 +130,7 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 		},
 		{
 			name: "missing version for non-nested",
-			stateMachine: &models.StateMachineDiagram{
+			diagram: &models.StateMachineDiagram{
 				Name:     "test-sm",
 				Version:  "",
 				Content:  "test content",
@@ -143,7 +143,7 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := th.repo.WriteStateMachine(tt.stateMachine)
+			err := th.repo.WriteStateMachine(tt.diagram)
 
 			if tt.expectError {
 				if err == nil {
@@ -164,10 +164,10 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 
 				// Verify file was created
 				filePath := th.repo.pathManager.GetStateMachineFilePathWithFileType(
-					tt.stateMachine.Name,
-					tt.stateMachine.Version,
-					tt.stateMachine.Location,
-					tt.stateMachine.FileType,
+					tt.diagram.Name,
+					tt.diagram.Version,
+					tt.diagram.Location,
+					tt.diagram.FileType,
 				)
 
 				if _, err := os.Stat(filePath); os.IsNotExist(err) {
@@ -180,7 +180,7 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 					t.Errorf("Failed to read created file: %v", err)
 				}
 
-				if string(content) != tt.stateMachine.Content {
+				if string(content) != tt.diagram.Content {
 					t.Error("File content doesn't match expected content")
 				}
 			}
@@ -242,7 +242,7 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sm, err := th.repo.ReadStateMachine(models.FileTypePUML, tt.smName, tt.version, tt.location)
+			diag, err := th.repo.ReadStateMachine(models.FileTypePUML, tt.smName, tt.version, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -261,24 +261,24 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 					return
 				}
 
-				if sm == nil {
+				if diag == nil {
 					t.Error("Expected state-machine diagram to be returned")
 					return
 				}
 
-				if sm.Name != tt.smName {
-					t.Errorf("Expected name %s, got %s", tt.smName, sm.Name)
+				if diag.Name != tt.smName {
+					t.Errorf("Expected name %s, got %s", tt.smName, diag.Name)
 				}
 
-				if sm.Version != tt.version {
-					t.Errorf("Expected version %s, got %s", tt.version, sm.Version)
+				if diag.Version != tt.version {
+					t.Errorf("Expected version %s, got %s", tt.version, diag.Version)
 				}
 
-				if sm.Location != tt.location {
-					t.Errorf("Expected location %v, got %v", tt.location, sm.Location)
+				if diag.Location != tt.location {
+					t.Errorf("Expected location %v, got %v", tt.location, diag.Location)
 				}
 
-				if sm.Content != testSM.Content {
+				if diag.Content != testSM.Content {
 					t.Error("Content doesn't match expected content")
 				}
 			}
@@ -596,11 +596,11 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 				}
 
 				// Verify content is preserved
-				sm, err := th.repo.ReadStateMachine(models.FileTypePUML, tt.smName, tt.version, tt.to)
+				diagram, err := th.repo.ReadStateMachine(models.FileTypePUML, tt.smName, tt.version, tt.to)
 				if err != nil {
 					t.Errorf("Error reading moved state-machine diagram: %v", err)
 				}
-				if sm.Content != testSM.Content {
+				if diagram.Content != testSM.Content {
 					t.Error("Content was not preserved during move")
 				}
 			}
@@ -706,17 +706,17 @@ func TestFileSystemRepository_ListStateMachines(t *testing.T) {
 	defer th.Cleanup()
 
 	// Create multiple test state-machine diagrams
-	testSMs := []*models.StateMachineDiagram{
+	testDiagrams := []*models.StateMachineDiagram{
 		th.CreateTestStateMachine("sm1", "1.0.0", models.LocationInProgress),
 		th.CreateTestStateMachine("sm2", "1.1.0", models.LocationInProgress),
 		th.CreateTestStateMachine("sm3", "2.0.0", models.LocationProducts),
 	}
 
 	// Write the state-machine diagrams
-	for _, sm := range testSMs {
-		err := th.repo.WriteStateMachine(sm)
+	for _, diag := range testDiagrams {
+		err := th.repo.WriteStateMachine(diag)
 		if err != nil {
-			t.Fatalf("Failed to create test state-machine diagram %s: %v", sm.Name, err)
+			t.Fatalf("Failed to create test state-machine diagram %s: %v", diag.Name, err)
 		}
 	}
 
@@ -748,7 +748,7 @@ func TestFileSystemRepository_ListStateMachines(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sms, err := th.repo.ListStateMachines(models.FileTypePUML, tt.location)
+			diagrams, err := th.repo.ListStateMachines(models.FileTypePUML, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -761,14 +761,14 @@ func TestFileSystemRepository_ListStateMachines(t *testing.T) {
 					return
 				}
 
-				if len(sms) != tt.expectedCount {
-					t.Errorf("Expected %d state-machine diagrams, got %d", tt.expectedCount, len(sms))
+				if len(diagrams) != tt.expectedCount {
+					t.Errorf("Expected %d state-machine diagrams, got %d", tt.expectedCount, len(diagrams))
 				}
 
 				// Verify all returned state-machine diagrams have the correct location
-				for _, sm := range sms {
-					if sm.Location != tt.location {
-						t.Errorf("Expected location %v, got %v for state-machine diagram %s", tt.location, sm.Location, sm.Name)
+				for _, diag := range diagrams {
+					if diag.Location != tt.location {
+						t.Errorf("Expected location %v, got %v for state-machine diagram %s", tt.location, diag.Location, diag.Name)
 					}
 				}
 			}
@@ -808,12 +808,12 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 4. List state-machine diagrams
-	sms, err := th.repo.ListStateMachines(models.FileTypePUML, models.LocationInProgress)
+	diagrams, err := th.repo.ListStateMachines(models.FileTypePUML, models.LocationInProgress)
 	if err != nil {
 		t.Fatalf("Failed to list state-machine diagrams: %v", err)
 	}
-	if len(sms) != 1 {
-		t.Errorf("Expected 1 state-machine diagram, got %d", len(sms))
+	if len(diagrams) != 1 {
+		t.Errorf("Expected 1 state-machine diagram, got %d", len(diagrams))
 	}
 
 	// 5. Move to products

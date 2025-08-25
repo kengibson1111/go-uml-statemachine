@@ -119,13 +119,13 @@ Idle --> Active : start
 Active --> [*] : stop
 @enduml`
 
-	sm, err := svc.Create(models.FileTypePUML, "demo-sm", "1.0.0", validContent, models.LocationInProgress)
+	diag, err := svc.Create(models.FileTypePUML, "demo-sm", "1.0.0", validContent, models.LocationInProgress)
 	if err != nil {
 		logger.WithError(err).Error("Failed to create demo state-machine diagram")
 		return
 	}
 
-	logger.WithField("name", sm.Name).Info("Demo state-machine diagram created successfully")
+	logger.WithField("name", diag.Name).Info("Demo state-machine diagram created successfully")
 
 	// Try to create the same state-machine diagram again (should cause conflict)
 	logger.Info("Attempting to create duplicate state-machine diagram...")

@@ -99,7 +99,7 @@ func TestStateMachine_Creation(t *testing.T) {
 		},
 	}
 
-	sm := StateMachineDiagram{
+	diag := StateMachineDiagram{
 		Name:       "test-machine",
 		Version:    "1.0.0",
 		Content:    "@startuml\n[*] --> State1\n@enduml",
@@ -109,23 +109,23 @@ func TestStateMachine_Creation(t *testing.T) {
 	}
 
 	// Test that all fields are properly set
-	if sm.Name != "test-machine" {
-		t.Errorf("StateMachine.Name = %v, want %v", sm.Name, "test-machine")
+	if diag.Name != "test-machine" {
+		t.Errorf("StateMachine.Name = %v, want %v", diag.Name, "test-machine")
 	}
-	if sm.Version != "1.0.0" {
-		t.Errorf("StateMachine.Version = %v, want %v", sm.Version, "1.0.0")
+	if diag.Version != "1.0.0" {
+		t.Errorf("StateMachine.Version = %v, want %v", diag.Version, "1.0.0")
 	}
-	if sm.Content != "@startuml\n[*] --> State1\n@enduml" {
-		t.Errorf("StateMachine.Content = %v, want %v", sm.Content, "@startuml\n[*] --> State1\n@enduml")
+	if diag.Content != "@startuml\n[*] --> State1\n@enduml" {
+		t.Errorf("StateMachine.Content = %v, want %v", diag.Content, "@startuml\n[*] --> State1\n@enduml")
 	}
-	if len(sm.References) != 2 {
-		t.Errorf("StateMachine.References length = %v, want %v", len(sm.References), 2)
+	if len(diag.References) != 2 {
+		t.Errorf("StateMachine.References length = %v, want %v", len(diag.References), 2)
 	}
-	if sm.Location != LocationInProgress {
-		t.Errorf("StateMachine.Location = %v, want %v", sm.Location, LocationInProgress)
+	if diag.Location != LocationInProgress {
+		t.Errorf("StateMachine.Location = %v, want %v", diag.Location, LocationInProgress)
 	}
-	if sm.Metadata.Author != "test-author" {
-		t.Errorf("StateMachine.Metadata.Author = %v, want %v", sm.Metadata.Author, "test-author")
+	if diag.Metadata.Author != "test-author" {
+		t.Errorf("StateMachine.Metadata.Author = %v, want %v", diag.Metadata.Author, "test-author")
 	}
 }
 

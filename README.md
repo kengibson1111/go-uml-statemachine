@@ -45,12 +45,12 @@ func main() {
     Active --> Idle : stop()
     @enduml`
     
-    sm, err := svc.Create(diagram.FileTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
+    diag, err := svc.Create(diagram.FileTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
     if err != nil {
         log.Fatal(err)
     }
     
-    fmt.Printf("Created state-machine diagram: %s-%s\n", sm.Name, sm.Version)
+    fmt.Printf("Created state-machine diagram: %s-%s\n", diag.Name, diag.Version)
 }
 ```
 
@@ -137,16 +137,16 @@ config.MergeWithEnv()
 
 ```go
 // Create in in-progress location
-sm, err := svc.Create(diagram.FileTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationInProgress)
+diag, err := svc.Create(diagram.FileTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationInProgress)
 
 // Create in products location (for direct production deployment)
-sm, err := svc.Create(diagram.FileTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationProducts)
+diag, err := svc.Create(diagram.FileTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationProducts)
 ```
 
 ### Reading State-Machine Diagrams
 
 ```go
-sm, err := svc.Read(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
+diag, err := svc.Read(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     log.Printf("Error reading state-machine diagram: %v", err)
 }
@@ -155,7 +155,7 @@ if err != nil {
 ### Updating State-Machine Diagrams
 
 ```go
-sm.Content = updatedPlantUMLContent
+diagram.Content = updatedPlantUMLContent
 err := svc.Update(sm)
 ```
 
@@ -172,7 +172,7 @@ err := svc.Delete(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationIn
 inProgressSMs, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
 
 // List all production state-machine diagrams
-productSMs, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationProducts)
+productDiagrams, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationProducts)
 ```
 
 ## Validation
@@ -278,13 +278,13 @@ Reference state-machine diagrams within the same parent directory:
 ### Reference Resolution
 
 ```go
-err := svc.ResolveReferences(sm)
+err := svc.ResolveReferences(diagram)
 if err != nil {
     log.Printf("Reference resolution failed: %v", err)
 }
 
 // Check resolved references
-for _, ref := range sm.References {
+for _, ref := range diagram.References {
     fmt.Printf("Reference: %s (type: %s, path: %s)\n", 
         ref.Name, ref.Type.String(), ref.Path)
 }
@@ -295,7 +295,7 @@ for _, ref := range sm.References {
 The module provides comprehensive error handling with context:
 
 ```go
-sm, err := svc.Read(diagram.FileTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
+diag, err := svc.Read(diagram.FileTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     // Error includes context about the operation, component, and parameters
     fmt.Printf("Error: %v\n", err)
@@ -303,7 +303,7 @@ if err != nil {
 }
 
 // Use the state-machine diagram
-fmt.Printf("Content: %s\n", sm.Content)
+fmt.Printf("Content: %s\n", diagram.Content)
 ```
 
 ## Examples
@@ -633,7 +633,7 @@ type DiagramService interface {
     ListAll(fileType FileType, location Location) ([]diagram, error)
 
     // Reference operations
-    ResolveReferences(sm *diagram) error
+    ResolveReferences(diagram *diagram) error
 }
 ```
 

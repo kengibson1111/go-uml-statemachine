@@ -119,7 +119,7 @@ Idle --> Active : start
 Active --> [*] : stop
 @enduml`
 
-	diag, err := svc.Create(models.FileTypePUML, "demo-sm", "1.0.0", validContent, models.LocationInProgress)
+	diag, err := svc.Create(models.FileTypePUML, "demo-diag", "1.0.0", validContent, models.LocationInProgress)
 	if err != nil {
 		logger.WithError(err).Error("Failed to create demo state-machine diagram")
 		return
@@ -129,7 +129,7 @@ Active --> [*] : stop
 
 	// Try to create the same state-machine diagram again (should cause conflict)
 	logger.Info("Attempting to create duplicate state-machine diagram...")
-	_, err = svc.Create(models.FileTypePUML, "demo-sm", "1.0.0", validContent, models.LocationInProgress)
+	_, err = svc.Create(models.FileTypePUML, "demo-diag", "1.0.0", validContent, models.LocationInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]interface{}{
@@ -147,7 +147,7 @@ Active --> [*] : stop
 
 	// Clean up
 	logger.Info("Cleaning up demo state-machine diagram...")
-	if err := svc.Delete(models.FileTypePUML, "demo-sm", "1.0.0", models.LocationInProgress); err != nil {
+	if err := svc.Delete(models.FileTypePUML, "demo-diag", "1.0.0", models.LocationInProgress); err != nil {
 		logger.WithError(err).Warn("Failed to clean up demo state-machine diagram")
 	}
 }

@@ -329,13 +329,13 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 	t.Run("Promote with validation errors", func(t *testing.T) {
 		// Create state-machine diagram with invalid PlantUML content
 		invalidContent := "@startuml\n' Missing @enduml tag"
-		_, err := svc.Create(models.FileTypePUML, "invalid-sm", "1.0.0", invalidContent, models.LocationInProgress)
+		_, err := svc.Create(models.FileTypePUML, "invalid-diag", "1.0.0", invalidContent, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to create invalid state-machine diagram: %v", err)
 		}
 
 		// Try to promote - should fail due to validation errors
-		err = svc.Promote(models.FileTypePUML, "invalid-sm", "1.0.0")
+		err = svc.Promote(models.FileTypePUML, "invalid-diag", "1.0.0")
 		if err == nil {
 			t.Errorf("Should not be able to promote state-machine diagram with validation errors")
 		}

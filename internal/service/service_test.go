@@ -149,7 +149,7 @@ func TestService_Create(t *testing.T) {
 	}{
 		{
 			name:         "successful create in progress",
-			inputName:    "test-sm",
+			inputName:    "test-diag",
 			inputVer:     "1.0.0",
 			inputContent: "@startuml\n[*] --> Idle\n@enduml",
 			inputLoc:     models.LocationInProgress,
@@ -178,7 +178,7 @@ func TestService_Create(t *testing.T) {
 		},
 		{
 			name:         "empty version validation",
-			inputName:    "test-sm",
+			inputName:    "test-diag",
 			inputVer:     "",
 			inputContent: "content",
 			inputLoc:     models.LocationInProgress,
@@ -188,7 +188,7 @@ func TestService_Create(t *testing.T) {
 		},
 		{
 			name:         "empty content validation",
-			inputName:    "test-sm",
+			inputName:    "test-diag",
 			inputVer:     "1.0.0",
 			inputContent: "",
 			inputLoc:     models.LocationInProgress,
@@ -198,7 +198,7 @@ func TestService_Create(t *testing.T) {
 		},
 		{
 			name:         "already exists conflict",
-			inputName:    "test-sm",
+			inputName:    "test-diag",
 			inputVer:     "1.0.0",
 			inputContent: "content",
 			inputLoc:     models.LocationInProgress,
@@ -212,7 +212,7 @@ func TestService_Create(t *testing.T) {
 		},
 		{
 			name:         "products directory conflict for in-progress",
-			inputName:    "test-sm",
+			inputName:    "test-diag",
 			inputVer:     "1.0.0",
 			inputContent: "content",
 			inputLoc:     models.LocationInProgress,
@@ -295,7 +295,7 @@ func TestService_Read(t *testing.T) {
 	}{
 		{
 			name:      "successful read",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
@@ -310,7 +310,7 @@ func TestService_Read(t *testing.T) {
 			},
 			wantErr: false,
 			wantResult: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
 				Location: models.LocationInProgress,
@@ -327,7 +327,7 @@ func TestService_Read(t *testing.T) {
 		},
 		{
 			name:        "empty version validation",
-			inputName:   "test-sm",
+			inputName:   "test-diag",
 			inputVer:    "",
 			inputLoc:    models.LocationInProgress,
 			setupMock:   func(repo *mockRepository) {},
@@ -336,7 +336,7 @@ func TestService_Read(t *testing.T) {
 		},
 		{
 			name:      "repository error",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
@@ -413,7 +413,7 @@ func TestService_Update(t *testing.T) {
 		{
 			name: "successful update",
 			input: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Updated\n@enduml",
 				Location: models.LocationInProgress,
@@ -450,7 +450,7 @@ func TestService_Update(t *testing.T) {
 		{
 			name: "empty version validation",
 			input: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "",
 				Content:  "content",
 				Location: models.LocationInProgress,
@@ -462,7 +462,7 @@ func TestService_Update(t *testing.T) {
 		{
 			name: "empty content validation",
 			input: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "",
 				Location: models.LocationInProgress,
@@ -474,7 +474,7 @@ func TestService_Update(t *testing.T) {
 		{
 			name: "state-machine diagram does not exist",
 			input: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "content",
 				Location: models.LocationInProgress,
@@ -535,7 +535,7 @@ func TestService_Delete(t *testing.T) {
 	}{
 		{
 			name:      "successful delete",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
@@ -559,7 +559,7 @@ func TestService_Delete(t *testing.T) {
 		},
 		{
 			name:        "empty version validation",
-			inputName:   "test-sm",
+			inputName:   "test-diag",
 			inputVer:    "",
 			inputLoc:    models.LocationInProgress,
 			setupMock:   func(repo *mockRepository) {},
@@ -568,7 +568,7 @@ func TestService_Delete(t *testing.T) {
 		},
 		{
 			name:      "state-machine diagram does not exist",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
@@ -581,7 +581,7 @@ func TestService_Delete(t *testing.T) {
 		},
 		{
 			name:      "repository delete error",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
@@ -641,7 +641,7 @@ func TestService_Promote(t *testing.T) {
 	}{
 		{
 			name:      "successful promotion",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// State-machine diagram exists in in-progress
@@ -712,7 +712,7 @@ func TestService_Promote(t *testing.T) {
 		},
 		{
 			name:        "empty version validation",
-			inputName:   "test-sm",
+			inputName:   "test-diag",
 			inputVer:    "",
 			setupMock:   func(repo *mockRepository, validator *mockValidator) {},
 			wantErr:     true,
@@ -720,7 +720,7 @@ func TestService_Promote(t *testing.T) {
 		},
 		{
 			name:      "state-machine diagram does not exist in in-progress",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
@@ -732,7 +732,7 @@ func TestService_Promote(t *testing.T) {
 		},
 		{
 			name:      "directory conflict in products",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
@@ -750,7 +750,7 @@ func TestService_Promote(t *testing.T) {
 		},
 		{
 			name:      "validation fails with errors",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// State-machine diagram exists in in-progress
@@ -788,7 +788,7 @@ func TestService_Promote(t *testing.T) {
 		},
 		{
 			name:      "move operation fails",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// State-machine diagram exists in in-progress
@@ -873,7 +873,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 	}{
 		{
 			name:      "rollback on verification failure - not found in products",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// Initial setup - state-machine diagram exists in in-progress
@@ -933,7 +933,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 		},
 		{
 			name:      "rollback on verification failure - still in in-progress",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// Initial setup - state-machine diagram exists in in-progress
@@ -1031,7 +1031,7 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 	}{
 		{
 			name:      "validation passes with warnings only",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			validationFunc: func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 				return &models.ValidationResult{
@@ -1046,7 +1046,7 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 		},
 		{
 			name:      "validation fails with errors and warnings",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			validationFunc: func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 				return &models.ValidationResult{
@@ -1064,7 +1064,7 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 		},
 		{
 			name:      "validation error during validation process",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			validationFunc: func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 				return nil, errors.New("validation process failed")
@@ -1168,7 +1168,7 @@ func TestService_Validate(t *testing.T) {
 	}{
 		{
 			name:      "successful validation in-progress with strictness in-progress",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
@@ -1200,7 +1200,7 @@ func TestService_Validate(t *testing.T) {
 		},
 		{
 			name:      "successful validation products with strictness products",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationProducts,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
@@ -1245,7 +1245,7 @@ func TestService_Validate(t *testing.T) {
 		},
 		{
 			name:        "empty version validation",
-			inputName:   "test-sm",
+			inputName:   "test-diag",
 			inputVer:    "",
 			inputLoc:    models.LocationInProgress,
 			setupMock:   func(repo *mockRepository, validator *mockValidator) {},
@@ -1254,7 +1254,7 @@ func TestService_Validate(t *testing.T) {
 		},
 		{
 			name:      "state-machine diagram not found",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
@@ -1267,7 +1267,7 @@ func TestService_Validate(t *testing.T) {
 		},
 		{
 			name:      "validator error",
-			inputName: "test-sm",
+			inputName: "test-diag",
 			inputVer:  "1.0.0",
 			inputLoc:  models.LocationInProgress,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
@@ -1378,7 +1378,7 @@ func TestService_ListAll(t *testing.T) {
 				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
 					return []models.StateMachineDiagram{
 						{
-							Name:     "prod-sm",
+							Name:     "prod-diag",
 							Version:  "1.0.0",
 							Content:  "@startuml\n[*] --> Ready\n@enduml",
 							Location: location,
@@ -1475,7 +1475,7 @@ func TestService_ResolveReferences(t *testing.T) {
 		{
 			name: "successful resolve no references",
 			input: &models.StateMachineDiagram{
-				Name:       "test-sm",
+				Name:       "test-diag",
 				Version:    "1.0.0",
 				Content:    "@startuml\n[*] --> Idle\n@enduml",
 				Location:   models.LocationInProgress,
@@ -1487,13 +1487,13 @@ func TestService_ResolveReferences(t *testing.T) {
 		{
 			name: "successful resolve product reference",
 			input: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
 				Location: models.LocationInProgress,
 				References: []models.Reference{
 					{
-						Name:    "auth-sm",
+						Name:    "auth-diag",
 						Version: "2.0.0",
 						Type:    models.ReferenceTypeProduct,
 					},
@@ -1501,7 +1501,7 @@ func TestService_ResolveReferences(t *testing.T) {
 			},
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
-					if name == "auth-sm" && version == "2.0.0" && location == models.LocationProducts {
+					if name == "auth-diag" && version == "2.0.0" && location == models.LocationProducts {
 						return true, nil
 					}
 					return false, nil
@@ -1512,20 +1512,20 @@ func TestService_ResolveReferences(t *testing.T) {
 		{
 			name: "successful resolve nested reference",
 			input: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
 				Location: models.LocationInProgress,
 				References: []models.Reference{
 					{
-						Name: "nested-sm",
+						Name: "nested-diag",
 						Type: models.ReferenceTypeNested,
 					},
 				},
 			},
 			setupMock: func(repo *mockRepository) {
 				repo.directoryExistsFunc = func(path string) (bool, error) {
-					expectedPath := "in-progress\\puml\\test-sm-1.0.0\\nested\\nested-sm"
+					expectedPath := "in-progress\\puml\\test-diag-1.0.0\\nested\\nested-diag"
 					if path == expectedPath {
 						return true, nil
 					}
@@ -1537,31 +1537,31 @@ func TestService_ResolveReferences(t *testing.T) {
 		{
 			name: "successful resolve multiple references",
 			input: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
 				Location: models.LocationInProgress,
 				References: []models.Reference{
 					{
-						Name:    "auth-sm",
+						Name:    "auth-diag",
 						Version: "2.0.0",
 						Type:    models.ReferenceTypeProduct,
 					},
 					{
-						Name: "nested-sm",
+						Name: "nested-diag",
 						Type: models.ReferenceTypeNested,
 					},
 				},
 			},
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
-					if name == "auth-sm" && version == "2.0.0" && location == models.LocationProducts {
+					if name == "auth-diag" && version == "2.0.0" && location == models.LocationProducts {
 						return true, nil
 					}
 					return false, nil
 				}
 				repo.directoryExistsFunc = func(path string) (bool, error) {
-					expectedPath := "in-progress\\puml\\test-sm-1.0.0\\nested\\nested-sm"
+					expectedPath := "in-progress\\puml\\test-diag-1.0.0\\nested\\nested-diag"
 					if path == expectedPath {
 						return true, nil
 					}
@@ -1580,13 +1580,13 @@ func TestService_ResolveReferences(t *testing.T) {
 		{
 			name: "product reference not found",
 			input: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
 				Location: models.LocationInProgress,
 				References: []models.Reference{
 					{
-						Name:    "missing-sm",
+						Name:    "missing-diag",
 						Version: "1.0.0",
 						Type:    models.ReferenceTypeProduct,
 					},
@@ -1603,7 +1603,7 @@ func TestService_ResolveReferences(t *testing.T) {
 		{
 			name: "nested reference not found",
 			input: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
 				Location: models.LocationInProgress,
@@ -1625,13 +1625,13 @@ func TestService_ResolveReferences(t *testing.T) {
 		{
 			name: "repository error checking product reference",
 			input: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
 				Location: models.LocationInProgress,
 				References: []models.Reference{
 					{
-						Name:    "auth-sm",
+						Name:    "auth-diag",
 						Version: "2.0.0",
 						Type:    models.ReferenceTypeProduct,
 					},
@@ -1648,13 +1648,13 @@ func TestService_ResolveReferences(t *testing.T) {
 		{
 			name: "repository error checking nested reference",
 			input: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
 				Location: models.LocationInProgress,
 				References: []models.Reference{
 					{
-						Name: "nested-sm",
+						Name: "nested-diag",
 						Type: models.ReferenceTypeNested,
 					},
 				},
@@ -1737,7 +1737,7 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 		{
 			name: "product reference path building",
 			diagram: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "1.0.0",
 				Location: models.LocationInProgress,
 			},
@@ -1751,7 +1751,7 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 		{
 			name: "nested reference path building in-progress",
 			diagram: &models.StateMachineDiagram{
-				Name:     "main-sm",
+				Name:     "main-diag",
 				Version:  "3.0.0",
 				Location: models.LocationInProgress,
 			},
@@ -1759,12 +1759,12 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 				Name: "sub-component",
 				Type: models.ReferenceTypeNested,
 			},
-			expectedPath: "in-progress\\puml\\main-sm-3.0.0\\nested\\sub-component\\sub-component.puml",
+			expectedPath: "in-progress\\puml\\main-diag-3.0.0\\nested\\sub-component\\sub-component.puml",
 		},
 		{
 			name: "nested reference path building products",
 			diagram: &models.StateMachineDiagram{
-				Name:     "prod-sm",
+				Name:     "prod-diag",
 				Version:  "1.5.0",
 				Location: models.LocationProducts,
 			},
@@ -1772,7 +1772,7 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 				Name: "helper",
 				Type: models.ReferenceTypeNested,
 			},
-			expectedPath: "products\\puml\\prod-sm-1.5.0\\nested\\helper\\helper.puml",
+			expectedPath: "products\\puml\\prod-diag-1.5.0\\nested\\helper\\helper.puml",
 		},
 	}
 

@@ -103,12 +103,12 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 	}{
 		{
 			name:        "valid in-progress state-machine diagram",
-			diagram:     th.CreateTestStateMachine("test-sm", "1.0.0", models.LocationInProgress),
+			diagram:     th.CreateTestStateMachine("test-diag", "1.0.0", models.LocationInProgress),
 			expectError: false,
 		},
 		{
 			name:        "valid products state-machine diagram",
-			diagram:     th.CreateTestStateMachine("test-sm", "1.0.0", models.LocationProducts),
+			diagram:     th.CreateTestStateMachine("test-diag", "1.0.0", models.LocationProducts),
 			expectError: false,
 		},
 		{
@@ -131,7 +131,7 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 		{
 			name: "missing version for non-nested",
 			diagram: &models.StateMachineDiagram{
-				Name:     "test-sm",
+				Name:     "test-diag",
 				Version:  "",
 				Content:  "test content",
 				Location: models.LocationInProgress,

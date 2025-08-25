@@ -65,7 +65,7 @@ func TestStateMachineError_DetailedError(t *testing.T) {
 		Operation: "Validate",
 		Component: "Validator",
 		Context: map[string]interface{}{
-			"name":    "test-sm",
+			"name":    "test-diag",
 			"version": "1.0.0",
 		},
 		Recoverable: true,
@@ -83,7 +83,7 @@ func TestStateMachineError_DetailedError(t *testing.T) {
 		"Operation: Validate",
 		"Component: Validator",
 		"Context:",
-		"name: test-sm",
+		"name: test-diag",
 		"version: 1.0.0",
 	}
 
@@ -98,7 +98,7 @@ func TestStateMachineError_WithContextMap(t *testing.T) {
 	err := NewStateMachineError(ErrorTypeValidation, "test", nil)
 
 	contextMap := map[string]interface{}{
-		"name":    "test-sm",
+		"name":    "test-diag",
 		"version": "1.0.0",
 		"count":   5,
 	}

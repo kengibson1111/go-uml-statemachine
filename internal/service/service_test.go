@@ -160,7 +160,7 @@ func TestService_Create(t *testing.T) {
 					}
 					return false, nil // doesn't exist in products either
 				}
-				repo.writeStateMachineFunc = func(sm *models.StateMachineDiagram) error {
+				repo.writeStateMachineFunc = func(diag *models.StateMachineDiagram) error {
 					return nil
 				}
 			},
@@ -422,7 +422,7 @@ func TestService_Update(t *testing.T) {
 				repo.existsFunc = func(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 					return true, nil // exists
 				}
-				repo.writeStateMachineFunc = func(sm *models.StateMachineDiagram) error {
+				repo.writeStateMachineFunc = func(diag *models.StateMachineDiagram) error {
 					return nil
 				}
 			},
@@ -666,7 +666,7 @@ func TestService_Promote(t *testing.T) {
 				}
 
 				// Validation passes
-				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					return &models.ValidationResult{
 						IsValid:  true,
 						Errors:   []models.ValidationError{},
@@ -772,7 +772,7 @@ func TestService_Promote(t *testing.T) {
 				}
 
 				// Validation fails with errors
-				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					result := &models.ValidationResult{
 						IsValid: false,
 						Errors: []models.ValidationError{
@@ -810,7 +810,7 @@ func TestService_Promote(t *testing.T) {
 				}
 
 				// Validation passes
-				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					return &models.ValidationResult{
 						IsValid:  true,
 						Errors:   []models.ValidationError{},
@@ -908,7 +908,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 				}
 
 				// Validation passes
-				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					return &models.ValidationResult{
 						IsValid:  true,
 						Errors:   []models.ValidationError{},
@@ -968,7 +968,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 				}
 
 				// Validation passes
-				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					return &models.ValidationResult{
 						IsValid:  true,
 						Errors:   []models.ValidationError{},
@@ -1033,7 +1033,7 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 			name:      "validation passes with warnings only",
 			inputName: "test-diag",
 			inputVer:  "1.0.0",
-			validationFunc: func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+			validationFunc: func(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 				return &models.ValidationResult{
 					IsValid: true,
 					Errors:  []models.ValidationError{},
@@ -1048,7 +1048,7 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 			name:      "validation fails with errors and warnings",
 			inputName: "test-diag",
 			inputVer:  "1.0.0",
-			validationFunc: func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+			validationFunc: func(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 				return &models.ValidationResult{
 					IsValid: false,
 					Errors: []models.ValidationError{
@@ -1066,7 +1066,7 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 			name:      "validation error during validation process",
 			inputName: "test-diag",
 			inputVer:  "1.0.0",
-			validationFunc: func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+			validationFunc: func(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 				return nil, errors.New("validation process failed")
 			},
 			wantErr:     true,
@@ -1180,7 +1180,7 @@ func TestService_Validate(t *testing.T) {
 						Location: location,
 					}, nil
 				}
-				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					if strictness != models.StrictnessInProgress {
 						t.Errorf("Expected StrictnessInProgress but got %v", strictness)
 					}
@@ -1212,7 +1212,7 @@ func TestService_Validate(t *testing.T) {
 						Location: location,
 					}, nil
 				}
-				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					if strictness != models.StrictnessProducts {
 						t.Errorf("Expected StrictnessProducts but got %v", strictness)
 					}
@@ -1279,7 +1279,7 @@ func TestService_Validate(t *testing.T) {
 						Location: location,
 					}, nil
 				}
-				validator.validateFunc = func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
+				validator.validateFunc = func(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {
 					return nil, errors.New("validation engine error")
 				}
 			},
@@ -1354,13 +1354,13 @@ func TestService_ListAll(t *testing.T) {
 				repo.listStateMachinesFunc = func(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
 					return []models.StateMachineDiagram{
 						{
-							Name:     "sm1",
+							Name:     "diag1",
 							Version:  "1.0.0",
 							Content:  "@startuml\n[*] --> Idle\n@enduml",
 							Location: location,
 						},
 						{
-							Name:     "sm2",
+							Name:     "diag2",
 							Version:  "2.0.0",
 							Content:  "@startuml\n[*] --> Active\n@enduml",
 							Location: location,

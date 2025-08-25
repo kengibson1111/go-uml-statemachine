@@ -298,11 +298,11 @@ Error --> Idle : reset()
 	}
 
 	// Test Read
-	readSM, err := svc.Read(FileTypePUML, "test-integration", "1.0.0", LocationInProgress)
+	readDiag, err := svc.Read(FileTypePUML, "test-integration", "1.0.0", LocationInProgress)
 	if err != nil {
 		t.Fatalf("Read() failed: %v", err)
 	}
-	if readSM.Content != content {
+	if readDiag.Content != content {
 		t.Errorf("Read content mismatch")
 	}
 
@@ -333,18 +333,18 @@ Error --> Idle : reset()
 
 	// Test Update
 	updatedContent := content + "\n' Updated comment"
-	readSM.Content = updatedContent
-	err = svc.Update(readSM)
+	readDiag.Content = updatedContent
+	err = svc.Update(readDiag)
 	if err != nil {
 		t.Fatalf("Update() failed: %v", err)
 	}
 
 	// Verify update
-	updatedSM, err := svc.Read(FileTypePUML, "test-integration", "1.0.0", LocationInProgress)
+	updatedDiag, err := svc.Read(FileTypePUML, "test-integration", "1.0.0", LocationInProgress)
 	if err != nil {
 		t.Fatalf("Read() after update failed: %v", err)
 	}
-	if updatedSM.Content != updatedContent {
+	if updatedDiag.Content != updatedContent {
 		t.Error("Update() did not persist changes")
 	}
 
@@ -356,12 +356,12 @@ Error --> Idle : reset()
 		}
 
 		// Verify promotion
-		productDiagrams, err := svc.ListAll(FileTypePUML, LocationProducts)
+		productDiags, err := svc.ListAll(FileTypePUML, LocationProducts)
 		if err != nil {
 			t.Fatalf("ListAll(LocationProducts) failed: %v", err)
 		}
 		found = false
-		for _, diag := range productDiagrams {
+		for _, diag := range productDiags {
 			if diag.Name == "test-integration" && diag.Version == "1.0.0" {
 				found = true
 				break

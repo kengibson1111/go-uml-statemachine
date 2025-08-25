@@ -72,12 +72,12 @@ Cancelled --> [*]
 	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", diag.Name, diag.Version)
 
 	// Read it back to verify
-	readSM, err := svc.Read(diagram.FileTypePUML, "order-processing", "1.0.0", diagram.LocationInProgress)
+	readDiag, err := svc.Read(diagram.FileTypePUML, "order-processing", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error reading state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Verified state-machine diagram exists (content length: %d)\n", len(readSM.Content))
+	fmt.Printf("✓ Verified state-machine diagram exists (content length: %d)\n", len(readDiag.Content))
 
 	// Clean up
 	err = svc.Delete(diagram.FileTypePUML, "order-processing", "1.0.0", diagram.LocationInProgress)
@@ -234,12 +234,12 @@ Authenticated --> [*]
 
 @enduml`
 
-	baseSM, err := svc.Create(diagram.FileTypePUML, "base-auth", "1.0.0", baseAuthContent, diagram.LocationInProgress)
+	baseDiag, err := svc.Create(diagram.FileTypePUML, "base-auth", "1.0.0", baseAuthContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating base auth: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created base component: %s-%s\n", baseSM.Name, baseSM.Version)
+	fmt.Printf("✓ Created base component: %s-%s\n", baseDiag.Name, baseDiag.Version)
 
 	// Validate and promote the base component
 	result, err := svc.Validate(diagram.FileTypePUML, "base-auth", "1.0.0", diagram.LocationInProgress)
@@ -277,20 +277,20 @@ Authenticated --> [*]
 
 @enduml`
 
-	complexSM, err := svc.Create(diagram.FileTypePUML, "complex-auth", "1.0.0", complexAuthContent, diagram.LocationInProgress)
+	complexDiag, err := svc.Create(diagram.FileTypePUML, "complex-auth", "1.0.0", complexAuthContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating complex auth: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created complex system: %s-%s\n", complexSM.Name, complexSM.Version)
+	fmt.Printf("✓ Created complex system: %s-%s\n", complexDiag.Name, complexDiag.Version)
 
 	// Resolve references in the complex system
-	err = svc.ResolveReferences(complexSM)
+	err = svc.ResolveReferences(complexDiag)
 	if err != nil {
 		log.Printf("Error resolving references: %v", err)
 	} else {
-		fmt.Printf("✓ Resolved %d references:\n", len(complexSM.References))
-		for _, ref := range complexSM.References {
+		fmt.Printf("✓ Resolved %d references:\n", len(complexDiag.References))
+		for _, ref := range complexDiag.References {
 			fmt.Printf("  - %s (type: %s)\n", ref.Name, ref.Type.String())
 		}
 	}

@@ -147,7 +147,7 @@ func (v *PlantUMLValidator) parseReferences(content string) ([]models.Reference,
 }
 
 // validateReference validates a single reference
-func (v *PlantUMLValidator) validateReference(ref models.Reference, sm *models.StateMachineDiagram, result *models.ValidationResult) {
+func (v *PlantUMLValidator) validateReference(ref models.Reference, diag *models.StateMachineDiagram, result *models.ValidationResult) {
 	// Validate reference name
 	if !v.isValidStateName(ref.Name) {
 		result.AddError("INVALID_REFERENCE_NAME",
@@ -158,9 +158,9 @@ func (v *PlantUMLValidator) validateReference(ref models.Reference, sm *models.S
 	// Validate reference type and structure
 	switch ref.Type {
 	case models.ReferenceTypeProduct:
-		v.validateProductReference(ref, sm, result)
+		v.validateProductReference(ref, diag, result)
 	case models.ReferenceTypeNested:
-		v.validateNestedReference(ref, sm, result)
+		v.validateNestedReference(ref, diag, result)
 	default:
 		result.AddError("UNKNOWN_REFERENCE_TYPE",
 			fmt.Sprintf("Unknown reference type for '%s'", ref.Name), 1, 1)
@@ -314,15 +314,15 @@ func (v *PlantUMLValidator) resolveReference(ref models.Reference, diag *models.
 }
 
 // checkCircularReference detects circular references between state-machine diagrams
-func (v *PlantUMLValidator) checkCircularReference(ref models.Reference, referencedSM *models.StateMachineDiagram, originalSM *models.StateMachineDiagram, result *models.ValidationResult, visited map[string]bool) {
+func (v *PlantUMLValidator) checkCircularReference(ref models.Reference, referencedDiag *models.StateMachineDiagram, originalDiag *models.StateMachineDiagram, result *models.ValidationResult, visited map[string]bool) {
 	// Create a unique key for the referenced state-machine diagram
-	refKey := fmt.Sprintf("%s-%s-%s", referencedSM.Name, referencedSM.Version, referencedSM.Location.String())
-	originalKey := fmt.Sprintf("%s-%s-%s", originalSM.Name, originalSM.Version, originalSM.Location.String())
+	refKey := fmt.Sprintf("%s-%s-%s", referencedDiag.Name, referencedDiag.Version, referencedDiag.Location.String())
+	originalKey := fmt.Sprintf("%s-%s-%s", originalDiag.Name, originalDiag.Version, originalDiag.Location.String())
 
 	// Check if we've already visited this reference (circular reference detected)
 	if visited[refKey] {
 		result.AddError("CIRCULAR_REFERENCE",
-			fmt.Sprintf("Circular reference detected: '%s' references '%s'", originalSM.Name, ref.Name), 1, 1)
+			fmt.Sprintf("Circular reference detected: '%s' references '%s'", originalDiag.Name, ref.Name), 1, 1)
 		return
 	}
 
@@ -337,17 +337,17 @@ func (v *PlantUMLValidator) checkCircularReference(ref models.Reference, referen
 	visited[refKey] = true
 
 	// Parse references from the referenced state-machine diagram if not already done
-	if len(referencedSM.References) == 0 {
-		references, err := v.parseReferences(referencedSM.Content)
+	if len(referencedDiag.References) == 0 {
+		references, err := v.parseReferences(referencedDiag.Content)
 		if err != nil {
 			// Can't check further, but don't fail validation for this
 			return
 		}
-		referencedSM.References = references
+		referencedDiag.References = references
 	}
 
 	// Check each reference in the referenced state-machine diagram
-	for _, nestedRef := range referencedSM.References {
+	for _, nestedRef := range referencedDiag.References {
 		// Only check if we can resolve the nested reference
 		var targetLocation models.Location
 		var checkVersion string
@@ -364,13 +364,13 @@ func (v *PlantUMLValidator) checkCircularReference(ref models.Reference, referen
 		}
 
 		// Try to read the nested referenced state-machine diagram
-		nestedReferencedSM, err := v.repository.ReadStateMachine(originalSM.FileType, nestedRef.Name, checkVersion, targetLocation)
+		nestedReferencedDiag, err := v.repository.ReadStateMachine(originalDiag.FileType, nestedRef.Name, checkVersion, targetLocation)
 		if err != nil {
 			continue // Skip if we can't read it
 		}
 
 		// Recursively check for circular references
-		v.checkCircularReference(nestedRef, nestedReferencedSM, originalSM, result, visited)
+		v.checkCircularReference(nestedRef, nestedReferencedDiag, originalDiag, result, visited)
 	}
 
 	// Remove from visited when we're done with this branch

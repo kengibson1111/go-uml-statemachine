@@ -150,13 +150,13 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		}
 
 		// Verify the update
-		updatedSM, err := svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
+		updatedDiag, err := svc.Read(models.FileTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to read updated state-machine diagram: %v", err)
 		}
 
-		if updatedSM.Content != updatedContent {
-			t.Errorf("Update failed. Expected:\n%s\nGot:\n%s", updatedContent, updatedSM.Content)
+		if updatedDiag.Content != updatedContent {
+			t.Errorf("Update failed. Expected:\n%s\nGot:\n%s", updatedContent, updatedDiag.Content)
 		}
 	})
 

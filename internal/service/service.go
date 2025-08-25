@@ -681,13 +681,13 @@ func (s *service) buildNestedReferencePath(diag *models.StateMachineDiagram, ref
 }
 
 // checkNestedReferenceExists checks if a nested reference exists within the parent state-machine diagram's directory
-func (s *service) checkNestedReferenceExists(sm *models.StateMachineDiagram, refName string) (bool, error) {
+func (s *service) checkNestedReferenceExists(diag *models.StateMachineDiagram, refName string) (bool, error) {
 	// For nested references, we need to check if the nested directory and file exist
 	// This is a simplified check - in a real implementation, we might need more sophisticated
 	// directory traversal logic depending on how the repository is implemented
 
 	// We'll use the repository's directory checking capabilities
-	nestedDirPath := s.buildNestedDirectoryPath(sm, refName)
+	nestedDirPath := s.buildNestedDirectoryPath(diag, refName)
 
 	// Check if the nested directory exists
 	exists, err := s.repo.DirectoryExists(nestedDirPath)

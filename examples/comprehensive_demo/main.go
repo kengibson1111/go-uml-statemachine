@@ -124,12 +124,12 @@ OrderCancelled --> [*]
 
 	// Read
 	fmt.Println("Reading the state-machine diagram...")
-	readSM, err := svc.Read(diagram.FileTypePUML, "ecommerce-order", "1.0.0", diagram.LocationInProgress)
+	readDiag, err := svc.Read(diagram.FileTypePUML, "ecommerce-order", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error reading state-machine diagram: %v", err)
 		return
 	}
-	fmt.Printf("✓ Read: %s-%s (content length: %d)\n", readSM.Name, readSM.Version, len(readSM.Content))
+	fmt.Printf("✓ Read: %s-%s (content length: %d)\n", readDiag.Name, readDiag.Version, len(readDiag.Content))
 
 	// Update
 	fmt.Println("Updating the state-machine diagram...")
@@ -139,8 +139,8 @@ PaymentFailed --> RefundProcessing : request_refund()
 RefundProcessing --> RefundCompleted : refund_success()
 RefundCompleted --> [*]`
 
-	readSM.Content = updatedContent
-	err = svc.Update(readSM)
+	readDiag.Content = updatedContent
+	err = svc.Update(readDiag)
 	if err != nil {
 		log.Printf("Error updating state-machine diagram: %v", err)
 		return
@@ -251,12 +251,12 @@ Authenticated --> [*]
 
 @enduml`
 
-	baseSM, err := svc.Create(diagram.FileTypePUML, "auth-component", "1.0.0", baseContent, diagram.LocationInProgress)
+	baseDiag, err := svc.Create(diagram.FileTypePUML, "auth-component", "1.0.0", baseContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating base component: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created base component: %s-%s\n", baseSM.Name, baseSM.Version)
+	fmt.Printf("✓ Created base component: %s-%s\n", baseDiag.Name, baseDiag.Version)
 
 	// Promote base component to products
 	result, err := svc.Validate(diagram.FileTypePUML, "auth-component", "1.0.0", diagram.LocationInProgress)
@@ -290,21 +290,21 @@ Authenticated --> [*]
 
 @enduml`
 
-	complexSM, err := svc.Create(diagram.FileTypePUML, "mfa-system", "1.0.0", complexContent, diagram.LocationInProgress)
+	complexDiag, err := svc.Create(diagram.FileTypePUML, "mfa-system", "1.0.0", complexContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating complex system: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created complex system: %s-%s\n", complexSM.Name, complexSM.Version)
+	fmt.Printf("✓ Created complex system: %s-%s\n", complexDiag.Name, complexDiag.Version)
 
 	// Resolve references
 	fmt.Println("Resolving references...")
-	err = svc.ResolveReferences(complexSM)
+	err = svc.ResolveReferences(complexDiag)
 	if err != nil {
 		log.Printf("Error resolving references: %v", err)
 	} else {
-		fmt.Printf("✓ Resolved %d references:\n", len(complexSM.References))
-		for _, ref := range complexSM.References {
+		fmt.Printf("✓ Resolved %d references:\n", len(complexDiag.References))
+		for _, ref := range complexDiag.References {
 			fmt.Printf("  - %s (type: %s)\n", ref.Name, ref.Type.String())
 		}
 	}
@@ -489,14 +489,14 @@ Test --> [*]
 
 	// 4. Update non-existent
 	fmt.Println("4. Testing update of non-existent state-machine diagram...")
-	nonExistentSM := &diagram.StateMachineDiagram{
+	nonExistentDiag := &diagram.StateMachineDiagram{
 		Name:     "non-existent",
 		Version:  "1.0.0",
 		Content:  content,
 		Location: diagram.LocationInProgress,
 		FileType: diagram.FileTypePUML,
 	}
-	err = svc.Update(nonExistentSM)
+	err = svc.Update(nonExistentDiag)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled update of non-existent state-machine diagram")
 	}

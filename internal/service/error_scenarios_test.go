@@ -43,7 +43,7 @@ func (m *MockErrorRepository) ReadStateMachine(fileType models.FileType, name, v
 	return m.readResult, nil
 }
 
-func (m *MockErrorRepository) WriteStateMachine(sm *models.StateMachineDiagram) error {
+func (m *MockErrorRepository) WriteStateMachine(diag *models.StateMachineDiagram) error {
 	if m.shouldFailWrite {
 		return errors.New("mock write error")
 	}

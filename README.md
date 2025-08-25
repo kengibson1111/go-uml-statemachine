@@ -169,10 +169,10 @@ err := svc.Delete(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationIn
 
 ```go
 // List all in-progress state-machine diagrams
-inProgressSMs, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
+inProgressDiags, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
 
 // List all production state-machine diagrams
-productDiagrams, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationProducts)
+productDiags, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationProducts)
 ```
 
 ## Validation

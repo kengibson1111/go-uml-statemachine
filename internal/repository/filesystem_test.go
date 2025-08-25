@@ -193,8 +193,8 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 	defer th.Cleanup()
 
 	// Create a test state-machine diagram first
-	testSM := th.CreateTestStateMachine("test-read", "1.0.0", models.LocationInProgress)
-	err := th.repo.WriteStateMachine(testSM)
+	testDiag := th.CreateTestStateMachine("test-read", "1.0.0", models.LocationInProgress)
+	err := th.repo.WriteStateMachine(testDiag)
 	if err != nil {
 		t.Fatalf("Failed to create test state-machine diagram: %v", err)
 	}
@@ -278,7 +278,7 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 					t.Errorf("Expected location %v, got %v", tt.location, diag.Location)
 				}
 
-				if diag.Content != testSM.Content {
+				if diag.Content != testDiag.Content {
 					t.Error("Content doesn't match expected content")
 				}
 			}
@@ -291,8 +291,8 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 	defer th.Cleanup()
 
 	// Create a test state-machine diagram first
-	testSM := th.CreateTestStateMachine("test-exists", "1.0.0", models.LocationInProgress)
-	err := th.repo.WriteStateMachine(testSM)
+	testDiag := th.CreateTestStateMachine("test-exists", "1.0.0", models.LocationInProgress)
+	err := th.repo.WriteStateMachine(testDiag)
 	if err != nil {
 		t.Fatalf("Failed to create test state-machine diagram: %v", err)
 	}
@@ -495,8 +495,8 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 	defer th.Cleanup()
 
 	// Create a test state-machine diagram in in-progress
-	testSM := th.CreateTestStateMachine("test-move", "1.0.0", models.LocationInProgress)
-	err := th.repo.WriteStateMachine(testSM)
+	testDiag := th.CreateTestStateMachine("test-move", "1.0.0", models.LocationInProgress)
+	err := th.repo.WriteStateMachine(testDiag)
 	if err != nil {
 		t.Fatalf("Failed to create test state-machine diagram: %v", err)
 	}
@@ -600,7 +600,7 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 				if err != nil {
 					t.Errorf("Error reading moved state-machine diagram: %v", err)
 				}
-				if diagram.Content != testSM.Content {
+				if diagram.Content != testDiag.Content {
 					t.Error("Content was not preserved during move")
 				}
 			}
@@ -614,7 +614,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		setupSM     bool
+		setupDiag   bool
 		diagName    string
 		version     string
 		location    models.Location
@@ -623,7 +623,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 	}{
 		{
 			name:        "delete existing state-machine diagram",
-			setupSM:     true,
+			setupDiag:   true,
 			diagName:    "test-delete",
 			version:     "1.0.0",
 			location:    models.LocationInProgress,
@@ -631,7 +631,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 		},
 		{
 			name:        "delete non-existent state-machine diagram",
-			setupSM:     false,
+			setupDiag:   false,
 			diagName:    "non-existent",
 			version:     "1.0.0",
 			location:    models.LocationInProgress,
@@ -640,7 +640,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 		},
 		{
 			name:        "empty name",
-			setupSM:     false,
+			setupDiag:   false,
 			diagName:    "",
 			version:     "1.0.0",
 			location:    models.LocationInProgress,
@@ -649,7 +649,7 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 		},
 		{
 			name:        "missing version for non-nested",
-			setupSM:     false,
+			setupDiag:   false,
 			diagName:    "test-delete",
 			version:     "",
 			location:    models.LocationInProgress,
@@ -661,9 +661,9 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Setup test state-machine diagram if needed
-			if tt.setupSM {
-				testSM := th.CreateTestStateMachine(tt.diagName, tt.version, tt.location)
-				err := th.repo.WriteStateMachine(testSM)
+			if tt.setupDiag {
+				testDiag := th.CreateTestStateMachine(tt.diagName, tt.version, tt.location)
+				err := th.repo.WriteStateMachine(testDiag)
 				if err != nil {
 					t.Fatalf("Failed to create test state-machine diagram: %v", err)
 				}
@@ -707,9 +707,9 @@ func TestFileSystemRepository_ListStateMachines(t *testing.T) {
 
 	// Create multiple test state-machine diagrams
 	testDiagrams := []*models.StateMachineDiagram{
-		th.CreateTestStateMachine("sm1", "1.0.0", models.LocationInProgress),
-		th.CreateTestStateMachine("sm2", "1.1.0", models.LocationInProgress),
-		th.CreateTestStateMachine("sm3", "2.0.0", models.LocationProducts),
+		th.CreateTestStateMachine("diag1", "1.0.0", models.LocationInProgress),
+		th.CreateTestStateMachine("diag2", "1.1.0", models.LocationInProgress),
+		th.CreateTestStateMachine("diag3", "2.0.0", models.LocationProducts),
 	}
 
 	// Write the state-machine diagrams
@@ -740,7 +740,7 @@ func TestFileSystemRepository_ListStateMachines(t *testing.T) {
 		},
 		{
 			name:          "list from non-existent location",
-			location:      models.LocationNested, // No nested SMs created
+			location:      models.LocationNested, // No nested state-machine diagrams created
 			expectedCount: 0,
 			expectError:   false,
 		},
@@ -781,16 +781,16 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	defer th.Cleanup()
 
 	// Test a complete workflow: create -> read -> move -> delete
-	testSM := th.CreateTestStateMachine("integration-test", "1.0.0", models.LocationInProgress)
+	testDiag := th.CreateTestStateMachine("integration-test", "1.0.0", models.LocationInProgress)
 
 	// 1. Write state-machine diagram
-	err := th.repo.WriteStateMachine(testSM)
+	err := th.repo.WriteStateMachine(testDiag)
 	if err != nil {
 		t.Fatalf("Failed to write state-machine diagram: %v", err)
 	}
 
 	// 2. Verify it exists
-	exists, err := th.repo.Exists(models.FileTypePUML, testSM.Name, testSM.Version, testSM.Location)
+	exists, err := th.repo.Exists(models.FileTypePUML, testDiag.Name, testDiag.Version, testDiag.Location)
 	if err != nil {
 		t.Fatalf("Failed to check existence: %v", err)
 	}
@@ -799,11 +799,11 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 3. Read it back
-	readSM, err := th.repo.ReadStateMachine(models.FileTypePUML, testSM.Name, testSM.Version, testSM.Location)
+	readDiag, err := th.repo.ReadStateMachine(models.FileTypePUML, testDiag.Name, testDiag.Version, testDiag.Location)
 	if err != nil {
 		t.Fatalf("Failed to read state-machine diagram: %v", err)
 	}
-	if readSM.Content != testSM.Content {
+	if readDiag.Content != testDiag.Content {
 		t.Error("Read content doesn't match written content")
 	}
 
@@ -817,13 +817,13 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 5. Move to products
-	err = th.repo.MoveStateMachine(models.FileTypePUML, testSM.Name, testSM.Version, models.LocationInProgress, models.LocationProducts)
+	err = th.repo.MoveStateMachine(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationInProgress, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to move state-machine diagram: %v", err)
 	}
 
 	// 6. Verify it's in products now
-	exists, err = th.repo.Exists(models.FileTypePUML, testSM.Name, testSM.Version, models.LocationProducts)
+	exists, err = th.repo.Exists(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to check existence in products: %v", err)
 	}
@@ -832,7 +832,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 7. Verify it's no longer in in-progress
-	exists, err = th.repo.Exists(models.FileTypePUML, testSM.Name, testSM.Version, models.LocationInProgress)
+	exists, err = th.repo.Exists(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationInProgress)
 	if err != nil {
 		t.Fatalf("Failed to check existence in in-progress: %v", err)
 	}
@@ -841,13 +841,13 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 8. Delete from products
-	err = th.repo.DeleteStateMachine(models.FileTypePUML, testSM.Name, testSM.Version, models.LocationProducts)
+	err = th.repo.DeleteStateMachine(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to delete state-machine diagram: %v", err)
 	}
 
 	// 9. Verify it's gone
-	exists, err = th.repo.Exists(models.FileTypePUML, testSM.Name, testSM.Version, models.LocationProducts)
+	exists, err = th.repo.Exists(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to check existence after delete: %v", err)
 	}

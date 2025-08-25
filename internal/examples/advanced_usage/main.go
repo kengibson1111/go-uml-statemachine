@@ -42,12 +42,12 @@ Authenticated --> Idle : logout()
 
 @enduml`
 
-	baseSM, err := svc.Create(models.FileTypePUML, "base-auth", "1.0.0", baseAuthContent, models.LocationInProgress)
+	baseDiag, err := svc.Create(models.FileTypePUML, "base-auth", "1.0.0", baseAuthContent, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating base auth: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created: %s-%s\n", baseSM.Name, baseSM.Version)
+	fmt.Printf("✓ Created: %s-%s\n", baseDiag.Name, baseDiag.Version)
 
 	// Validate and promote base auth to products
 	validationResult, err := svc.Validate(models.FileTypePUML, "base-auth", "1.0.0", models.LocationInProgress)
@@ -85,21 +85,21 @@ Failed --> RequireAuth : retry
 
 @enduml`
 
-	advancedSM, err := svc.Create(models.FileTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
+	advancedDiag, err := svc.Create(models.FileTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating advanced auth: %v", err)
 		return
 	}
-	fmt.Printf("✓ Created: %s-%s\n", advancedSM.Name, advancedSM.Version)
+	fmt.Printf("✓ Created: %s-%s\n", advancedDiag.Name, advancedDiag.Version)
 
 	// Example 3: Resolve references in the advanced auth system
 	fmt.Println("\n3. Resolving references...")
-	err = svc.ResolveReferences(advancedSM)
+	err = svc.ResolveReferences(advancedDiag)
 	if err != nil {
 		log.Printf("Error resolving references: %v", err)
 	} else {
-		fmt.Printf("✓ Resolved %d references\n", len(advancedSM.References))
-		for _, ref := range advancedSM.References {
+		fmt.Printf("✓ Resolved %d references\n", len(advancedDiag.References))
+		for _, ref := range advancedDiag.References {
 			fmt.Printf("  - %s (type: %s, path: %s)\n", ref.Name, ref.Type.String(), ref.Path)
 		}
 	}
@@ -128,8 +128,8 @@ SessionTimeout --> RequireAuth : session_expired
 
 @enduml`
 
-	advancedSM.Content = updatedContent
-	err = svc.Update(advancedSM)
+	advancedDiag.Content = updatedContent
+	err = svc.Update(advancedDiag)
 	if err != nil {
 		log.Printf("Error updating state-machine diagram: %v", err)
 	} else {

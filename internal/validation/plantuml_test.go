@@ -519,8 +519,8 @@ func (m *MockRepository) AddStateMachine(diag *models.StateMachineDiagram) {
 
 func (m *MockRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	key := fmt.Sprintf("%s-%s-%s", name, version, location.String())
-	if sm, exists := m.diagrams[key]; exists {
-		return sm, nil
+	if diag, exists := m.diagrams[key]; exists {
+		return diag, nil
 	}
 	return nil, fmt.Errorf("state-machine diagram not found: %s", key)
 }
@@ -534,7 +534,7 @@ func (m *MockRepository) Exists(fileType models.FileType, name, version string, 
 func (m *MockRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
 	return nil, nil
 }
-func (m *MockRepository) WriteStateMachine(sm *models.StateMachineDiagram) error { return nil }
+func (m *MockRepository) WriteStateMachine(diag *models.StateMachineDiagram) error { return nil }
 func (m *MockRepository) MoveStateMachine(fileType models.FileType, name, version string, from, to models.Location) error {
 	return nil
 }
@@ -583,13 +583,13 @@ func TestPlantUMLValidator_ResolveReferences_ExistingReference(t *testing.T) {
 	validator := NewPlantUMLValidatorWithRepository(mockRepo)
 
 	// Add a referenced state-machine diagram to the mock repository
-	referencedSM := &models.StateMachineDiagram{
+	referencedDiag := &models.StateMachineDiagram{
 		Name:     "auth-service",
 		Version:  "1.2.0",
 		Location: models.LocationProducts,
 		Content:  "@startuml\n[*] --> AuthIdle\n@enduml",
 	}
-	mockRepo.AddStateMachine(referencedSM)
+	mockRepo.AddStateMachine(referencedDiag)
 
 	diag := &models.StateMachineDiagram{
 		Name:    "test",
@@ -704,13 +704,13 @@ func TestPlantUMLValidator_ResolveReferences_NestedReference(t *testing.T) {
 	validator := NewPlantUMLValidatorWithRepository(mockRepo)
 
 	// Add a nested state-machine diagram to the mock repository
-	nestedSM := &models.StateMachineDiagram{
+	nestedDiag := &models.StateMachineDiagram{
 		Name:     "sub-process",
 		Version:  "",
 		Location: models.LocationNested,
 		Content:  "@startuml\n[*] --> SubState\n@enduml",
 	}
-	mockRepo.AddStateMachine(nestedSM)
+	mockRepo.AddStateMachine(nestedDiag)
 
 	diag := &models.StateMachineDiagram{
 		Name:    "test",

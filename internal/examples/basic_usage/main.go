@@ -53,13 +53,13 @@ Authenticated --> Idle : logout()
 
 	// Example 2: Read the state-machine diagram back
 	fmt.Println("\n2. Reading the state-machine diagram...")
-	readSM, err := svc.Read(models.FileTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
+	readDiag, err := svc.Read(models.FileTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error reading state-machine diagram: %v", err)
 		return
 	}
 	fmt.Printf("✓ Read state-machine diagram: %s-%s (content length: %d)\n",
-		readSM.Name, readSM.Version, len(readSM.Content))
+		readDiag.Name, readDiag.Version, len(readDiag.Content))
 
 	// Example 3: Validate the state-machine diagram
 	fmt.Println("\n3. Validating the state-machine diagram...")
@@ -113,13 +113,13 @@ Authenticated --> Idle : logout()
 
 	// Example 6: List products
 	fmt.Println("\n6. Listing all product state-machine diagrams...")
-	productDiagrams, err := svc.ListAll(models.FileTypePUML, models.LocationProducts)
+	productDiags, err := svc.ListAll(models.FileTypePUML, models.LocationProducts)
 	if err != nil {
 		log.Printf("Error listing product state-machine diagrams: %v", err)
 		return
 	}
-	fmt.Printf("✓ Found %d state-machine diagram(s) in products:\n", len(productDiagrams))
-	for _, diag := range productDiagrams {
+	fmt.Printf("✓ Found %d state-machine diagram(s) in products:\n", len(productDiags))
+	for _, diag := range productDiags {
 		fmt.Printf("  - %s-%s (created: %s)\n",
 			diag.Name, diag.Version, diag.Metadata.CreatedAt.Format("2006-01-02 15:04:05"))
 	}

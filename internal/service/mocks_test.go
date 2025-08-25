@@ -9,7 +9,7 @@ type mockRepository struct {
 	readStateMachineFunc   func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error)
 	listStateMachinesFunc  func(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error)
 	existsFunc             func(fileType models.FileType, name, version string, location models.Location) (bool, error)
-	writeStateMachineFunc  func(sm *models.StateMachineDiagram) error
+	writeStateMachineFunc  func(diag *models.StateMachineDiagram) error
 	moveStateMachineFunc   func(fileType models.FileType, name, version string, from, to models.Location) error
 	deleteStateMachineFunc func(fileType models.FileType, name, version string, location models.Location) error
 	createDirectoryFunc    func(path string) error
@@ -37,9 +37,9 @@ func (m *mockRepository) Exists(fileType models.FileType, name, version string, 
 	return false, nil
 }
 
-func (m *mockRepository) WriteStateMachine(sm *models.StateMachineDiagram) error {
+func (m *mockRepository) WriteStateMachine(diag *models.StateMachineDiagram) error {
 	if m.writeStateMachineFunc != nil {
-		return m.writeStateMachineFunc(sm)
+		return m.writeStateMachineFunc(diag)
 	}
 	return nil
 }
@@ -74,8 +74,8 @@ func (m *mockRepository) DirectoryExists(path string) (bool, error) {
 
 // mockValidator is a mock implementation of the Validator interface for testing
 type mockValidator struct {
-	validateFunc           func(sm *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error)
-	validateReferencesFunc func(sm *models.StateMachineDiagram) (*models.ValidationResult, error)
+	validateFunc           func(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error)
+	validateReferencesFunc func(diag *models.StateMachineDiagram) (*models.ValidationResult, error)
 }
 
 func (m *mockValidator) Validate(diag *models.StateMachineDiagram, strictness models.ValidationStrictness) (*models.ValidationResult, error) {

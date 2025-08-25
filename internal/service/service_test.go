@@ -245,14 +245,14 @@ func TestService_Create(t *testing.T) {
 					return
 				}
 
-				var smErr *models.StateMachineError
-				if !errors.As(err, &smErr) {
+				var diagErr *models.StateMachineError
+				if !errors.As(err, &diagErr) {
 					t.Errorf("Create() expected StateMachineError but got %T", err)
 					return
 				}
 
-				if smErr.Type != tt.wantErrType {
-					t.Errorf("Create() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				if diagErr.Type != tt.wantErrType {
+					t.Errorf("Create() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
@@ -365,14 +365,14 @@ func TestService_Read(t *testing.T) {
 					return
 				}
 
-				var smErr *models.StateMachineError
-				if !errors.As(err, &smErr) {
+				var diagErr *models.StateMachineError
+				if !errors.As(err, &diagErr) {
 					t.Errorf("Read() expected StateMachineError but got %T", err)
 					return
 				}
 
-				if smErr.Type != tt.wantErrType {
-					t.Errorf("Read() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				if diagErr.Type != tt.wantErrType {
+					t.Errorf("Read() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
@@ -505,14 +505,14 @@ func TestService_Update(t *testing.T) {
 					return
 				}
 
-				var smErr *models.StateMachineError
-				if !errors.As(err, &smErr) {
+				var diagErr *models.StateMachineError
+				if !errors.As(err, &diagErr) {
 					t.Errorf("Update() expected StateMachineError but got %T", err)
 					return
 				}
 
-				if smErr.Type != tt.wantErrType {
-					t.Errorf("Update() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				if diagErr.Type != tt.wantErrType {
+					t.Errorf("Update() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
@@ -613,14 +613,14 @@ func TestService_Delete(t *testing.T) {
 					return
 				}
 
-				var smErr *models.StateMachineError
-				if !errors.As(err, &smErr) {
+				var diagErr *models.StateMachineError
+				if !errors.As(err, &diagErr) {
 					t.Errorf("Delete() expected StateMachineError but got %T", err)
 					return
 				}
 
-				if smErr.Type != tt.wantErrType {
-					t.Errorf("Delete() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				if diagErr.Type != tt.wantErrType {
+					t.Errorf("Delete() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
@@ -844,14 +844,14 @@ func TestService_Promote(t *testing.T) {
 					return
 				}
 
-				var smErr *models.StateMachineError
-				if !errors.As(err, &smErr) {
+				var diagErr *models.StateMachineError
+				if !errors.As(err, &diagErr) {
 					t.Errorf("Promote() expected StateMachineError but got %T", err)
 					return
 				}
 
-				if smErr.Type != tt.wantErrType {
-					t.Errorf("Promote() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				if diagErr.Type != tt.wantErrType {
+					t.Errorf("Promote() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
@@ -1002,14 +1002,14 @@ func TestService_PromoteWithRollback(t *testing.T) {
 					return
 				}
 
-				var smErr *models.StateMachineError
-				if !errors.As(err, &smErr) {
+				var diagErr *models.StateMachineError
+				if !errors.As(err, &diagErr) {
 					t.Errorf("Promote() expected StateMachineError but got %T", err)
 					return
 				}
 
-				if smErr.Type != tt.wantErrType {
-					t.Errorf("Promote() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				if diagErr.Type != tt.wantErrType {
+					t.Errorf("Promote() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
@@ -1135,14 +1135,14 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 					return
 				}
 
-				var smErr *models.StateMachineError
-				if !errors.As(err, &smErr) {
+				var diagErr *models.StateMachineError
+				if !errors.As(err, &diagErr) {
 					t.Errorf("Promote() expected StateMachineError but got %T", err)
 					return
 				}
 
-				if smErr.Type != tt.wantErrType {
-					t.Errorf("Promote() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				if diagErr.Type != tt.wantErrType {
+					t.Errorf("Promote() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
@@ -1304,14 +1304,14 @@ func TestService_Validate(t *testing.T) {
 					return
 				}
 
-				var smErr *models.StateMachineError
-				if !errors.As(err, &smErr) {
+				var diagErr *models.StateMachineError
+				if !errors.As(err, &diagErr) {
 					t.Errorf("Validate() expected StateMachineError but got %T", err)
 					return
 				}
 
-				if smErr.Type != tt.wantErrType {
-					t.Errorf("Validate() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				if diagErr.Type != tt.wantErrType {
+					t.Errorf("Validate() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
@@ -1429,14 +1429,14 @@ func TestService_ListAll(t *testing.T) {
 					return
 				}
 
-				var smErr *models.StateMachineError
-				if !errors.As(err, &smErr) {
+				var diagErr *models.StateMachineError
+				if !errors.As(err, &diagErr) {
 					t.Errorf("ListAll() expected StateMachineError but got %T", err)
 					return
 				}
 
-				if smErr.Type != tt.wantErrType {
-					t.Errorf("ListAll() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				if diagErr.Type != tt.wantErrType {
+					t.Errorf("ListAll() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
@@ -1685,14 +1685,14 @@ func TestService_ResolveReferences(t *testing.T) {
 					return
 				}
 
-				var smErr *models.StateMachineError
-				if !errors.As(err, &smErr) {
+				var diagErr *models.StateMachineError
+				if !errors.As(err, &diagErr) {
 					t.Errorf("ResolveReferences() expected StateMachineError but got %T", err)
 					return
 				}
 
-				if smErr.Type != tt.wantErrType {
-					t.Errorf("ResolveReferences() expected error type %v but got %v", tt.wantErrType, smErr.Type)
+				if diagErr.Type != tt.wantErrType {
+					t.Errorf("ResolveReferences() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {

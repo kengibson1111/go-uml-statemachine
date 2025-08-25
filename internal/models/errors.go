@@ -166,9 +166,9 @@ func (e *StateMachineError) DetailedError() string {
 		builder.WriteString(fmt.Sprintf("Caused by: %v\n", e.Cause))
 
 		// If the cause is also a StateMachineError, show its details
-		if smErr, ok := e.Cause.(*StateMachineError); ok {
+		if diagErr, ok := e.Cause.(*StateMachineError); ok {
 			builder.WriteString("Cause details:\n")
-			causeDetails := smErr.DetailedError()
+			causeDetails := diagErr.DetailedError()
 			// Indent the cause details
 			for _, line := range strings.Split(causeDetails, "\n") {
 				if line != "" {
@@ -312,16 +312,16 @@ func WrapError(err error, errorType ErrorType, message string) *StateMachineErro
 	}
 
 	// If the error is already a StateMachineError, preserve its context
-	if smErr, ok := err.(*StateMachineError); ok {
+	if diagErr, ok := err.(*StateMachineError); ok {
 		return &StateMachineError{
 			Type:        errorType,
 			Message:     message,
-			Cause:       smErr,
+			Cause:       diagErr,
 			Context:     make(map[string]interface{}),
-			Severity:    smErr.Severity, // Inherit severity from wrapped error
+			Severity:    diagErr.Severity, // Inherit severity from wrapped error
 			Timestamp:   time.Now(),
 			StackTrace:  captureStackTrace(2),
-			Recoverable: smErr.Recoverable, // Inherit recoverability
+			Recoverable: diagErr.Recoverable, // Inherit recoverability
 		}
 	}
 
@@ -330,8 +330,8 @@ func WrapError(err error, errorType ErrorType, message string) *StateMachineErro
 
 // IsRecoverable checks if an error is recoverable
 func IsRecoverable(err error) bool {
-	if smErr, ok := err.(*StateMachineError); ok {
-		return smErr.Recoverable
+	if diagErr, ok := err.(*StateMachineError); ok {
+		return diagErr.Recoverable
 	}
 	// Default to recoverable for non-StateMachineError errors
 	return true
@@ -339,8 +339,8 @@ func IsRecoverable(err error) bool {
 
 // GetErrorSeverity returns the severity of an error
 func GetErrorSeverity(err error) ErrorSeverity {
-	if smErr, ok := err.(*StateMachineError); ok {
-		return smErr.Severity
+	if diagErr, ok := err.(*StateMachineError); ok {
+		return diagErr.Severity
 	}
 	// Default to medium severity for non-StateMachineError errors
 	return ErrorSeverityMedium
@@ -348,8 +348,8 @@ func GetErrorSeverity(err error) ErrorSeverity {
 
 // GetErrorType returns the type of an error
 func GetErrorType(err error) ErrorType {
-	if smErr, ok := err.(*StateMachineError); ok {
-		return smErr.Type
+	if diagErr, ok := err.(*StateMachineError); ok {
+		return diagErr.Type
 	}
 	// Default to file system error for unknown errors
 	return ErrorTypeFileSystem

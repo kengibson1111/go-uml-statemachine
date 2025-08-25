@@ -151,9 +151,9 @@ func TestFileSystemRepository_WriteStateMachine(t *testing.T) {
 					return
 				}
 
-				if smErr, ok := err.(*models.StateMachineError); ok {
-					if smErr.Type != tt.errorType {
-						t.Errorf("Expected error type %v, got %v", tt.errorType, smErr.Type)
+				if diagErr, ok := err.(*models.StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("Expected error type %v, got %v", tt.errorType, diagErr.Type)
 					}
 				}
 			} else {
@@ -250,9 +250,9 @@ func TestFileSystemRepository_ReadStateMachine(t *testing.T) {
 					return
 				}
 
-				if smErr, ok := err.(*models.StateMachineError); ok {
-					if smErr.Type != tt.errorType {
-						t.Errorf("Expected error type %v, got %v", tt.errorType, smErr.Type)
+				if diagErr, ok := err.(*models.StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("Expected error type %v, got %v", tt.errorType, diagErr.Type)
 					}
 				}
 			} else {
@@ -342,9 +342,9 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 					return
 				}
 
-				if smErr, ok := err.(*models.StateMachineError); ok {
-					if smErr.Type != tt.errorType {
-						t.Errorf("Expected error type %v, got %v", tt.errorType, smErr.Type)
+				if diagErr, ok := err.(*models.StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("Expected error type %v, got %v", tt.errorType, diagErr.Type)
 					}
 				}
 			} else {
@@ -403,9 +403,9 @@ func TestFileSystemRepository_CreateDirectory(t *testing.T) {
 					return
 				}
 
-				if smErr, ok := err.(*models.StateMachineError); ok {
-					if smErr.Type != tt.errorType {
-						t.Errorf("Expected error type %v, got %v", tt.errorType, smErr.Type)
+				if diagErr, ok := err.(*models.StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("Expected error type %v, got %v", tt.errorType, diagErr.Type)
 					}
 				}
 			} else {
@@ -471,9 +471,9 @@ func TestFileSystemRepository_DirectoryExists(t *testing.T) {
 					return
 				}
 
-				if smErr, ok := err.(*models.StateMachineError); ok {
-					if smErr.Type != tt.errorType {
-						t.Errorf("Expected error type %v, got %v", tt.errorType, smErr.Type)
+				if diagErr, ok := err.(*models.StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("Expected error type %v, got %v", tt.errorType, diagErr.Type)
 					}
 				}
 			} else {
@@ -566,9 +566,9 @@ func TestFileSystemRepository_MoveStateMachine(t *testing.T) {
 					return
 				}
 
-				if smErr, ok := err.(*models.StateMachineError); ok {
-					if smErr.Type != tt.errorType {
-						t.Errorf("Expected error type %v, got %v", tt.errorType, smErr.Type)
+				if diagErr, ok := err.(*models.StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("Expected error type %v, got %v", tt.errorType, diagErr.Type)
 					}
 				}
 			} else {
@@ -677,9 +677,9 @@ func TestFileSystemRepository_DeleteStateMachine(t *testing.T) {
 					return
 				}
 
-				if smErr, ok := err.(*models.StateMachineError); ok {
-					if smErr.Type != tt.errorType {
-						t.Errorf("Expected error type %v, got %v", tt.errorType, smErr.Type)
+				if diagErr, ok := err.(*models.StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("Expected error type %v, got %v", tt.errorType, diagErr.Type)
 					}
 				}
 			} else {

@@ -133,7 +133,7 @@ type DiagramService interface {
     // CRUD operations
     Create(fileType FileType, name, version string, content string, location Location) (*diagram, error)
     Read(fileType FileType, name, version string, location Location) (*diagram, error)
-    Update(sm *diagram) error
+    Update(diag *StateMachineDiagram) error
     Delete(fileType FileType, name, version string, location Location) error
 
     // Business operations
@@ -142,7 +142,7 @@ type DiagramService interface {
     ListAll(fileType FileType, location Location) ([]diagram, error)
 
     // Reference operations
-    ResolveReferences(diagram *diagram) error
+    ResolveReferences(diagram *StateMachineDiagram) error
 }
 ```
 
@@ -317,11 +317,11 @@ fmt.Printf("Content: %s\n", diagram.Content)
 Modifies an existing state-machine diagram.
 
 ```go
-Update(sm *diagram) error
+Update(diag *StateMachineDiagram) error
 ```
 
 **Parameters:**
-- `sm`: State-machine diagram to update (must not be nil)
+- `diag`: State-machine diagram to update (must not be nil)
 
 **Returns:**
 - `error`: Error if update fails
@@ -333,8 +333,8 @@ Update(sm *diagram) error
 
 **Example:**
 ```go
-diagram.Content = updatedPlantUMLContent
-err := svc.Update(sm)
+diag.Content = updatedPlantUMLContent
+err := svc.Update(diag)
 if err != nil {
     log.Fatal(err)
 }
@@ -481,11 +481,11 @@ for _, diag := range diagrams {
 Resolves all references in a state-machine diagram.
 
 ```go
-ResolveReferences(diagram *diagram) error
+ResolveReferences(diag *StateMachineDiagram) error
 ```
 
 **Parameters:**
-- `sm`: State-machine diagram with references to resolve
+- `diag`: State-machine diagram with references to resolve
 
 **Returns:**
 - `error`: Error if reference resolution fails
@@ -545,8 +545,8 @@ Errors include context information such as:
 diag, err := svc.Read("non-existent", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     // Check if it's a specific error type
-    if smErr, ok := err.(*models.diagramError); ok {
-        switch smErr.Type {
+    if diagErr, ok := err.(*models.StateMachineError); ok {
+        switch diagErr.Type {
         case models.ErrorTypeFileNotFound:
             fmt.Println("State-machine diagram not found")
         case models.ErrorTypeValidation:

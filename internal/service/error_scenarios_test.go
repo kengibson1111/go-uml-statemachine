@@ -156,26 +156,26 @@ func TestService_Create_ValidationErrors(t *testing.T) {
 				return
 			}
 
-			smErr, ok := err.(*models.StateMachineError)
+			diagErr, ok := err.(*models.StateMachineError)
 			if !ok {
 				t.Errorf("Expected StateMachineError, got %T", err)
 				return
 			}
 
-			if smErr.Type != models.ErrorTypeValidation {
-				t.Errorf("Expected ErrorTypeValidation, got %v", smErr.Type)
+			if diagErr.Type != models.ErrorTypeValidation {
+				t.Errorf("Expected ErrorTypeValidation, got %v", diagErr.Type)
 			}
 
-			if smErr.Operation != "Create" {
-				t.Errorf("Expected operation 'Create', got %v", smErr.Operation)
+			if diagErr.Operation != "Create" {
+				t.Errorf("Expected operation 'Create', got %v", diagErr.Operation)
 			}
 
-			if smErr.Component != "service" {
-				t.Errorf("Expected component 'service', got %v", smErr.Component)
+			if diagErr.Component != "service" {
+				t.Errorf("Expected component 'service', got %v", diagErr.Component)
 			}
 
-			if smErr.Severity != models.ErrorSeverityHigh {
-				t.Errorf("Expected ErrorSeverityHigh, got %v", smErr.Severity)
+			if diagErr.Severity != models.ErrorSeverityHigh {
+				t.Errorf("Expected ErrorSeverityHigh, got %v", diagErr.Severity)
 			}
 		})
 	}
@@ -231,22 +231,22 @@ func TestService_Create_RepositoryErrors(t *testing.T) {
 				return
 			}
 
-			smErr, ok := err.(*models.StateMachineError)
+			diagErr, ok := err.(*models.StateMachineError)
 			if !ok {
 				t.Errorf("Expected StateMachineError, got %T", err)
 				return
 			}
 
-			if smErr.Type != tt.expectedErrType {
-				t.Errorf("Expected error type %v, got %v", tt.expectedErrType, smErr.Type)
+			if diagErr.Type != tt.expectedErrType {
+				t.Errorf("Expected error type %v, got %v", tt.expectedErrType, diagErr.Type)
 			}
 
-			if smErr.Operation != "Create" {
-				t.Errorf("Expected operation 'Create', got %v", smErr.Operation)
+			if diagErr.Operation != "Create" {
+				t.Errorf("Expected operation 'Create', got %v", diagErr.Operation)
 			}
 
-			if smErr.Component != "service" {
-				t.Errorf("Expected component 'service', got %v", smErr.Component)
+			if diagErr.Component != "service" {
+				t.Errorf("Expected component 'service', got %v", diagErr.Component)
 			}
 		})
 	}
@@ -278,14 +278,14 @@ func TestService_Create_ProductConflictCheck(t *testing.T) {
 			return
 		}
 
-		smErr, ok := err.(*models.StateMachineError)
+		diagErr, ok := err.(*models.StateMachineError)
 		if !ok {
 			t.Errorf("Expected StateMachineError, got %T", err)
 			return
 		}
 
-		if smErr.Type != models.ErrorTypeFileSystem {
-			t.Errorf("Expected ErrorTypeFileSystem, got %v", smErr.Type)
+		if diagErr.Type != models.ErrorTypeFileSystem {
+			t.Errorf("Expected ErrorTypeFileSystem, got %v", diagErr.Type)
 		}
 	})
 
@@ -314,14 +314,14 @@ func TestService_Create_ProductConflictCheck(t *testing.T) {
 			return
 		}
 
-		smErr, ok := err.(*models.StateMachineError)
+		diagErr, ok := err.(*models.StateMachineError)
 		if !ok {
 			t.Errorf("Expected StateMachineError, got %T", err)
 			return
 		}
 
-		if smErr.Type != models.ErrorTypeDirectoryConflict {
-			t.Errorf("Expected ErrorTypeDirectoryConflict, got %v", smErr.Type)
+		if diagErr.Type != models.ErrorTypeDirectoryConflict {
+			t.Errorf("Expected ErrorTypeDirectoryConflict, got %v", diagErr.Type)
 		}
 	})
 }
@@ -364,18 +364,18 @@ func TestService_Read_ValidationErrors(t *testing.T) {
 				return
 			}
 
-			smErr, ok := err.(*models.StateMachineError)
+			diagErr, ok := err.(*models.StateMachineError)
 			if !ok {
 				t.Errorf("Expected StateMachineError, got %T", err)
 				return
 			}
 
-			if smErr.Type != models.ErrorTypeValidation {
-				t.Errorf("Expected ErrorTypeValidation, got %v", smErr.Type)
+			if diagErr.Type != models.ErrorTypeValidation {
+				t.Errorf("Expected ErrorTypeValidation, got %v", diagErr.Type)
 			}
 
-			if smErr.Operation != "Read" {
-				t.Errorf("Expected operation 'Read', got %v", smErr.Operation)
+			if diagErr.Operation != "Read" {
+				t.Errorf("Expected operation 'Read', got %v", diagErr.Operation)
 			}
 		})
 	}
@@ -396,22 +396,22 @@ func TestService_Read_RepositoryError(t *testing.T) {
 		return
 	}
 
-	smErr, ok := err.(*models.StateMachineError)
+	diagErr, ok := err.(*models.StateMachineError)
 	if !ok {
 		t.Errorf("Expected StateMachineError, got %T", err)
 		return
 	}
 
-	if smErr.Type != models.ErrorTypeFileNotFound {
-		t.Errorf("Expected ErrorTypeFileNotFound, got %v", smErr.Type)
+	if diagErr.Type != models.ErrorTypeFileNotFound {
+		t.Errorf("Expected ErrorTypeFileNotFound, got %v", diagErr.Type)
 	}
 
-	if smErr.Operation != "Read" {
-		t.Errorf("Expected operation 'Read', got %v", smErr.Operation)
+	if diagErr.Operation != "Read" {
+		t.Errorf("Expected operation 'Read', got %v", diagErr.Operation)
 	}
 
-	if smErr.Component != "service" {
-		t.Errorf("Expected component 'service', got %v", smErr.Component)
+	if diagErr.Component != "service" {
+		t.Errorf("Expected component 'service', got %v", diagErr.Component)
 	}
 }
 
@@ -430,23 +430,23 @@ func TestService_ErrorContextPropagation(t *testing.T) {
 		return
 	}
 
-	smErr, ok := err.(*models.StateMachineError)
+	diagErr, ok := err.(*models.StateMachineError)
 	if !ok {
 		t.Errorf("Expected StateMachineError, got %T", err)
 		return
 	}
 
 	// Check that context was properly set
-	if smErr.Context["name"] != "test-name" {
-		t.Errorf("Expected context name 'test-name', got %v", smErr.Context["name"])
+	if diagErr.Context["name"] != "test-name" {
+		t.Errorf("Expected context name 'test-name', got %v", diagErr.Context["name"])
 	}
 
-	if smErr.Context["version"] != "1.2.3" {
-		t.Errorf("Expected context version '1.2.3', got %v", smErr.Context["version"])
+	if diagErr.Context["version"] != "1.2.3" {
+		t.Errorf("Expected context version '1.2.3', got %v", diagErr.Context["version"])
 	}
 
-	if smErr.Context["location"] != "in-progress" {
-		t.Errorf("Expected context location 'in-progress', got %v", smErr.Context["location"])
+	if diagErr.Context["location"] != "in-progress" {
+		t.Errorf("Expected context location 'in-progress', got %v", diagErr.Context["location"])
 	}
 }
 
@@ -529,14 +529,14 @@ func TestService_ErrorSeverityAssignment(t *testing.T) {
 				return
 			}
 
-			smErr, ok := err.(*models.StateMachineError)
+			diagErr, ok := err.(*models.StateMachineError)
 			if !ok {
 				t.Errorf("Expected StateMachineError, got %T", err)
 				return
 			}
 
-			if smErr.Severity != tt.expectedSeverity {
-				t.Errorf("Expected severity %v, got %v", tt.expectedSeverity, smErr.Severity)
+			if diagErr.Severity != tt.expectedSeverity {
+				t.Errorf("Expected severity %v, got %v", tt.expectedSeverity, diagErr.Severity)
 			}
 		})
 	}

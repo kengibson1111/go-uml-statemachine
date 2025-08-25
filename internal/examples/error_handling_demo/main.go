@@ -58,17 +58,17 @@ func demonstrateValidationErrors(svc models.DiagramService, logger *logging.Logg
 	logger.Info("Testing empty name validation...")
 	_, err := svc.Create(models.FileTypePUML, "", "1.0.0", "content", models.LocationInProgress)
 	if err != nil {
-		if smErr, ok := err.(*models.StateMachineError); ok {
+		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]interface{}{
-				"errorType":   smErr.Type.String(),
-				"severity":    smErr.Severity.String(),
-				"operation":   smErr.Operation,
-				"component":   smErr.Component,
-				"recoverable": smErr.Recoverable,
+				"errorType":   diagErr.Type.String(),
+				"severity":    diagErr.Severity.String(),
+				"operation":   diagErr.Operation,
+				"component":   diagErr.Component,
+				"recoverable": diagErr.Recoverable,
 			}).Error("Validation error caught as expected")
 
 			fmt.Println("Detailed Error Information:")
-			fmt.Println(smErr.DetailedError())
+			fmt.Println(diagErr.DetailedError())
 		}
 	}
 
@@ -76,8 +76,8 @@ func demonstrateValidationErrors(svc models.DiagramService, logger *logging.Logg
 	logger.Info("Testing empty version validation...")
 	_, err = svc.Create(models.FileTypePUML, "test", "", "content", models.LocationInProgress)
 	if err != nil {
-		if smErr, ok := err.(*models.StateMachineError); ok {
-			logger.WithField("errorType", smErr.Type.String()).Error("Version validation error caught as expected")
+		if diagErr, ok := err.(*models.StateMachineError); ok {
+			logger.WithField("errorType", diagErr.Type.String()).Error("Version validation error caught as expected")
 		}
 	}
 
@@ -85,8 +85,8 @@ func demonstrateValidationErrors(svc models.DiagramService, logger *logging.Logg
 	logger.Info("Testing empty content validation...")
 	_, err = svc.Create(models.FileTypePUML, "test", "1.0.0", "", models.LocationInProgress)
 	if err != nil {
-		if smErr, ok := err.(*models.StateMachineError); ok {
-			logger.WithField("errorType", smErr.Type.String()).Error("Content validation error caught as expected")
+		if diagErr, ok := err.(*models.StateMachineError); ok {
+			logger.WithField("errorType", diagErr.Type.String()).Error("Content validation error caught as expected")
 		}
 	}
 }
@@ -98,11 +98,11 @@ func demonstrateFileSystemErrors(svc models.DiagramService, logger *logging.Logg
 	logger.Info("Testing file not found error...")
 	_, err := svc.Read(models.FileTypePUML, "nonexistent", "1.0.0", models.LocationInProgress)
 	if err != nil {
-		if smErr, ok := err.(*models.StateMachineError); ok {
+		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]interface{}{
-				"errorType": smErr.Type.String(),
-				"severity":  smErr.Severity.String(),
-				"context":   smErr.Context,
+				"errorType": diagErr.Type.String(),
+				"severity":  diagErr.Severity.String(),
+				"context":   diagErr.Context,
 			}).Error("File not found error caught as expected")
 		}
 	}
@@ -131,16 +131,16 @@ Active --> [*] : stop
 	logger.Info("Attempting to create duplicate state-machine diagram...")
 	_, err = svc.Create(models.FileTypePUML, "demo-sm", "1.0.0", validContent, models.LocationInProgress)
 	if err != nil {
-		if smErr, ok := err.(*models.StateMachineError); ok {
+		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]interface{}{
-				"errorType":   smErr.Type.String(),
-				"severity":    smErr.Severity.String(),
-				"recoverable": smErr.Recoverable,
+				"errorType":   diagErr.Type.String(),
+				"severity":    diagErr.Severity.String(),
+				"recoverable": diagErr.Recoverable,
 			}).Error("Directory conflict error caught as expected")
 
 			// Demonstrate error unwrapping
-			if smErr.Cause != nil {
-				logger.WithField("cause", smErr.Cause.Error()).Info("Error has wrapped cause")
+			if diagErr.Cause != nil {
+				logger.WithField("cause", diagErr.Cause.Error()).Info("Error has wrapped cause")
 			}
 		}
 	}
@@ -167,16 +167,16 @@ func demonstrateErrorSeverities(svc models.DiagramService, logger *logging.Logge
 	}
 
 	for i, err := range errors {
-		if smErr, ok := err.(*models.StateMachineError); ok {
+		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]interface{}{
 				"errorIndex":  i + 1,
-				"errorType":   smErr.Type.String(),
-				"severity":    smErr.Severity.String(),
-				"recoverable": smErr.Recoverable,
+				"errorType":   diagErr.Type.String(),
+				"severity":    diagErr.Severity.String(),
+				"recoverable": diagErr.Recoverable,
 			}).Info("Demonstrating error severity")
 
 			// Log at appropriate level based on severity
-			switch smErr.Severity {
+			switch diagErr.Severity {
 			case models.ErrorSeverityLow:
 				logger.WithError(err).Debug("Low severity error")
 			case models.ErrorSeverityMedium:

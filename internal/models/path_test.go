@@ -223,9 +223,9 @@ func TestPathManager_ValidatePath(t *testing.T) {
 					t.Errorf("ValidatePath() expected error but got none")
 					return
 				}
-				if smErr, ok := err.(*StateMachineError); ok {
-					if smErr.Type != tt.errorType {
-						t.Errorf("ValidatePath() error type = %v, want %v", smErr.Type, tt.errorType)
+				if diagErr, ok := err.(*StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("ValidatePath() error type = %v, want %v", diagErr.Type, tt.errorType)
 					}
 				} else {
 					t.Errorf("ValidatePath() expected StateMachineError but got %T", err)
@@ -313,9 +313,9 @@ func TestPathManager_ValidateName(t *testing.T) {
 					t.Errorf("ValidateName() expected error but got none")
 					return
 				}
-				if smErr, ok := err.(*StateMachineError); ok {
-					if smErr.Type != tt.errorType {
-						t.Errorf("ValidateName() error type = %v, want %v", smErr.Type, tt.errorType)
+				if diagErr, ok := err.(*StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("ValidateName() error type = %v, want %v", diagErr.Type, tt.errorType)
 					}
 				} else {
 					t.Errorf("ValidateName() expected StateMachineError but got %T", err)
@@ -394,9 +394,9 @@ func TestPathManager_ParseDirectoryName(t *testing.T) {
 					t.Errorf("ParseDirectoryName() expected error but got none")
 					return
 				}
-				if smErr, ok := err.(*StateMachineError); ok {
-					if smErr.Type != tt.errorType {
-						t.Errorf("ParseDirectoryName() error type = %v, want %v", smErr.Type, tt.errorType)
+				if diagErr, ok := err.(*StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("ParseDirectoryName() error type = %v, want %v", diagErr.Type, tt.errorType)
 					}
 				} else {
 					t.Errorf("ParseDirectoryName() expected StateMachineError but got %T", err)
@@ -496,9 +496,9 @@ func TestPathManager_ParseFileName(t *testing.T) {
 					t.Errorf("ParseFileName() expected error but got none")
 					return
 				}
-				if smErr, ok := err.(*StateMachineError); ok {
-					if smErr.Type != tt.errorType {
-						t.Errorf("ParseFileName() error type = %v, want %v", smErr.Type, tt.errorType)
+				if diagErr, ok := err.(*StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("ParseFileName() error type = %v, want %v", diagErr.Type, tt.errorType)
 					}
 				} else {
 					t.Errorf("ParseFileName() expected StateMachineError but got %T", err)
@@ -597,9 +597,9 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 					t.Errorf("ParseFullPath() expected error but got none")
 					return
 				}
-				if smErr, ok := err.(*StateMachineError); ok {
-					if smErr.Type != tt.errorType {
-						t.Errorf("ParseFullPath() error type = %v, want %v", smErr.Type, tt.errorType)
+				if diagErr, ok := err.(*StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("ParseFullPath() error type = %v, want %v", diagErr.Type, tt.errorType)
 					}
 				} else {
 					t.Errorf("ParseFullPath() expected StateMachineError but got %T", err)

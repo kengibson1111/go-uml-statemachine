@@ -8,7 +8,7 @@ type Repository interface {
 	Exists(fileType FileType, name, version string, location Location) (bool, error)
 
 	// Write operations
-	WriteStateMachine(sm *StateMachineDiagram) error
+	WriteStateMachine(diag *StateMachineDiagram) error
 	MoveStateMachine(fileType FileType, name, version string, from, to Location) error
 	DeleteStateMachine(fileType FileType, name, version string, location Location) error
 
@@ -28,7 +28,7 @@ type DiagramService interface {
 	// CRUD operations
 	Create(fileType FileType, name, version string, content string, location Location) (*StateMachineDiagram, error)
 	Read(fileType FileType, name, version string, location Location) (*StateMachineDiagram, error)
-	Update(sm *StateMachineDiagram) error
+	Update(diag *StateMachineDiagram) error
 	Delete(fileType FileType, name, version string, location Location) error
 
 	// Business operations

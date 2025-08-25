@@ -155,8 +155,8 @@ if err != nil {
 ### Updating State-Machine Diagrams
 
 ```go
-diagram.Content = updatedPlantUMLContent
-err := svc.Update(sm)
+diag.Content = updatedPlantUMLContent
+err := svc.Update(diag)
 ```
 
 ### Deleting State-Machine Diagrams
@@ -624,7 +624,7 @@ type DiagramService interface {
     // CRUD operations
     Create(fileType FileType, name, version string, content string, location Location) (*diagram, error)
     Read(fileType FileType, name, version string, location Location) (*diagram, error)
-    Update(sm *diagram) error
+    Update(diag *StateMachineDiagram) error
     Delete(fileType FileType, name, version string, location Location) error
 
     // Business operations
@@ -633,7 +633,7 @@ type DiagramService interface {
     ListAll(fileType FileType, location Location) ([]diagram, error)
 
     // Reference operations
-    ResolveReferences(diagram *diagram) error
+    ResolveReferences(diagram *StateMachineDiagram) error
 }
 ```
 

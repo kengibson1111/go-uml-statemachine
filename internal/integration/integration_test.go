@@ -268,9 +268,9 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 		}
 
 		// Verify error type
-		if smErr, ok := err.(*models.StateMachineError); ok {
-			if smErr.Type != models.ErrorTypeDirectoryConflict {
-				t.Errorf("Expected ErrorTypeDirectoryConflict, got %v", smErr.Type)
+		if diagErr, ok := err.(*models.StateMachineError); ok {
+			if diagErr.Type != models.ErrorTypeDirectoryConflict {
+				t.Errorf("Expected ErrorTypeDirectoryConflict, got %v", diagErr.Type)
 			}
 		} else {
 			t.Errorf("Expected StateMachineError, got %T", err)
@@ -284,9 +284,9 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 		}
 
 		// Verify error type
-		if smErr, ok := err.(*models.StateMachineError); ok {
-			if smErr.Type != models.ErrorTypeFileNotFound {
-				t.Errorf("Expected ErrorTypeFileNotFound, got %v", smErr.Type)
+		if diagErr, ok := err.(*models.StateMachineError); ok {
+			if diagErr.Type != models.ErrorTypeFileNotFound {
+				t.Errorf("Expected ErrorTypeFileNotFound, got %v", diagErr.Type)
 			}
 		}
 	})
@@ -305,9 +305,9 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 		}
 
 		// Verify error type
-		if smErr, ok := err.(*models.StateMachineError); ok {
-			if smErr.Type != models.ErrorTypeFileNotFound {
-				t.Errorf("Expected ErrorTypeFileNotFound, got %v", smErr.Type)
+		if diagErr, ok := err.(*models.StateMachineError); ok {
+			if diagErr.Type != models.ErrorTypeFileNotFound {
+				t.Errorf("Expected ErrorTypeFileNotFound, got %v", diagErr.Type)
 			}
 		}
 	})
@@ -319,9 +319,9 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 		}
 
 		// Verify error type
-		if smErr, ok := err.(*models.StateMachineError); ok {
-			if smErr.Type != models.ErrorTypeFileNotFound {
-				t.Errorf("Expected ErrorTypeFileNotFound, got %v", smErr.Type)
+		if diagErr, ok := err.(*models.StateMachineError); ok {
+			if diagErr.Type != models.ErrorTypeFileNotFound {
+				t.Errorf("Expected ErrorTypeFileNotFound, got %v", diagErr.Type)
 			}
 		}
 	})
@@ -341,9 +341,9 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 		}
 
 		// Verify error type
-		if smErr, ok := err.(*models.StateMachineError); ok {
-			if smErr.Type != models.ErrorTypeValidation {
-				t.Errorf("Expected ErrorTypeValidation, got %v", smErr.Type)
+		if diagErr, ok := err.(*models.StateMachineError); ok {
+			if diagErr.Type != models.ErrorTypeValidation {
+				t.Errorf("Expected ErrorTypeValidation, got %v", diagErr.Type)
 			}
 		}
 	})
@@ -367,9 +367,9 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 		}
 
 		// Verify error type
-		if smErr, ok := err.(*models.StateMachineError); ok {
-			if smErr.Type != models.ErrorTypeDirectoryConflict {
-				t.Errorf("Expected ErrorTypeDirectoryConflict, got %v", smErr.Type)
+		if diagErr, ok := err.(*models.StateMachineError); ok {
+			if diagErr.Type != models.ErrorTypeDirectoryConflict {
+				t.Errorf("Expected ErrorTypeDirectoryConflict, got %v", diagErr.Type)
 			}
 		}
 	})
@@ -700,9 +700,9 @@ func TestReferenceResolutionWorkflow(t *testing.T) {
 			t.Logf("Reference resolution failed as expected: %v", err)
 
 			// Verify it's the expected error type
-			if smErr, ok := err.(*models.StateMachineError); ok {
-				if smErr.Type != models.ErrorTypeReferenceResolution {
-					t.Errorf("Expected ErrorTypeReferenceResolution, got %v", smErr.Type)
+			if diagErr, ok := err.(*models.StateMachineError); ok {
+				if diagErr.Type != models.ErrorTypeReferenceResolution {
+					t.Errorf("Expected ErrorTypeReferenceResolution, got %v", diagErr.Type)
 				}
 			} else {
 				t.Errorf("Expected StateMachineError, got %T", err)

@@ -53,10 +53,11 @@ func NewFileSystemRepository(config *models.Config) *FileSystemRepository {
 }
 
 // ReadStateMachine reads a state machine from the file system
-func (r *FileSystemRepository) ReadStateMachine(name, version string, location models.Location) (*models.StateMachine, error) {
+func (r *FileSystemRepository) ReadStateMachine(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 	// Create operation logger with context
 	opLogger := r.logger.WithFields(map[string]interface{}{
 		"operation": "ReadStateMachine",
+		"fileType":  fileType.String(),
 		"name":      name,
 		"version":   version,
 		"location":  location.String(),
@@ -88,7 +89,7 @@ func (r *FileSystemRepository) ReadStateMachine(name, version string, location m
 	opLogger.Debug("Input validation passed")
 
 	// Get the file path
-	filePath := r.pathManager.GetStateMachineFilePath(name, version, location)
+	filePath := r.pathManager.GetStateMachineFilePathWithFileType(name, version, location, fileType)
 	opLogger.WithField("filePath", filePath).Debug("Resolved file path")
 
 	// Check if file exists
@@ -161,6 +162,7 @@ func (r *FileSystemRepository) ReadStateMachine(name, version string, location m
 		Version:  version,
 		Content:  string(content),
 		Location: location,
+		FileType: fileType,
 		Metadata: models.Metadata{
 			ModifiedAt: fileInfo.ModTime(),
 			// CreatedAt and Author would need additional metadata storage
@@ -204,8 +206,8 @@ func (r *FileSystemRepository) WriteStateMachine(sm *models.StateMachine) error 
 	}
 
 	// Get directory and file paths
-	dirPath := r.pathManager.GetStateMachineDirectoryPath(sm.Name, sm.Version, sm.Location)
-	filePath := r.pathManager.GetStateMachineFilePath(sm.Name, sm.Version, sm.Location)
+	dirPath := r.pathManager.GetStateMachineDirectoryPathWithFileType(sm.Name, sm.Version, sm.Location, sm.FileType)
+	filePath := r.pathManager.GetStateMachineFilePathWithFileType(sm.Name, sm.Version, sm.Location, sm.FileType)
 
 	// Create directory if it doesn't exist
 	if err := r.CreateDirectory(dirPath); err != nil {
@@ -222,7 +224,7 @@ func (r *FileSystemRepository) WriteStateMachine(sm *models.StateMachine) error 
 }
 
 // Exists checks if a state machine exists
-func (r *FileSystemRepository) Exists(name, version string, location models.Location) (bool, error) {
+func (r *FileSystemRepository) Exists(fileType models.FileType, name, version string, location models.Location) (bool, error) {
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
 		return false, err
@@ -235,7 +237,7 @@ func (r *FileSystemRepository) Exists(name, version string, location models.Loca
 	}
 
 	// Get the file path
-	filePath := r.pathManager.GetStateMachineFilePath(name, version, location)
+	filePath := r.pathManager.GetStateMachineFilePathWithFileType(name, version, location, fileType)
 
 	// Check if file exists
 	_, err := os.Stat(filePath)
@@ -296,7 +298,7 @@ func (r *FileSystemRepository) DirectoryExists(path string) (bool, error) {
 }
 
 // MoveStateMachine moves a state machine from one location to another
-func (r *FileSystemRepository) MoveStateMachine(name, version string, from, to models.Location) error {
+func (r *FileSystemRepository) MoveStateMachine(fileType models.FileType, name, version string, from, to models.Location) error {
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
 		return err
@@ -314,8 +316,8 @@ func (r *FileSystemRepository) MoveStateMachine(name, version string, from, to m
 	}
 
 	// Get source and destination paths
-	sourcePath := r.pathManager.GetStateMachineDirectoryPath(name, version, from)
-	destPath := r.pathManager.GetStateMachineDirectoryPath(name, version, to)
+	sourcePath := r.pathManager.GetStateMachineDirectoryPathWithFileType(name, version, from, fileType)
+	destPath := r.pathManager.GetStateMachineDirectoryPathWithFileType(name, version, to, fileType)
 
 	// Check if source exists
 	sourceExists, err := r.DirectoryExists(sourcePath)
@@ -344,7 +346,7 @@ func (r *FileSystemRepository) MoveStateMachine(name, version string, from, to m
 	}
 
 	// Create destination parent directory if needed
-	destParent := r.pathManager.GetLocationPath(to)
+	destParent := r.pathManager.GetLocationWithFileTypePath(to, fileType)
 	if err := r.CreateDirectory(destParent); err != nil {
 		return fmt.Errorf("failed to create destination parent directory: %w", err)
 	}
@@ -360,7 +362,7 @@ func (r *FileSystemRepository) MoveStateMachine(name, version string, from, to m
 }
 
 // DeleteStateMachine deletes a state machine and its directory
-func (r *FileSystemRepository) DeleteStateMachine(name, version string, location models.Location) error {
+func (r *FileSystemRepository) DeleteStateMachine(fileType models.FileType, name, version string, location models.Location) error {
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
 		return err
@@ -373,7 +375,7 @@ func (r *FileSystemRepository) DeleteStateMachine(name, version string, location
 	}
 
 	// Get the directory path
-	dirPath := r.pathManager.GetStateMachineDirectoryPath(name, version, location)
+	dirPath := r.pathManager.GetStateMachineDirectoryPathWithFileType(name, version, location, fileType)
 
 	// Check if directory exists
 	exists, err := r.DirectoryExists(dirPath)
@@ -398,9 +400,9 @@ func (r *FileSystemRepository) DeleteStateMachine(name, version string, location
 }
 
 // ListStateMachines lists all state machines in a location
-func (r *FileSystemRepository) ListStateMachines(location models.Location) ([]models.StateMachine, error) {
+func (r *FileSystemRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
 	// Get the location path
-	locationPath := r.pathManager.GetLocationPath(location)
+	locationPath := r.pathManager.GetLocationWithFileTypePath(location, fileType)
 
 	// Check if location directory exists
 	exists, err := r.DirectoryExists(locationPath)
@@ -440,7 +442,7 @@ func (r *FileSystemRepository) ListStateMachines(location models.Location) ([]mo
 		}
 
 		// Try to read the state machine
-		sm, err := r.ReadStateMachine(pathInfo.Name, pathInfo.Version, location)
+		sm, err := r.ReadStateMachine(fileType, pathInfo.Name, pathInfo.Version, location)
 		if err != nil {
 			// Skip state machines that can't be read, but continue processing others
 			continue

@@ -84,6 +84,15 @@ import (
 
 // Re-export key types for public API
 
+// FileType indicates the type of file being processed.
+type FileType = models.FileType
+
+// FileType constants for different file types.
+const (
+	// FileTypePUML indicates a PlantUML file.
+	FileTypePUML = models.FileTypePUML
+)
+
 // Location indicates where the state machine is stored.
 type Location = models.Location
 

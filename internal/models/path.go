@@ -48,6 +48,12 @@ func (pm *PathManager) GetLocationPath(location Location) string {
 	}
 }
 
+// GetLocationWithFileTypePath returns the path for a specific location and file type
+func (pm *PathManager) GetLocationWithFileTypePath(location Location, fileType FileType) string {
+	locationPath := pm.GetLocationPath(location)
+	return filepath.Join(locationPath, fileType.String())
+}
+
 // GetStateMachineDirectoryPath returns the directory path for a state machine
 func (pm *PathManager) GetStateMachineDirectoryPath(name, version string, location Location) string {
 	locationPath := pm.GetLocationPath(location)
@@ -58,9 +64,29 @@ func (pm *PathManager) GetStateMachineDirectoryPath(name, version string, locati
 	return filepath.Join(locationPath, fmt.Sprintf("%s-%s", name, version))
 }
 
+// GetStateMachineDirectoryPathWithFileType returns the directory path for a state machine with file type
+func (pm *PathManager) GetStateMachineDirectoryPathWithFileType(name, version string, location Location, fileType FileType) string {
+	locationPath := pm.GetLocationWithFileTypePath(location, fileType)
+	if location == LocationNested {
+		// Nested state machines don't include version in directory name
+		return filepath.Join(locationPath, name)
+	}
+	return filepath.Join(locationPath, fmt.Sprintf("%s-%s", name, version))
+}
+
 // GetStateMachineFilePath returns the full file path for a state machine
 func (pm *PathManager) GetStateMachineFilePath(name, version string, location Location) string {
 	dirPath := pm.GetStateMachineDirectoryPath(name, version, location)
+	if location == LocationNested {
+		// Nested state machines don't include version in filename
+		return filepath.Join(dirPath, name+PlantUMLExtension)
+	}
+	return filepath.Join(dirPath, fmt.Sprintf("%s-%s%s", name, version, PlantUMLExtension))
+}
+
+// GetStateMachineFilePathWithFileType returns the full file path for a state machine with file type
+func (pm *PathManager) GetStateMachineFilePathWithFileType(name, version string, location Location, fileType FileType) string {
+	dirPath := pm.GetStateMachineDirectoryPathWithFileType(name, version, location, fileType)
 	if location == LocationNested {
 		// Nested state machines don't include version in filename
 		return filepath.Join(dirPath, name+PlantUMLExtension)

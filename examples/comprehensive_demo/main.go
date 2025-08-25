@@ -115,7 +115,7 @@ OrderCancelled --> [*]
 
 @enduml`
 
-	sm, err := svc.Create("ecommerce-order", "1.0.0", content, statemachine.LocationInProgress)
+	sm, err := svc.Create(statemachine.FileTypePUML, "ecommerce-order", "1.0.0", content, statemachine.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state machine: %v", err)
 		return
@@ -124,7 +124,7 @@ OrderCancelled --> [*]
 
 	// Read
 	fmt.Println("Reading the state machine...")
-	readSM, err := svc.Read("ecommerce-order", "1.0.0", statemachine.LocationInProgress)
+	readSM, err := svc.Read(statemachine.FileTypePUML, "ecommerce-order", "1.0.0", statemachine.LocationInProgress)
 	if err != nil {
 		log.Printf("Error reading state machine: %v", err)
 		return
@@ -149,7 +149,7 @@ RefundCompleted --> [*]`
 
 	// Clean up for next demo
 	defer func() {
-		svc.Delete("ecommerce-order", "1.0.0", statemachine.LocationInProgress)
+		svc.Delete(statemachine.FileTypePUML, "ecommerce-order", "1.0.0", statemachine.LocationInProgress)
 	}()
 }
 
@@ -178,7 +178,7 @@ AccountLocked --> Anonymous : unlock_timeout()
 
 @enduml`
 
-	sm, err := svc.Create("user-session", "1.0.0", content, statemachine.LocationInProgress)
+	sm, err := svc.Create(statemachine.FileTypePUML, "user-session", "1.0.0", content, statemachine.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state machine: %v", err)
 		return
@@ -187,7 +187,7 @@ AccountLocked --> Anonymous : unlock_timeout()
 
 	// Validate
 	fmt.Println("Validating state machine...")
-	result, err := svc.Validate("user-session", "1.0.0", statemachine.LocationInProgress)
+	result, err := svc.Validate(statemachine.FileTypePUML, "user-session", "1.0.0", statemachine.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating state machine: %v", err)
 		return
@@ -215,7 +215,7 @@ AccountLocked --> Anonymous : unlock_timeout()
 	// Promote if validation passes
 	if result.IsValid && !result.HasErrors() {
 		fmt.Println("Promoting to products...")
-		err = svc.Promote("user-session", "1.0.0")
+		err = svc.Promote(statemachine.FileTypePUML, "user-session", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting state machine: %v", err)
 		} else {
@@ -227,8 +227,8 @@ AccountLocked --> Anonymous : unlock_timeout()
 
 	// Clean up
 	defer func() {
-		svc.Delete("user-session", "1.0.0", statemachine.LocationProducts)
-		svc.Delete("user-session", "1.0.0", statemachine.LocationInProgress)
+		svc.Delete(statemachine.FileTypePUML, "user-session", "1.0.0", statemachine.LocationProducts)
+		svc.Delete(statemachine.FileTypePUML, "user-session", "1.0.0", statemachine.LocationInProgress)
 	}()
 }
 
@@ -251,7 +251,7 @@ Authenticated --> [*]
 
 @enduml`
 
-	baseSM, err := svc.Create("auth-component", "1.0.0", baseContent, statemachine.LocationInProgress)
+	baseSM, err := svc.Create(statemachine.FileTypePUML, "auth-component", "1.0.0", baseContent, statemachine.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating base component: %v", err)
 		return
@@ -259,9 +259,9 @@ Authenticated --> [*]
 	fmt.Printf("✓ Created base component: %s-%s\n", baseSM.Name, baseSM.Version)
 
 	// Promote base component to products
-	result, err := svc.Validate("auth-component", "1.0.0", statemachine.LocationInProgress)
+	result, err := svc.Validate(statemachine.FileTypePUML, "auth-component", "1.0.0", statemachine.LocationInProgress)
 	if err == nil && result.IsValid && !result.HasErrors() {
-		err = svc.Promote("auth-component", "1.0.0")
+		err = svc.Promote(statemachine.FileTypePUML, "auth-component", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting base component: %v", err)
 			return
@@ -290,7 +290,7 @@ Authenticated --> [*]
 
 @enduml`
 
-	complexSM, err := svc.Create("mfa-system", "1.0.0", complexContent, statemachine.LocationInProgress)
+	complexSM, err := svc.Create(statemachine.FileTypePUML, "mfa-system", "1.0.0", complexContent, statemachine.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating complex system: %v", err)
 		return
@@ -311,8 +311,8 @@ Authenticated --> [*]
 
 	// Clean up
 	defer func() {
-		svc.Delete("mfa-system", "1.0.0", statemachine.LocationInProgress)
-		svc.Delete("auth-component", "1.0.0", statemachine.LocationProducts)
+		svc.Delete(statemachine.FileTypePUML, "mfa-system", "1.0.0", statemachine.LocationInProgress)
+		svc.Delete(statemachine.FileTypePUML, "auth-component", "1.0.0", statemachine.LocationProducts)
 	}()
 }
 
@@ -371,7 +371,7 @@ Rejected --> [*]
 	// Create all state machines
 	fmt.Printf("Creating %d business process state machines...\n", len(processes))
 	for _, process := range processes {
-		_, err := svc.Create(process.name, process.version, process.content, statemachine.LocationInProgress)
+		_, err := svc.Create(statemachine.FileTypePUML, process.name, process.version, process.content, statemachine.LocationInProgress)
 		if err != nil {
 			log.Printf("Error creating %s: %v", process.name, err)
 			continue
@@ -381,7 +381,7 @@ Rejected --> [*]
 
 	// List all in-progress state machines
 	fmt.Println("Listing all in-progress state machines...")
-	allSMs, err := svc.ListAll(statemachine.LocationInProgress)
+	allSMs, err := svc.ListAll(statemachine.FileTypePUML, statemachine.LocationInProgress)
 	if err != nil {
 		log.Printf("Error listing state machines: %v", err)
 		return
@@ -397,7 +397,7 @@ Rejected --> [*]
 	fmt.Println("Batch validation of all state machines...")
 	validCount := 0
 	for _, process := range processes {
-		result, err := svc.Validate(process.name, process.version, statemachine.LocationInProgress)
+		result, err := svc.Validate(statemachine.FileTypePUML, process.name, process.version, statemachine.LocationInProgress)
 		if err != nil {
 			log.Printf("Error validating %s: %v", process.name, err)
 			continue
@@ -417,7 +417,7 @@ Rejected --> [*]
 	// Clean up all created state machines
 	fmt.Println("Cleaning up batch-created state machines...")
 	for _, process := range processes {
-		err := svc.Delete(process.name, process.version, statemachine.LocationInProgress)
+		err := svc.Delete(statemachine.FileTypePUML, process.name, process.version, statemachine.LocationInProgress)
 		if err != nil {
 			log.Printf("Warning: Could not delete %s: %v", process.name, err)
 		} else {
@@ -437,34 +437,34 @@ func demonstrateErrorHandling() {
 
 	// 1. Invalid parameters
 	fmt.Println("1. Testing invalid parameters...")
-	_, err = svc.Create("", "1.0.0", "content", statemachine.LocationInProgress)
+	_, err = svc.Create(statemachine.FileTypePUML, "", "1.0.0", "content", statemachine.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled empty name error")
 	}
 
-	_, err = svc.Create("test", "", "content", statemachine.LocationInProgress)
+	_, err = svc.Create(statemachine.FileTypePUML, "test", "", "content", statemachine.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled empty version error")
 	}
 
-	_, err = svc.Create("test", "1.0.0", "", statemachine.LocationInProgress)
+	_, err = svc.Create(statemachine.FileTypePUML, "test", "1.0.0", "", statemachine.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled empty content error")
 	}
 
 	// 2. Non-existent operations
 	fmt.Println("2. Testing non-existent resource operations...")
-	_, err = svc.Read("non-existent", "1.0.0", statemachine.LocationInProgress)
+	_, err = svc.Read(statemachine.FileTypePUML, "non-existent", "1.0.0", statemachine.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled non-existent read error")
 	}
 
-	err = svc.Delete("non-existent", "1.0.0", statemachine.LocationInProgress)
+	err = svc.Delete(statemachine.FileTypePUML, "non-existent", "1.0.0", statemachine.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled non-existent delete error")
 	}
 
-	err = svc.Promote("non-existent", "1.0.0")
+	err = svc.Promote(statemachine.FileTypePUML, "non-existent", "1.0.0")
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled non-existent promote error")
 	}
@@ -476,13 +476,13 @@ func demonstrateErrorHandling() {
 Test --> [*]
 @enduml`
 
-	_, err = svc.Create("duplicate-test", "1.0.0", content, statemachine.LocationInProgress)
+	_, err = svc.Create(statemachine.FileTypePUML, "duplicate-test", "1.0.0", content, statemachine.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating first instance: %v", err)
 		return
 	}
 
-	_, err = svc.Create("duplicate-test", "1.0.0", content, statemachine.LocationInProgress)
+	_, err = svc.Create(statemachine.FileTypePUML, "duplicate-test", "1.0.0", content, statemachine.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled duplicate creation error")
 	}
@@ -494,6 +494,7 @@ Test --> [*]
 		Version:  "1.0.0",
 		Content:  content,
 		Location: statemachine.LocationInProgress,
+		FileType: statemachine.FileTypePUML,
 	}
 	err = svc.Update(nonExistentSM)
 	if err != nil {
@@ -501,7 +502,7 @@ Test --> [*]
 	}
 
 	// Clean up
-	svc.Delete("duplicate-test", "1.0.0", statemachine.LocationInProgress)
+	svc.Delete(statemachine.FileTypePUML, "duplicate-test", "1.0.0", statemachine.LocationInProgress)
 
 	fmt.Println("✓ Error handling demonstration completed")
 }
@@ -538,14 +539,14 @@ title Environment Test
 EnvConfigured --> [*]
 @enduml`
 
-	sm, err := svc.Create("env-config-test", "1.0.0", content, statemachine.LocationInProgress)
+	sm, err := svc.Create(statemachine.FileTypePUML, "env-config-test", "1.0.0", content, statemachine.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating test state machine: %v", err)
 	} else {
 		fmt.Printf("✓ Created state machine using environment configuration: %s-%s\n", sm.Name, sm.Version)
 
 		// Clean up
-		svc.Delete("env-config-test", "1.0.0", statemachine.LocationInProgress)
+		svc.Delete(statemachine.FileTypePUML, "env-config-test", "1.0.0", statemachine.LocationInProgress)
 	}
 
 	// Restore original environment variables

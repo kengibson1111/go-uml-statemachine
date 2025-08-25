@@ -44,7 +44,7 @@ Authenticated --> Idle : logout()
 
 	// Example 1: Create a new state machine in in-progress
 	fmt.Println("\n1. Creating a new state machine...")
-	sm, err := svc.Create("user-auth", "1.0.0", authContent, models.LocationInProgress)
+	sm, err := svc.Create(models.FileTypePUML, "user-auth", "1.0.0", authContent, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state machine: %v", err)
 		return
@@ -53,7 +53,7 @@ Authenticated --> Idle : logout()
 
 	// Example 2: Read the state machine back
 	fmt.Println("\n2. Reading the state machine...")
-	readSM, err := svc.Read("user-auth", "1.0.0", models.LocationInProgress)
+	readSM, err := svc.Read(models.FileTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error reading state machine: %v", err)
 		return
@@ -63,7 +63,7 @@ Authenticated --> Idle : logout()
 
 	// Example 3: Validate the state machine
 	fmt.Println("\n3. Validating the state machine...")
-	validationResult, err := svc.Validate("user-auth", "1.0.0", models.LocationInProgress)
+	validationResult, err := svc.Validate(models.FileTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating state machine: %v", err)
 		return
@@ -87,7 +87,7 @@ Authenticated --> Idle : logout()
 
 	// Example 4: List all state machines in in-progress
 	fmt.Println("\n4. Listing all in-progress state machines...")
-	stateMachines, err := svc.ListAll(models.LocationInProgress)
+	stateMachines, err := svc.ListAll(models.FileTypePUML, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error listing state machines: %v", err)
 		return
@@ -101,7 +101,7 @@ Authenticated --> Idle : logout()
 	// Example 5: Promote to products (if validation passes)
 	if validationResult.IsValid && !validationResult.HasErrors() {
 		fmt.Println("\n5. Promoting state machine to products...")
-		err = svc.Promote("user-auth", "1.0.0")
+		err = svc.Promote(models.FileTypePUML, "user-auth", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting state machine: %v", err)
 		} else {
@@ -113,7 +113,7 @@ Authenticated --> Idle : logout()
 
 	// Example 6: List products
 	fmt.Println("\n6. Listing all product state machines...")
-	productSMs, err := svc.ListAll(models.LocationProducts)
+	productSMs, err := svc.ListAll(models.FileTypePUML, models.LocationProducts)
 	if err != nil {
 		log.Printf("Error listing product state machines: %v", err)
 		return

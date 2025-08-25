@@ -36,7 +36,7 @@ func main() {
 Test --> [*]
 @enduml`
 
-	sm, err := svc.Create("api-test", "1.0.0", content, statemachine.LocationInProgress)
+	sm, err := svc.Create(statemachine.FileTypePUML, "api-test", "1.0.0", content, statemachine.LocationInProgress)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +44,7 @@ Test --> [*]
 	fmt.Printf("✓ Created state machine: %s-%s\n", sm.Name, sm.Version)
 
 	// Clean up
-	err = svc.Delete("api-test", "1.0.0", statemachine.LocationInProgress)
+	err = svc.Delete(statemachine.FileTypePUML, "api-test", "1.0.0", statemachine.LocationInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not clean up: %v", err)
 	}

@@ -42,7 +42,7 @@ Authenticated --> Idle : logout()
 
 @enduml`
 
-	baseSM, err := svc.Create("base-auth", "1.0.0", baseAuthContent, models.LocationInProgress)
+	baseSM, err := svc.Create(models.FileTypePUML, "base-auth", "1.0.0", baseAuthContent, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating base auth: %v", err)
 		return
@@ -50,14 +50,14 @@ Authenticated --> Idle : logout()
 	fmt.Printf("✓ Created: %s-%s\n", baseSM.Name, baseSM.Version)
 
 	// Validate and promote base auth to products
-	validationResult, err := svc.Validate("base-auth", "1.0.0", models.LocationInProgress)
+	validationResult, err := svc.Validate(models.FileTypePUML, "base-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating base auth: %v", err)
 		return
 	}
 
 	if validationResult.IsValid && !validationResult.HasErrors() {
-		err = svc.Promote("base-auth", "1.0.0")
+		err = svc.Promote(models.FileTypePUML, "base-auth", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting base auth: %v", err)
 			return
@@ -85,7 +85,7 @@ Failed --> RequireAuth : retry
 
 @enduml`
 
-	advancedSM, err := svc.Create("advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
+	advancedSM, err := svc.Create(models.FileTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating advanced auth: %v", err)
 		return
@@ -140,7 +140,7 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Println("\n5. Testing validation strictness...")
 
 	// Validate with in-progress strictness (errors and warnings)
-	inProgressResult, err := svc.Validate("advanced-auth", "1.0.0", models.LocationInProgress)
+	inProgressResult, err := svc.Validate(models.FileTypePUML, "advanced-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating with in-progress strictness: %v", err)
 	} else {
@@ -152,19 +152,19 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Println("\n6. Demonstrating error handling...")
 
 	// Try to create a duplicate
-	_, err = svc.Create("advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
+	_, err = svc.Create(models.FileTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
 	if err != nil {
 		fmt.Printf("✓ Expected error for duplicate creation: %v\n", err)
 	}
 
 	// Try to read non-existent state machine
-	_, err = svc.Read("non-existent", "1.0.0", models.LocationInProgress)
+	_, err = svc.Read(models.FileTypePUML, "non-existent", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		fmt.Printf("✓ Expected error for non-existent read: %v\n", err)
 	}
 
 	// Try to promote without validation
-	err = svc.Promote("non-existent", "1.0.0")
+	err = svc.Promote(models.FileTypePUML, "non-existent", "1.0.0")
 	if err != nil {
 		fmt.Printf("✓ Expected error for non-existent promotion: %v\n", err)
 	}
@@ -183,7 +183,7 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Println("\n8. Cleaning up test data...")
 
 	// Delete from products first
-	err = svc.Delete("base-auth", "1.0.0", models.LocationProducts)
+	err = svc.Delete(models.FileTypePUML, "base-auth", "1.0.0", models.LocationProducts)
 	if err != nil {
 		log.Printf("Warning: Could not delete base-auth from products: %v", err)
 	} else {
@@ -191,7 +191,7 @@ SessionTimeout --> RequireAuth : session_expired
 	}
 
 	// Delete from in-progress
-	err = svc.Delete("advanced-auth", "1.0.0", models.LocationInProgress)
+	err = svc.Delete(models.FileTypePUML, "advanced-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not delete advanced-auth from in-progress: %v", err)
 	} else {

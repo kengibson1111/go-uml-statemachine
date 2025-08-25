@@ -56,7 +56,7 @@ func demonstrateValidationErrors(svc models.StateMachineService, logger *logging
 
 	// Test empty name
 	logger.Info("Testing empty name validation...")
-	_, err := svc.Create("", "1.0.0", "content", models.LocationInProgress)
+	_, err := svc.Create(models.FileTypePUML, "", "1.0.0", "content", models.LocationInProgress)
 	if err != nil {
 		if smErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]interface{}{
@@ -74,7 +74,7 @@ func demonstrateValidationErrors(svc models.StateMachineService, logger *logging
 
 	// Test empty version
 	logger.Info("Testing empty version validation...")
-	_, err = svc.Create("test", "", "content", models.LocationInProgress)
+	_, err = svc.Create(models.FileTypePUML, "test", "", "content", models.LocationInProgress)
 	if err != nil {
 		if smErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithField("errorType", smErr.Type.String()).Error("Version validation error caught as expected")
@@ -83,7 +83,7 @@ func demonstrateValidationErrors(svc models.StateMachineService, logger *logging
 
 	// Test empty content
 	logger.Info("Testing empty content validation...")
-	_, err = svc.Create("test", "1.0.0", "", models.LocationInProgress)
+	_, err = svc.Create(models.FileTypePUML, "test", "1.0.0", "", models.LocationInProgress)
 	if err != nil {
 		if smErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithField("errorType", smErr.Type.String()).Error("Content validation error caught as expected")
@@ -96,7 +96,7 @@ func demonstrateFileSystemErrors(svc models.StateMachineService, logger *logging
 
 	// Try to read a non-existent state machine
 	logger.Info("Testing file not found error...")
-	_, err := svc.Read("nonexistent", "1.0.0", models.LocationInProgress)
+	_, err := svc.Read(models.FileTypePUML, "nonexistent", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		if smErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]interface{}{
@@ -119,7 +119,7 @@ Idle --> Active : start
 Active --> [*] : stop
 @enduml`
 
-	sm, err := svc.Create("demo-sm", "1.0.0", validContent, models.LocationInProgress)
+	sm, err := svc.Create(models.FileTypePUML, "demo-sm", "1.0.0", validContent, models.LocationInProgress)
 	if err != nil {
 		logger.WithError(err).Error("Failed to create demo state machine")
 		return
@@ -129,7 +129,7 @@ Active --> [*] : stop
 
 	// Try to create the same state machine again (should cause conflict)
 	logger.Info("Attempting to create duplicate state machine...")
-	_, err = svc.Create("demo-sm", "1.0.0", validContent, models.LocationInProgress)
+	_, err = svc.Create(models.FileTypePUML, "demo-sm", "1.0.0", validContent, models.LocationInProgress)
 	if err != nil {
 		if smErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]interface{}{
@@ -147,7 +147,7 @@ Active --> [*] : stop
 
 	// Clean up
 	logger.Info("Cleaning up demo state machine...")
-	if err := svc.Delete("demo-sm", "1.0.0", models.LocationInProgress); err != nil {
+	if err := svc.Delete(models.FileTypePUML, "demo-sm", "1.0.0", models.LocationInProgress); err != nil {
 		logger.WithError(err).Warn("Failed to clean up demo state machine")
 	}
 }

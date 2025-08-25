@@ -3,14 +3,14 @@ package models
 // Repository interface defines the contract for data persistence operations
 type Repository interface {
 	// Read operations
-	ReadStateMachine(name, version string, location Location) (*StateMachine, error)
-	ListStateMachines(location Location) ([]StateMachine, error)
-	Exists(name, version string, location Location) (bool, error)
+	ReadStateMachine(fileType FileType, name, version string, location Location) (*StateMachine, error)
+	ListStateMachines(fileType FileType, location Location) ([]StateMachine, error)
+	Exists(fileType FileType, name, version string, location Location) (bool, error)
 
 	// Write operations
 	WriteStateMachine(sm *StateMachine) error
-	MoveStateMachine(name, version string, from, to Location) error
-	DeleteStateMachine(name, version string, location Location) error
+	MoveStateMachine(fileType FileType, name, version string, from, to Location) error
+	DeleteStateMachine(fileType FileType, name, version string, location Location) error
 
 	// Directory operations
 	CreateDirectory(path string) error
@@ -26,15 +26,15 @@ type Validator interface {
 // StateMachineService interface defines the contract for business operations
 type StateMachineService interface {
 	// CRUD operations
-	Create(name, version string, content string, location Location) (*StateMachine, error)
-	Read(name, version string, location Location) (*StateMachine, error)
+	Create(fileType FileType, name, version string, content string, location Location) (*StateMachine, error)
+	Read(fileType FileType, name, version string, location Location) (*StateMachine, error)
 	Update(sm *StateMachine) error
-	Delete(name, version string, location Location) error
+	Delete(fileType FileType, name, version string, location Location) error
 
 	// Business operations
-	Promote(name, version string) error // Move from in-progress to products
-	Validate(name, version string, location Location) (*ValidationResult, error)
-	ListAll(location Location) ([]StateMachine, error)
+	Promote(fileType FileType, name, version string) error // Move from in-progress to products
+	Validate(fileType FileType, name, version string, location Location) (*ValidationResult, error)
+	ListAll(fileType FileType, location Location) ([]StateMachine, error)
 
 	// Reference operations
 	ResolveReferences(sm *StateMachine) error

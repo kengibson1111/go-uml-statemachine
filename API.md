@@ -12,6 +12,18 @@ import "github.com/kengibson1111/go-uml-statemachine-parsers"
 
 ## Core Types
 
+### FileType
+
+Indicates the type of file being processed.
+
+```go
+type FileType int
+
+const (
+    FileTypePUML FileType = iota // PlantUML files
+)
+```
+
 ### StateMachine
 
 Represents a UML state machine with its metadata and content.
@@ -23,6 +35,7 @@ type StateMachine struct {
     Content    string      // PlantUML content
     References []Reference // References to other state machines
     Location   Location    // Storage location
+    FileType   FileType    // Type of file (e.g., PUML)
     Metadata   Metadata    // Additional metadata
 }
 ```
@@ -118,15 +131,15 @@ The main interface for state machine operations.
 ```go
 type StateMachineService interface {
     // CRUD operations
-    Create(name, version string, content string, location Location) (*StateMachine, error)
-    Read(name, version string, location Location) (*StateMachine, error)
+    Create(fileType FileType, name, version string, content string, location Location) (*StateMachine, error)
+    Read(fileType FileType, name, version string, location Location) (*StateMachine, error)
     Update(sm *StateMachine) error
-    Delete(name, version string, location Location) error
+    Delete(fileType FileType, name, version string, location Location) error
 
     // Business operations
-    Promote(name, version string) error
-    Validate(name, version string, location Location) (*ValidationResult, error)
-    ListAll(location Location) ([]StateMachine, error)
+    Promote(fileType FileType, name, version string) error
+    Validate(fileType FileType, name, version string, location Location) (*ValidationResult, error)
+    ListAll(fileType FileType, location Location) ([]StateMachine, error)
 
     // Reference operations
     ResolveReferences(sm *StateMachine) error
@@ -235,10 +248,11 @@ func LoadConfigFromEnv() *Config
 Creates a new state machine with the specified parameters.
 
 ```go
-Create(name, version string, content string, location Location) (*StateMachine, error)
+Create(fileType FileType, name, version string, content string, location Location) (*StateMachine, error)
 ```
 
 **Parameters:**
+- `fileType`: Type of file (e.g., FileTypePUML)
 - `name`: State machine name (must be non-empty)
 - `version`: Semantic version (must be non-empty)
 - `content`: PlantUML content (must be non-empty)
@@ -261,7 +275,7 @@ Idle --> Active : start()
 Active --> Idle : stop()
 @enduml`
 
-sm, err := svc.Create("my-machine", "1.0.0", content, statemachine.LocationInProgress)
+sm, err := svc.Create(statemachine.FileTypePUML, "my-machine", "1.0.0", content, statemachine.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -272,10 +286,11 @@ if err != nil {
 Retrieves a state machine by name, version, and location.
 
 ```go
-Read(name, version string, location Location) (*StateMachine, error)
+Read(fileType FileType, name, version string, location Location) (*StateMachine, error)
 ```
 
 **Parameters:**
+- `fileType`: Type of file (e.g., FileTypePUML)
 - `name`: State machine name
 - `version`: State machine version
 - `location`: Storage location
@@ -290,7 +305,7 @@ Read(name, version string, location Location) (*StateMachine, error)
 
 **Example:**
 ```go
-sm, err := svc.Read("my-machine", "1.0.0", statemachine.LocationInProgress)
+sm, err := svc.Read(statemachine.FileTypePUML, "my-machine", "1.0.0", statemachine.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -330,10 +345,11 @@ if err != nil {
 Removes a state machine by name, version, and location.
 
 ```go
-Delete(name, version string, location Location) error
+Delete(fileType FileType, name, version string, location Location) error
 ```
 
 **Parameters:**
+- `fileType`: Type of file (e.g., FileTypePUML)
 - `name`: State machine name
 - `version`: State machine version
 - `location`: Storage location
@@ -348,7 +364,7 @@ Delete(name, version string, location Location) error
 
 **Example:**
 ```go
-err := svc.Delete("my-machine", "1.0.0", statemachine.LocationInProgress)
+err := svc.Delete(statemachine.FileTypePUML, "my-machine", "1.0.0", statemachine.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -361,10 +377,11 @@ if err != nil {
 Moves a state machine from in-progress to products with validation.
 
 ```go
-Promote(name, version string) error
+Promote(fileType FileType, name, version string) error
 ```
 
 **Parameters:**
+- `fileType`: Type of file (e.g., FileTypePUML)
 - `name`: State machine name
 - `version`: State machine version
 
@@ -386,7 +403,7 @@ Promote(name, version string) error
 
 **Example:**
 ```go
-err := svc.Promote("my-machine", "1.0.0")
+err := svc.Promote(statemachine.FileTypePUML, "my-machine", "1.0.0")
 if err != nil {
     log.Fatal(err)
 }
@@ -397,10 +414,11 @@ if err != nil {
 Validates a state machine with the specified strictness level.
 
 ```go
-Validate(name, version string, location Location) (*ValidationResult, error)
+Validate(fileType FileType, name, version string, location Location) (*ValidationResult, error)
 ```
 
 **Parameters:**
+- `fileType`: Type of file (e.g., FileTypePUML)
 - `name`: State machine name
 - `version`: State machine version
 - `location`: Storage location
@@ -415,7 +433,7 @@ Validate(name, version string, location Location) (*ValidationResult, error)
 
 **Example:**
 ```go
-result, err := svc.Validate("my-machine", "1.0.0", statemachine.LocationInProgress)
+result, err := svc.Validate(statemachine.FileTypePUML, "my-machine", "1.0.0", statemachine.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -433,10 +451,11 @@ if result.HasErrors() {
 Lists all state machines in the specified location.
 
 ```go
-ListAll(location Location) ([]StateMachine, error)
+ListAll(fileType FileType, location Location) ([]StateMachine, error)
 ```
 
 **Parameters:**
+- `fileType`: Type of file (e.g., FileTypePUML)
 - `location`: Storage location to list
 
 **Returns:**
@@ -445,7 +464,7 @@ ListAll(location Location) ([]StateMachine, error)
 
 **Example:**
 ```go
-stateMachines, err := svc.ListAll(statemachine.LocationInProgress)
+stateMachines, err := svc.ListAll(statemachine.FileTypePUML, statemachine.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }

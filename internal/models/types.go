@@ -2,6 +2,23 @@ package models
 
 import "time"
 
+// FileType indicates the type of file being processed
+type FileType int
+
+const (
+	FileTypePUML FileType = iota
+)
+
+// String returns the string representation of FileType
+func (ft FileType) String() string {
+	switch ft {
+	case FileTypePUML:
+		return "puml"
+	default:
+		return "unknown"
+	}
+}
+
 // Location indicates where the state machine is stored
 type Location int
 
@@ -52,6 +69,7 @@ type StateMachine struct {
 	Content    string
 	References []Reference
 	Location   Location
+	FileType   FileType
 	Metadata   Metadata
 }
 

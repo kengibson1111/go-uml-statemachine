@@ -79,13 +79,14 @@ func NewServiceWithEnvOverrides(repo models.Repository, validator models.Validat
 }
 
 // Create creates a new state machine with the specified parameters
-func (s *service) Create(name, version string, content string, location models.Location) (*models.StateMachine, error) {
+func (s *service) Create(fileType models.FileType, name, version string, content string, location models.Location) (*models.StateMachine, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	// Create operation logger with context
 	opLogger := s.logger.WithFields(map[string]interface{}{
 		"operation": "Create",
+		"fileType":  fileType.String(),
 		"name":      name,
 		"version":   version,
 		"location":  location.String(),
@@ -123,7 +124,7 @@ func (s *service) Create(name, version string, content string, location models.L
 
 	// Check if state machine already exists
 	opLogger.Debug("Checking if state machine already exists")
-	exists, err := s.repo.Exists(name, version, location)
+	exists, err := s.repo.Exists(fileType, name, version, location)
 	if err != nil {
 		wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
 			"failed to check if state machine exists").
@@ -153,7 +154,7 @@ func (s *service) Create(name, version string, content string, location models.L
 	// For in-progress state machines, check if there's a conflicting directory in products
 	if location == models.LocationInProgress {
 		opLogger.Debug("Checking for conflicts in products directory")
-		productExists, err := s.repo.Exists(name, version, models.LocationProducts)
+		productExists, err := s.repo.Exists(fileType, name, version, models.LocationProducts)
 		if err != nil {
 			wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
 				"failed to check products directory for conflicts").
@@ -185,6 +186,7 @@ func (s *service) Create(name, version string, content string, location models.L
 		Version:  version,
 		Content:  content,
 		Location: location,
+		FileType: fileType,
 		Metadata: models.Metadata{
 			CreatedAt:  time.Now(),
 			ModifiedAt: time.Now(),
@@ -211,13 +213,14 @@ func (s *service) Create(name, version string, content string, location models.L
 }
 
 // Read retrieves a state machine by name, version, and location
-func (s *service) Read(name, version string, location models.Location) (*models.StateMachine, error) {
+func (s *service) Read(fileType models.FileType, name, version string, location models.Location) (*models.StateMachine, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	// Create operation logger with context
 	opLogger := s.logger.WithFields(map[string]interface{}{
 		"operation": "Read",
+		"fileType":  fileType.String(),
 		"name":      name,
 		"version":   version,
 		"location":  location.String(),
@@ -247,7 +250,7 @@ func (s *service) Read(name, version string, location models.Location) (*models.
 
 	// Read the state machine from repository
 	opLogger.Debug("Reading state machine from repository")
-	sm, err := s.repo.ReadStateMachine(name, version, location)
+	sm, err := s.repo.ReadStateMachine(fileType, name, version, location)
 	if err != nil {
 		wrappedErr := models.WrapError(err, models.ErrorTypeFileNotFound,
 			"failed to read state machine").
@@ -284,7 +287,7 @@ func (s *service) Update(sm *models.StateMachine) error {
 	}
 
 	// Check if state machine exists
-	exists, err := s.repo.Exists(sm.Name, sm.Version, sm.Location)
+	exists, err := s.repo.Exists(sm.FileType, sm.Name, sm.Version, sm.Location)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check if state machine exists", err).
@@ -316,7 +319,7 @@ func (s *service) Update(sm *models.StateMachine) error {
 }
 
 // Delete removes a state machine by name, version, and location
-func (s *service) Delete(name, version string, location models.Location) error {
+func (s *service) Delete(fileType models.FileType, name, version string, location models.Location) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -329,7 +332,7 @@ func (s *service) Delete(name, version string, location models.Location) error {
 	}
 
 	// Check if state machine exists
-	exists, err := s.repo.Exists(name, version, location)
+	exists, err := s.repo.Exists(fileType, name, version, location)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check if state machine exists", err).
@@ -346,7 +349,7 @@ func (s *service) Delete(name, version string, location models.Location) error {
 	}
 
 	// Delete the state machine from repository
-	if err := s.repo.DeleteStateMachine(name, version, location); err != nil {
+	if err := s.repo.DeleteStateMachine(fileType, name, version, location); err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to delete state machine", err).
 			WithContext("name", name).
@@ -358,7 +361,7 @@ func (s *service) Delete(name, version string, location models.Location) error {
 }
 
 // Promote moves a state machine from in-progress to products
-func (s *service) Promote(name, version string) error {
+func (s *service) Promote(fileType models.FileType, name, version string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -371,7 +374,7 @@ func (s *service) Promote(name, version string) error {
 	}
 
 	// Step 1: Check if state machine exists in in-progress
-	exists, err := s.repo.Exists(name, version, models.LocationInProgress)
+	exists, err := s.repo.Exists(fileType, name, version, models.LocationInProgress)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check if state machine exists in in-progress", err).
@@ -386,7 +389,7 @@ func (s *service) Promote(name, version string) error {
 	}
 
 	// Step 2: Check if there's already a directory with the same name in products
-	productExists, err := s.repo.Exists(name, version, models.LocationProducts)
+	productExists, err := s.repo.Exists(fileType, name, version, models.LocationProducts)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check products directory for conflicts", err).
@@ -401,7 +404,7 @@ func (s *service) Promote(name, version string) error {
 	}
 
 	// Step 3: Read the state machine for validation
-	sm, err := s.repo.ReadStateMachine(name, version, models.LocationInProgress)
+	sm, err := s.repo.ReadStateMachine(fileType, name, version, models.LocationInProgress)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to read state machine for validation", err).
@@ -429,7 +432,7 @@ func (s *service) Promote(name, version string) error {
 	}
 
 	// Step 6: Perform atomic move operation with rollback capability
-	err = s.performAtomicPromotion(name, version)
+	err = s.performAtomicPromotion(fileType, name, version)
 	if err != nil {
 		return err
 	}
@@ -438,9 +441,9 @@ func (s *service) Promote(name, version string) error {
 }
 
 // performAtomicPromotion performs the actual move operation with rollback capability
-func (s *service) performAtomicPromotion(name, version string) error {
+func (s *service) performAtomicPromotion(fileType models.FileType, name, version string) error {
 	// Step 1: Attempt to move the state machine
-	err := s.repo.MoveStateMachine(name, version, models.LocationInProgress, models.LocationProducts)
+	err := s.repo.MoveStateMachine(fileType, name, version, models.LocationInProgress, models.LocationProducts)
 	if err != nil {
 		// If move fails, no rollback needed since nothing was changed
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
@@ -451,10 +454,10 @@ func (s *service) performAtomicPromotion(name, version string) error {
 
 	// Step 2: Verify the move was successful by checking both locations
 	// Check that it exists in products
-	productExists, err := s.repo.Exists(name, version, models.LocationProducts)
+	productExists, err := s.repo.Exists(fileType, name, version, models.LocationProducts)
 	if err != nil {
 		// Attempt rollback - move back to in-progress
-		s.attemptRollback(name, version)
+		s.attemptRollback(fileType, name, version)
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to verify promotion: cannot check products directory", err).
 			WithContext("name", name).
@@ -462,7 +465,7 @@ func (s *service) performAtomicPromotion(name, version string) error {
 	}
 	if !productExists {
 		// Attempt rollback - move back to in-progress
-		s.attemptRollback(name, version)
+		s.attemptRollback(fileType, name, version)
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"promotion verification failed: state machine not found in products after move", nil).
 			WithContext("name", name).
@@ -470,10 +473,10 @@ func (s *service) performAtomicPromotion(name, version string) error {
 	}
 
 	// Check that it no longer exists in in-progress
-	inProgressExists, err := s.repo.Exists(name, version, models.LocationInProgress)
+	inProgressExists, err := s.repo.Exists(fileType, name, version, models.LocationInProgress)
 	if err != nil {
 		// Attempt rollback - move back to in-progress
-		s.attemptRollback(name, version)
+		s.attemptRollback(fileType, name, version)
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to verify promotion: cannot check in-progress directory", err).
 			WithContext("name", name).
@@ -492,10 +495,10 @@ func (s *service) performAtomicPromotion(name, version string) error {
 }
 
 // attemptRollback attempts to rollback a failed promotion by moving the state machine back to in-progress
-func (s *service) attemptRollback(name, version string) {
+func (s *service) attemptRollback(fileType models.FileType, name, version string) {
 	// This is a best-effort rollback - we don't return errors from here
 	// as we're already in an error state
-	rollbackErr := s.repo.MoveStateMachine(name, version, models.LocationProducts, models.LocationInProgress)
+	rollbackErr := s.repo.MoveStateMachine(fileType, name, version, models.LocationProducts, models.LocationInProgress)
 	if rollbackErr != nil {
 		// Log the rollback failure but don't return it - the original error is more important
 		// In a real implementation, this would be logged to a proper logging system
@@ -504,7 +507,7 @@ func (s *service) attemptRollback(name, version string) {
 }
 
 // Validate validates a state machine with the specified strictness level
-func (s *service) Validate(name, version string, location models.Location) (*models.ValidationResult, error) {
+func (s *service) Validate(fileType models.FileType, name, version string, location models.Location) (*models.ValidationResult, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -517,7 +520,7 @@ func (s *service) Validate(name, version string, location models.Location) (*mod
 	}
 
 	// Read the state machine from repository
-	sm, err := s.repo.ReadStateMachine(name, version, location)
+	sm, err := s.repo.ReadStateMachine(fileType, name, version, location)
 	if err != nil {
 		return nil, models.NewStateMachineError(models.ErrorTypeFileNotFound,
 			"failed to read state machine for validation", err).
@@ -547,12 +550,12 @@ func (s *service) Validate(name, version string, location models.Location) (*mod
 }
 
 // ListAll lists all state machines in the specified location
-func (s *service) ListAll(location models.Location) ([]models.StateMachine, error) {
+func (s *service) ListAll(fileType models.FileType, location models.Location) ([]models.StateMachine, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	// Use the repository to list all state machines in the specified location
-	stateMachines, err := s.repo.ListStateMachines(location)
+	stateMachines, err := s.repo.ListStateMachines(fileType, location)
 	if err != nil {
 		return nil, models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to list state machines", err).
@@ -614,7 +617,7 @@ func (s *service) resolveReference(sm *models.StateMachine, ref *models.Referenc
 	switch ref.Type {
 	case models.ReferenceTypeProduct:
 		// For product references, check if the referenced state machine exists in products
-		exists, err := s.repo.Exists(ref.Name, ref.Version, models.LocationProducts)
+		exists, err := s.repo.Exists(sm.FileType, ref.Name, ref.Version, models.LocationProducts)
 		if err != nil {
 			return models.NewStateMachineError(models.ErrorTypeFileSystem,
 				"failed to check product reference existence", err).
@@ -629,7 +632,7 @@ func (s *service) resolveReference(sm *models.StateMachine, ref *models.Referenc
 		}
 
 		// Set the resolved path for the reference
-		ref.Path = s.buildProductReferencePath(ref.Name, ref.Version)
+		ref.Path = s.buildProductReferencePath(sm.FileType, ref.Name, ref.Version)
 
 	case models.ReferenceTypeNested:
 		// For nested references, check if the referenced state machine exists as a nested item
@@ -665,16 +668,16 @@ func (s *service) resolveReference(sm *models.StateMachine, ref *models.Referenc
 }
 
 // buildProductReferencePath builds the path for a product reference
-func (s *service) buildProductReferencePath(name, version string) string {
-	// Product references are in the format: products/{name}-{version}/{name}-{version}.puml
-	return "products\\" + name + "-" + version + "\\" + name + "-" + version + ".puml"
+func (s *service) buildProductReferencePath(fileType models.FileType, name, version string) string {
+	// Product references are in the format: products/{fileType}/{name}-{version}/{name}-{version}.puml
+	return "products\\" + fileType.String() + "\\" + name + "-" + version + "\\" + name + "-" + version + ".puml"
 }
 
 // buildNestedReferencePath builds the path for a nested reference
 func (s *service) buildNestedReferencePath(sm *models.StateMachine, refName string) string {
-	// Nested references are in the format: {location}/{parent-name}-{parent-version}/nested/{ref-name}/{ref-name}.puml
+	// Nested references are in the format: {location}/{fileType}/{parent-name}-{parent-version}/nested/{ref-name}/{ref-name}.puml
 	locationStr := sm.Location.String()
-	return locationStr + "\\" + sm.Name + "-" + sm.Version + "\\nested\\" + refName + "\\" + refName + ".puml"
+	return locationStr + "\\" + sm.FileType.String() + "\\" + sm.Name + "-" + sm.Version + "\\nested\\" + refName + "\\" + refName + ".puml"
 }
 
 // checkNestedReferenceExists checks if a nested reference exists within the parent state machine's directory
@@ -697,7 +700,7 @@ func (s *service) checkNestedReferenceExists(sm *models.StateMachine, refName st
 
 // buildNestedDirectoryPath builds the directory path for a nested reference
 func (s *service) buildNestedDirectoryPath(sm *models.StateMachine, refName string) string {
-	// Nested directory path: {location}/{parent-name}-{parent-version}/nested/{ref-name}
+	// Nested directory path: {location}/{fileType}/{parent-name}-{parent-version}/nested/{ref-name}
 	locationStr := sm.Location.String()
-	return locationStr + "\\" + sm.Name + "-" + sm.Version + "\\nested\\" + refName
+	return locationStr + "\\" + sm.FileType.String() + "\\" + sm.Name + "-" + sm.Version + "\\nested\\" + refName
 }

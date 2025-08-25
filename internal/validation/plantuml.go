@@ -282,7 +282,7 @@ func (v *PlantUMLValidator) resolveReference(ref models.Reference, sm *models.St
 	}
 
 	// Check if the referenced state machine exists
-	exists, err := v.repository.Exists(ref.Name, checkVersion, targetLocation)
+	exists, err := v.repository.Exists(sm.FileType, ref.Name, checkVersion, targetLocation)
 	if err != nil {
 		result.AddWarning("REFERENCE_CHECK_ERROR",
 			fmt.Sprintf("Failed to check existence of reference '%s': %v", ref.Name, err), 1, 1)
@@ -302,7 +302,7 @@ func (v *PlantUMLValidator) resolveReference(ref models.Reference, sm *models.St
 	}
 
 	// Try to read the referenced state machine to ensure it's accessible
-	referencedSM, err := v.repository.ReadStateMachine(ref.Name, checkVersion, targetLocation)
+	referencedSM, err := v.repository.ReadStateMachine(sm.FileType, ref.Name, checkVersion, targetLocation)
 	if err != nil {
 		result.AddWarning("REFERENCE_READ_ERROR",
 			fmt.Sprintf("Referenced state machine '%s' exists but cannot be read: %v", ref.Name, err), 1, 1)
@@ -364,7 +364,7 @@ func (v *PlantUMLValidator) checkCircularReference(ref models.Reference, referen
 		}
 
 		// Try to read the nested referenced state machine
-		nestedReferencedSM, err := v.repository.ReadStateMachine(nestedRef.Name, checkVersion, targetLocation)
+		nestedReferencedSM, err := v.repository.ReadStateMachine(originalSM.FileType, nestedRef.Name, checkVersion, targetLocation)
 		if err != nil {
 			continue // Skip if we can't read it
 		}

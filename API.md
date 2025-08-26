@@ -7,7 +7,8 @@ This document provides comprehensive API documentation for the Go UML State Mach
 The `diagram` package provides functionality for managing UML state-machine diagrams in PlantUML format with structured file organization, versioning, validation, and cross-references.
 
 ```go
-import "github.com/kengibson1111/go-uml-statemachine-parsers"
+import "github.com/kengibson1111/go-uml-statemachine-models/models"
+import "github.com/kengibson1111/go-uml-statemachine-parsers/diagram"
 ```
 
 ## Core Types

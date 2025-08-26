@@ -28,6 +28,7 @@ import (
     "fmt"
     "log"
 
+    "github.com/kengibson1111/go-uml-statemachine-models/models"
     "github.com/kengibson1111/go-uml-statemachine-parsers/diagram"
 )
 
@@ -618,6 +619,7 @@ The module provides the following main interfaces:
 ### DiagramService Interface
 
 ```go
+import "github.com/kengibson1111/go-uml-statemachine-models/models"
 import "github.com/kengibson1111/go-uml-statemachine-parsers/diagram"
 
 type DiagramService interface {
@@ -640,6 +642,7 @@ type DiagramService interface {
 ### Core Types
 
 ```go
+import "github.com/kengibson1111/go-uml-statemachine-models/models"
 import "github.com/kengibson1111/go-uml-statemachine-parsers/diagram"
 
 // diagram represents a UML state-machine diagram

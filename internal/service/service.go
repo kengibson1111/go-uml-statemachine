@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	smmodels "github.com/kengibson1111/go-uml-statemachine-models/models"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/logging"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 )
@@ -79,17 +80,17 @@ func NewServiceWithEnvOverrides(repo models.Repository, validator models.Validat
 }
 
 // Create creates a new state-machine diagram with the specified parameters
-func (s *service) Create(fileType models.FileType, name, version string, content string, location models.Location) (*models.StateMachineDiagram, error) {
+func (s *service) Create(diagramType smmodels.DiagramType, name, version string, content string, location models.Location) (*models.StateMachineDiagram, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	// Create operation logger with context
 	opLogger := s.logger.WithFields(map[string]interface{}{
-		"operation": "Create",
-		"fileType":  fileType.String(),
-		"name":      name,
-		"version":   version,
-		"location":  location.String(),
+		"operation":   "Create",
+		"diagramType": diagramType.String(),
+		"name":        name,
+		"version":     version,
+		"location":    location.String(),
 	})
 
 	opLogger.Info("Starting state-machine diagram creation")
@@ -124,7 +125,7 @@ func (s *service) Create(fileType models.FileType, name, version string, content
 
 	// Check if state-machine diagram already exists
 	opLogger.Debug("Checking if state-machine diagram already exists")
-	exists, err := s.repo.Exists(fileType, name, version, location)
+	exists, err := s.repo.Exists(diagramType, name, version, location)
 	if err != nil {
 		wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
 			"failed to check if state-machine diagram exists").
@@ -154,7 +155,7 @@ func (s *service) Create(fileType models.FileType, name, version string, content
 	// For in-progress state-machine diagrams, check if there's a conflicting directory in products
 	if location == models.LocationInProgress {
 		opLogger.Debug("Checking for conflicts in products directory")
-		productExists, err := s.repo.Exists(fileType, name, version, models.LocationProducts)
+		productExists, err := s.repo.Exists(diagramType, name, version, models.LocationProducts)
 		if err != nil {
 			wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
 				"failed to check products directory for conflicts").
@@ -182,11 +183,11 @@ func (s *service) Create(fileType models.FileType, name, version string, content
 	// Create the state-machine diagram object
 	opLogger.Debug("Creating state-machine diagram object")
 	diag := &models.StateMachineDiagram{
-		Name:     name,
-		Version:  version,
-		Content:  content,
-		Location: location,
-		FileType: fileType,
+		Name:        name,
+		Version:     version,
+		Content:     content,
+		Location:    location,
+		DiagramType: diagramType,
 		Metadata: models.Metadata{
 			CreatedAt:  time.Now(),
 			ModifiedAt: time.Now(),
@@ -213,17 +214,17 @@ func (s *service) Create(fileType models.FileType, name, version string, content
 }
 
 // Read retrieves a state-machine diagram by name, version, and location
-func (s *service) Read(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+func (s *service) Read(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	// Create operation logger with context
 	opLogger := s.logger.WithFields(map[string]interface{}{
-		"operation": "Read",
-		"fileType":  fileType.String(),
-		"name":      name,
-		"version":   version,
-		"location":  location.String(),
+		"operation":   "Read",
+		"diagramType": diagramType.String(),
+		"name":        name,
+		"version":     version,
+		"location":    location.String(),
 	})
 
 	opLogger.Debug("Starting state-machine diagram read operation")
@@ -250,7 +251,7 @@ func (s *service) Read(fileType models.FileType, name, version string, location 
 
 	// Read the state-machine diagram from repository
 	opLogger.Debug("Reading state-machine diagram from repository")
-	diag, err := s.repo.ReadDiagram(fileType, name, version, location)
+	diag, err := s.repo.ReadDiagram(diagramType, name, version, location)
 	if err != nil {
 		wrappedErr := models.WrapError(err, models.ErrorTypeFileNotFound,
 			"failed to read state-machine diagram").
@@ -287,7 +288,7 @@ func (s *service) Update(diag *models.StateMachineDiagram) error {
 	}
 
 	// Check if state-machine diagram exists
-	exists, err := s.repo.Exists(diag.FileType, diag.Name, diag.Version, diag.Location)
+	exists, err := s.repo.Exists(diag.DiagramType, diag.Name, diag.Version, diag.Location)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check if state-machine diagram exists", err).
@@ -319,7 +320,7 @@ func (s *service) Update(diag *models.StateMachineDiagram) error {
 }
 
 // Delete removes a state-machine diagram by name, version, and location
-func (s *service) Delete(fileType models.FileType, name, version string, location models.Location) error {
+func (s *service) Delete(diagramType smmodels.DiagramType, name, version string, location models.Location) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -332,7 +333,7 @@ func (s *service) Delete(fileType models.FileType, name, version string, locatio
 	}
 
 	// Check if state-machine diagram exists
-	exists, err := s.repo.Exists(fileType, name, version, location)
+	exists, err := s.repo.Exists(diagramType, name, version, location)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check if state-machine diagram exists", err).
@@ -349,7 +350,7 @@ func (s *service) Delete(fileType models.FileType, name, version string, locatio
 	}
 
 	// Delete the state-machine diagram from repository
-	if err := s.repo.DeleteDiagram(fileType, name, version, location); err != nil {
+	if err := s.repo.DeleteDiagram(diagramType, name, version, location); err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to delete state-machine diagram", err).
 			WithContext("name", name).
@@ -361,7 +362,7 @@ func (s *service) Delete(fileType models.FileType, name, version string, locatio
 }
 
 // Promote moves a state-machine diagram from in-progress to products
-func (s *service) Promote(fileType models.FileType, name, version string) error {
+func (s *service) Promote(diagramType smmodels.DiagramType, name, version string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -374,7 +375,7 @@ func (s *service) Promote(fileType models.FileType, name, version string) error 
 	}
 
 	// Step 1: Check if state-machine diagram exists in in-progress
-	exists, err := s.repo.Exists(fileType, name, version, models.LocationInProgress)
+	exists, err := s.repo.Exists(diagramType, name, version, models.LocationInProgress)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check if state-machine diagram exists in in-progress", err).
@@ -389,7 +390,7 @@ func (s *service) Promote(fileType models.FileType, name, version string) error 
 	}
 
 	// Step 2: Check if there's already a directory with the same name in products
-	productExists, err := s.repo.Exists(fileType, name, version, models.LocationProducts)
+	productExists, err := s.repo.Exists(diagramType, name, version, models.LocationProducts)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check products directory for conflicts", err).
@@ -404,7 +405,7 @@ func (s *service) Promote(fileType models.FileType, name, version string) error 
 	}
 
 	// Step 3: Read the state-machine diagram for validation
-	diagram, err := s.repo.ReadDiagram(fileType, name, version, models.LocationInProgress)
+	diagram, err := s.repo.ReadDiagram(diagramType, name, version, models.LocationInProgress)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to read state-machine diagram for validation", err).
@@ -432,7 +433,7 @@ func (s *service) Promote(fileType models.FileType, name, version string) error 
 	}
 
 	// Step 6: Perform atomic move operation with rollback capability
-	err = s.performAtomicPromotion(fileType, name, version)
+	err = s.performAtomicPromotion(diagramType, name, version)
 	if err != nil {
 		return err
 	}
@@ -441,9 +442,9 @@ func (s *service) Promote(fileType models.FileType, name, version string) error 
 }
 
 // performAtomicPromotion performs the actual move operation with rollback capability
-func (s *service) performAtomicPromotion(fileType models.FileType, name, version string) error {
+func (s *service) performAtomicPromotion(diagramType smmodels.DiagramType, name, version string) error {
 	// Step 1: Attempt to move the state-machine diagram
-	err := s.repo.MoveDiagram(fileType, name, version, models.LocationInProgress, models.LocationProducts)
+	err := s.repo.MoveDiagram(diagramType, name, version, models.LocationInProgress, models.LocationProducts)
 	if err != nil {
 		// If move fails, no rollback needed since nothing was changed
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
@@ -454,10 +455,10 @@ func (s *service) performAtomicPromotion(fileType models.FileType, name, version
 
 	// Step 2: Verify the move was successful by checking both locations
 	// Check that it exists in products
-	productExists, err := s.repo.Exists(fileType, name, version, models.LocationProducts)
+	productExists, err := s.repo.Exists(diagramType, name, version, models.LocationProducts)
 	if err != nil {
 		// Attempt rollback - move back to in-progress
-		s.attemptRollback(fileType, name, version)
+		s.attemptRollback(diagramType, name, version)
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to verify promotion: cannot check products directory", err).
 			WithContext("name", name).
@@ -465,7 +466,7 @@ func (s *service) performAtomicPromotion(fileType models.FileType, name, version
 	}
 	if !productExists {
 		// Attempt rollback - move back to in-progress
-		s.attemptRollback(fileType, name, version)
+		s.attemptRollback(diagramType, name, version)
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"promotion verification failed: state-machine diagram not found in products after move", nil).
 			WithContext("name", name).
@@ -473,10 +474,10 @@ func (s *service) performAtomicPromotion(fileType models.FileType, name, version
 	}
 
 	// Check that it no longer exists in in-progress
-	inProgressExists, err := s.repo.Exists(fileType, name, version, models.LocationInProgress)
+	inProgressExists, err := s.repo.Exists(diagramType, name, version, models.LocationInProgress)
 	if err != nil {
 		// Attempt rollback - move back to in-progress
-		s.attemptRollback(fileType, name, version)
+		s.attemptRollback(diagramType, name, version)
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to verify promotion: cannot check in-progress directory", err).
 			WithContext("name", name).
@@ -495,10 +496,10 @@ func (s *service) performAtomicPromotion(fileType models.FileType, name, version
 }
 
 // attemptRollback attempts to rollback a failed promotion by moving the state-machine diagram back to in-progress
-func (s *service) attemptRollback(fileType models.FileType, name, version string) {
+func (s *service) attemptRollback(diagramType smmodels.DiagramType, name, version string) {
 	// This is a best-effort rollback - we don't return errors from here
 	// as we're already in an error state
-	rollbackErr := s.repo.MoveDiagram(fileType, name, version, models.LocationProducts, models.LocationInProgress)
+	rollbackErr := s.repo.MoveDiagram(diagramType, name, version, models.LocationProducts, models.LocationInProgress)
 	if rollbackErr != nil {
 		// Log the rollback failure but don't return it - the original error is more important
 		// In a real implementation, this would be logged to a proper logging system
@@ -507,7 +508,7 @@ func (s *service) attemptRollback(fileType models.FileType, name, version string
 }
 
 // Validate validates a state-machine diagram with the specified strictness level
-func (s *service) Validate(fileType models.FileType, name, version string, location models.Location) (*models.ValidationResult, error) {
+func (s *service) Validate(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.ValidationResult, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -520,7 +521,7 @@ func (s *service) Validate(fileType models.FileType, name, version string, locat
 	}
 
 	// Read the state-machine diagram from repository
-	diagram, err := s.repo.ReadDiagram(fileType, name, version, location)
+	diagram, err := s.repo.ReadDiagram(diagramType, name, version, location)
 	if err != nil {
 		return nil, models.NewStateMachineError(models.ErrorTypeFileNotFound,
 			"failed to read state-machine diagram for validation", err).
@@ -550,12 +551,12 @@ func (s *service) Validate(fileType models.FileType, name, version string, locat
 }
 
 // ListAll lists all state-machine diagrams in the specified location
-func (s *service) ListAll(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
+func (s *service) ListAll(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	// Use the repository to list all state-machine diagrams in the specified location
-	diagrams, err := s.repo.ListStateMachines(fileType, location)
+	diagrams, err := s.repo.ListStateMachines(diagramType, location)
 	if err != nil {
 		return nil, models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to list state-machine diagrams", err).
@@ -617,7 +618,7 @@ func (s *service) resolveReference(diag *models.StateMachineDiagram, ref *models
 	switch ref.Type {
 	case models.ReferenceTypeProduct:
 		// For product references, check if the referenced state-machine diagram exists in products
-		exists, err := s.repo.Exists(diag.FileType, ref.Name, ref.Version, models.LocationProducts)
+		exists, err := s.repo.Exists(diag.DiagramType, ref.Name, ref.Version, models.LocationProducts)
 		if err != nil {
 			return models.NewStateMachineError(models.ErrorTypeFileSystem,
 				"failed to check product reference existence", err).
@@ -632,7 +633,7 @@ func (s *service) resolveReference(diag *models.StateMachineDiagram, ref *models
 		}
 
 		// Set the resolved path for the reference
-		ref.Path = s.buildProductReferencePath(diag.FileType, ref.Name, ref.Version)
+		ref.Path = s.buildProductReferencePath(diag.DiagramType, ref.Name, ref.Version)
 
 	case models.ReferenceTypeNested:
 		// For nested references, check if the referenced state-machine diagram exists as a nested item
@@ -668,16 +669,16 @@ func (s *service) resolveReference(diag *models.StateMachineDiagram, ref *models
 }
 
 // buildProductReferencePath builds the path for a product reference
-func (s *service) buildProductReferencePath(fileType models.FileType, name, version string) string {
-	// Product references are in the format: products/{fileType}/{name}-{version}/{name}-{version}.puml
-	return "products\\" + fileType.String() + "\\" + name + "-" + version + "\\" + name + "-" + version + ".puml"
+func (s *service) buildProductReferencePath(diagramType smmodels.DiagramType, name, version string) string {
+	// Product references are in the format: products/{diagramType}/{name}-{version}/{name}-{version}.puml
+	return "products\\" + diagramType.String() + "\\" + name + "-" + version + "\\" + name + "-" + version + ".puml"
 }
 
 // buildNestedReferencePath builds the path for a nested reference
 func (s *service) buildNestedReferencePath(diag *models.StateMachineDiagram, refName string) string {
-	// Nested references are in the format: {location}/{fileType}/{parent-name}-{parent-version}/nested/{ref-name}/{ref-name}.puml
+	// Nested references are in the format: {location}/{diagramType}/{parent-name}-{parent-version}/nested/{ref-name}/{ref-name}.puml
 	locationStr := diag.Location.String()
-	return locationStr + "\\" + diag.FileType.String() + "\\" + diag.Name + "-" + diag.Version + "\\nested\\" + refName + "\\" + refName + ".puml"
+	return locationStr + "\\" + diag.DiagramType.String() + "\\" + diag.Name + "-" + diag.Version + "\\nested\\" + refName + "\\" + refName + ".puml"
 }
 
 // checkNestedReferenceExists checks if a nested reference exists within the parent state-machine diagram's directory
@@ -700,7 +701,7 @@ func (s *service) checkNestedReferenceExists(diag *models.StateMachineDiagram, r
 
 // buildNestedDirectoryPath builds the directory path for a nested reference
 func (s *service) buildNestedDirectoryPath(diag *models.StateMachineDiagram, refName string) string {
-	// Nested directory path: {location}/{fileType}/{parent-name}-{parent-version}/nested/{ref-name}
+	// Nested directory path: {location}/{diagramType}/{parent-name}-{parent-version}/nested/{ref-name}
 	locationStr := diag.Location.String()
-	return locationStr + "\\" + diag.FileType.String() + "\\" + diag.Name + "-" + diag.Version + "\\nested\\" + refName
+	return locationStr + "\\" + diag.DiagramType.String() + "\\" + diag.Name + "-" + diag.Version + "\\nested\\" + refName
 }

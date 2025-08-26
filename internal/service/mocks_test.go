@@ -1,38 +1,39 @@
 package service
 
 import (
+	smmodels "github.com/kengibson1111/go-uml-statemachine-models/models"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 )
 
 // mockRepository is a mock implementation of the Repository interface for testing
 type mockRepository struct {
-	readStateMachineFunc   func(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error)
-	listStateMachinesFunc  func(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error)
-	existsFunc             func(fileType models.FileType, name, version string, location models.Location) (bool, error)
+	readStateMachineFunc   func(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error)
+	listStateMachinesFunc  func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error)
+	existsFunc             func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error)
 	writeStateMachineFunc  func(diag *models.StateMachineDiagram) error
-	moveStateMachineFunc   func(fileType models.FileType, name, version string, from, to models.Location) error
-	deleteStateMachineFunc func(fileType models.FileType, name, version string, location models.Location) error
+	moveStateMachineFunc   func(diagramType smmodels.DiagramType, name, version string, from, to models.Location) error
+	deleteStateMachineFunc func(diagramType smmodels.DiagramType, name, version string, location models.Location) error
 	createDirectoryFunc    func(path string) error
 	directoryExistsFunc    func(path string) (bool, error)
 }
 
-func (m *mockRepository) ReadDiagram(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+func (m *mockRepository) ReadDiagram(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	if m.readStateMachineFunc != nil {
-		return m.readStateMachineFunc(fileType, name, version, location)
+		return m.readStateMachineFunc(diagramType, name, version, location)
 	}
 	return nil, nil
 }
 
-func (m *mockRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
+func (m *mockRepository) ListStateMachines(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 	if m.listStateMachinesFunc != nil {
-		return m.listStateMachinesFunc(fileType, location)
+		return m.listStateMachinesFunc(diagramType, location)
 	}
 	return nil, nil
 }
 
-func (m *mockRepository) Exists(fileType models.FileType, name, version string, location models.Location) (bool, error) {
+func (m *mockRepository) Exists(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
 	if m.existsFunc != nil {
-		return m.existsFunc(fileType, name, version, location)
+		return m.existsFunc(diagramType, name, version, location)
 	}
 	return false, nil
 }
@@ -44,16 +45,16 @@ func (m *mockRepository) WriteDiagram(diag *models.StateMachineDiagram) error {
 	return nil
 }
 
-func (m *mockRepository) MoveDiagram(fileType models.FileType, name, version string, from, to models.Location) error {
+func (m *mockRepository) MoveDiagram(diagramType smmodels.DiagramType, name, version string, from, to models.Location) error {
 	if m.moveStateMachineFunc != nil {
-		return m.moveStateMachineFunc(fileType, name, version, from, to)
+		return m.moveStateMachineFunc(diagramType, name, version, from, to)
 	}
 	return nil
 }
 
-func (m *mockRepository) DeleteDiagram(fileType models.FileType, name, version string, location models.Location) error {
+func (m *mockRepository) DeleteDiagram(diagramType smmodels.DiagramType, name, version string, location models.Location) error {
 	if m.deleteStateMachineFunc != nil {
-		return m.deleteStateMachineFunc(fileType, name, version, location)
+		return m.deleteStateMachineFunc(diagramType, name, version, location)
 	}
 	return nil
 }

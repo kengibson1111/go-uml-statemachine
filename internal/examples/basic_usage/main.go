@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	smmodels "github.com/kengibson1111/go-uml-statemachine-models/models"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/repository"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/service"
@@ -44,7 +45,7 @@ Authenticated --> Idle : logout()
 
 	// Example 1: Create a new state-machine diagram in in-progress
 	fmt.Println("\n1. Creating a new state-machine diagram...")
-	diag, err := svc.Create(models.FileTypePUML, "user-auth", "1.0.0", authContent, models.LocationInProgress)
+	diag, err := svc.Create(smmodels.DiagramTypePUML, "user-auth", "1.0.0", authContent, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
@@ -53,7 +54,7 @@ Authenticated --> Idle : logout()
 
 	// Example 2: Read the state-machine diagram back
 	fmt.Println("\n2. Reading the state-machine diagram...")
-	readDiag, err := svc.Read(models.FileTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
+	readDiag, err := svc.Read(smmodels.DiagramTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error reading state-machine diagram: %v", err)
 		return
@@ -63,7 +64,7 @@ Authenticated --> Idle : logout()
 
 	// Example 3: Validate the state-machine diagram
 	fmt.Println("\n3. Validating the state-machine diagram...")
-	validationResult, err := svc.Validate(models.FileTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
+	validationResult, err := svc.Validate(smmodels.DiagramTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating state-machine diagram: %v", err)
 		return
@@ -87,7 +88,7 @@ Authenticated --> Idle : logout()
 
 	// Example 4: List all state-machine diagrams in in-progress
 	fmt.Println("\n4. Listing all in-progress state-machine diagrams...")
-	diagrams, err := svc.ListAll(models.FileTypePUML, models.LocationInProgress)
+	diagrams, err := svc.ListAll(smmodels.DiagramTypePUML, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error listing state-machine diagrams: %v", err)
 		return
@@ -101,7 +102,7 @@ Authenticated --> Idle : logout()
 	// Example 5: Promote to products (if validation passes)
 	if validationResult.IsValid && !validationResult.HasErrors() {
 		fmt.Println("\n5. Promoting state-machine diagram to products...")
-		err = svc.Promote(models.FileTypePUML, "user-auth", "1.0.0")
+		err = svc.Promote(smmodels.DiagramTypePUML, "user-auth", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting state-machine diagram: %v", err)
 		} else {
@@ -113,7 +114,7 @@ Authenticated --> Idle : logout()
 
 	// Example 6: List products
 	fmt.Println("\n6. Listing all product state-machine diagrams...")
-	productDiags, err := svc.ListAll(models.FileTypePUML, models.LocationProducts)
+	productDiags, err := svc.ListAll(smmodels.DiagramTypePUML, models.LocationProducts)
 	if err != nil {
 		log.Printf("Error listing product state-machine diagrams: %v", err)
 		return

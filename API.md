@@ -12,31 +12,19 @@ import "github.com/kengibson1111/go-uml-statemachine-parsers"
 
 ## Core Types
 
-### FileType
-
-Indicates the type of file being processed.
-
-```go
-type FileType int
-
-const (
-    FileTypePUML FileType = iota // PlantUML files
-)
-```
-
 ### diagram
 
 Represents a UML state-machine diagram with its metadata and content.
 
 ```go
 type diagram struct {
-    Name       string      // State-machine diagram name
-    Version    string      // Semantic version (e.g., "1.0.0")
-    Content    string      // PlantUML content
-    References []Reference // References to other state-machines diagrams
-    Location   Location    // Storage location
-    FileType   FileType    // Type of file (e.g., PUML)
-    Metadata   Metadata    // Additional metadata
+    Name        string             // State-machine diagram name
+    Version     string             // Semantic version (e.g., "1.0.0")
+    Content     string             // PlantUML content
+    References  []Reference        // References to other state-machines diagrams
+    Location    Location           // Storage location
+    DiagramType models.DiagramType // Type of diagram (e.g., PUML)
+    Metadata    Metadata           // Additional metadata
 }
 ```
 
@@ -131,15 +119,15 @@ The main interface for state-machine diagram operations.
 ```go
 type DiagramService interface {
     // CRUD operations
-    Create(fileType FileType, name, version string, content string, location Location) (*diagram, error)
-    Read(fileType FileType, name, version string, location Location) (*diagram, error)
+    Create(diagramType models.DiagramType, name, version string, content string, location Location) (*diagram, error)
+    Read(diagramType models.DiagramType, name, version string, location Location) (*diagram, error)
     Update(diag *StateMachineDiagram) error
-    Delete(fileType FileType, name, version string, location Location) error
+    Delete(diagramType models.DiagramType, name, version string, location Location) error
 
     // Business operations
-    Promote(fileType FileType, name, version string) error
-    Validate(fileType FileType, name, version string, location Location) (*ValidationResult, error)
-    ListAll(fileType FileType, location Location) ([]diagram, error)
+    Promote(diagramType models.DiagramType, name, version string) error
+    Validate(diagramType models.DiagramType, name, version string, location Location) (*ValidationResult, error)
+    ListAll(diagramType models.DiagramType, location Location) ([]diagram, error)
 
     // Reference operations
     ResolveReferences(diagram *StateMachineDiagram) error
@@ -248,11 +236,11 @@ func LoadConfigFromEnv() *Config
 Creates a new state-machine diagram with the specified parameters.
 
 ```go
-Create(fileType FileType, name, version string, content string, location Location) (*diagram, error)
+Create(diagramType models.DiagramType, name, version string, content string, location Location) (*diagram, error)
 ```
 
 **Parameters:**
-- `fileType`: Type of file (e.g., FileTypePUML)
+- `diagramType`: Type of file (e.g., models.DiagramTypePUML)
 - `name`: State-machine diagram name (must be non-empty)
 - `version`: Semantic version (must be non-empty)
 - `content`: PlantUML content (must be non-empty)
@@ -275,7 +263,7 @@ Idle --> Active : start()
 Active --> Idle : stop()
 @enduml`
 
-diag, err := svc.Create(diagram.FileTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
+diag, err := svc.Create(models.DiagramTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -286,11 +274,11 @@ if err != nil {
 Retrieves a state-machine diagram by name, version, and location.
 
 ```go
-Read(fileType FileType, name, version string, location Location) (*diagram, error)
+Read(diagramType models.DiagramType, name, version string, location Location) (*diagram, error)
 ```
 
 **Parameters:**
-- `fileType`: Type of file (e.g., FileTypePUML)
+- `diagramType`: Type of file (e.g., models.DiagramTypePUML)
 - `name`: State-machine diagram name
 - `version`: State-machine diagram version
 - `location`: Storage location
@@ -305,7 +293,7 @@ Read(fileType FileType, name, version string, location Location) (*diagram, erro
 
 **Example:**
 ```go
-diag, err := svc.Read(diagram.FileTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
+diag, err := svc.Read(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -345,11 +333,11 @@ if err != nil {
 Removes a state-machine diagram by name, version, and location.
 
 ```go
-Delete(fileType FileType, name, version string, location Location) error
+Delete(diagramType models.DiagramType, name, version string, location Location) error
 ```
 
 **Parameters:**
-- `fileType`: Type of file (e.g., FileTypePUML)
+- `diagramType`: Type of file (e.g., models.DiagramTypePUML)
 - `name`: State-machine diagram name
 - `version`: State-machine diagram version
 - `location`: Storage location
@@ -364,7 +352,7 @@ Delete(fileType FileType, name, version string, location Location) error
 
 **Example:**
 ```go
-err := svc.Delete(diagram.FileTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
+err := svc.Delete(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -377,11 +365,11 @@ if err != nil {
 Moves a state-machine diagram from in-progress to products with validation.
 
 ```go
-Promote(fileType FileType, name, version string) error
+Promote(diagramType models.DiagramType, name, version string) error
 ```
 
 **Parameters:**
-- `fileType`: Type of file (e.g., FileTypePUML)
+- `diagramType`: Type of file (e.g., models.DiagramTypePUML)
 - `name`: State-machine diagram name
 - `version`: State-machine diagram version
 
@@ -403,7 +391,7 @@ Promote(fileType FileType, name, version string) error
 
 **Example:**
 ```go
-err := svc.Promote(diagram.FileTypePUML, "my-machine", "1.0.0")
+err := svc.Promote(models.DiagramTypePUML, "my-machine", "1.0.0")
 if err != nil {
     log.Fatal(err)
 }
@@ -414,11 +402,11 @@ if err != nil {
 Validates a state-machine diagram with the specified strictness level.
 
 ```go
-Validate(fileType FileType, name, version string, location Location) (*ValidationResult, error)
+Validate(diagramType models.DiagramType, name, version string, location Location) (*ValidationResult, error)
 ```
 
 **Parameters:**
-- `fileType`: Type of file (e.g., FileTypePUML)
+- `diagramType`: Type of file (e.g., models.DiagramTypePUML)
 - `name`: State-machine diagram name
 - `version`: State-machine diagram version
 - `location`: Storage location
@@ -433,7 +421,7 @@ Validate(fileType FileType, name, version string, location Location) (*Validatio
 
 **Example:**
 ```go
-result, err := svc.Validate(diagram.FileTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
+result, err := svc.Validate(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -451,11 +439,11 @@ if result.HasErrors() {
 Lists all state-machine diagrams in the specified location.
 
 ```go
-ListAll(fileType FileType, location Location) ([]diagram, error)
+ListAll(diagramType models.DiagramType, location Location) ([]diagram, error)
 ```
 
 **Parameters:**
-- `fileType`: Type of file (e.g., FileTypePUML)
+- `diagramType`: Type of file (e.g., models.DiagramTypePUML)
 - `location`: Storage location to list
 
 **Returns:**
@@ -464,7 +452,7 @@ ListAll(fileType FileType, location Location) ([]diagram, error)
 
 **Example:**
 ```go
-diagrams, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
+diagrams, err := svc.ListAll(models.DiagramTypePUML, diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }

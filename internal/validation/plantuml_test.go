@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	smmodels "github.com/kengibson1111/go-uml-statemachine-models/models"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 )
 
@@ -512,33 +513,33 @@ func NewMockRepository() *MockRepository {
 }
 
 func (m *MockRepository) AddStateMachine(diag *models.StateMachineDiagram) {
-	key := fmt.Sprintf("%s-%s-%s", diag.Name, diag.Version, diag.Location.String())
+	key := fmt.Sprintf("%s-%s-%s-%s", diag.DiagramType, diag.Name, diag.Version, diag.Location.String())
 	m.diagrams[key] = diag
 	m.existsMap[key] = true
 }
 
-func (m *MockRepository) ReadDiagram(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
-	key := fmt.Sprintf("%s-%s-%s", name, version, location.String())
+func (m *MockRepository) ReadDiagram(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+	key := fmt.Sprintf("%s-%s-%s-%s", diagramType, name, version, location.String())
 	if diag, exists := m.diagrams[key]; exists {
 		return diag, nil
 	}
 	return nil, fmt.Errorf("state-machine diagram not found: %s", key)
 }
 
-func (m *MockRepository) Exists(fileType models.FileType, name, version string, location models.Location) (bool, error) {
-	key := fmt.Sprintf("%s-%s-%s", name, version, location.String())
+func (m *MockRepository) Exists(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
+	key := fmt.Sprintf("%s-%s-%s-%s", diagramType, name, version, location.String())
 	return m.existsMap[key], nil
 }
 
 // Implement other Repository methods as no-ops for testing
-func (m *MockRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
+func (m *MockRepository) ListStateMachines(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 	return nil, nil
 }
 func (m *MockRepository) WriteDiagram(diag *models.StateMachineDiagram) error { return nil }
-func (m *MockRepository) MoveDiagram(fileType models.FileType, name, version string, from, to models.Location) error {
+func (m *MockRepository) MoveDiagram(diagramType smmodels.DiagramType, name, version string, from, to models.Location) error {
 	return nil
 }
-func (m *MockRepository) DeleteDiagram(fileType models.FileType, name, version string, location models.Location) error {
+func (m *MockRepository) DeleteDiagram(diagramType smmodels.DiagramType, name, version string, location models.Location) error {
 	return nil
 }
 func (m *MockRepository) CreateDirectory(path string) error         { return nil }

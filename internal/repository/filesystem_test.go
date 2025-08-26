@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	smmodels "github.com/kengibson1111/go-uml-statemachine-models/models"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 )
 
@@ -163,11 +164,11 @@ func TestFileSystemRepository_WriteDiagram(t *testing.T) {
 				}
 
 				// Verify file was created
-				filePath := th.repo.pathManager.GetDiagramFilePathWithFileType(
+				filePath := th.repo.pathManager.GetDiagramFilePathWithDiagramType(
 					tt.diagram.Name,
 					tt.diagram.Version,
 					tt.diagram.Location,
-					tt.diagram.FileType,
+					tt.diagram.DiagramType,
 				)
 
 				if _, err := os.Stat(filePath); os.IsNotExist(err) {
@@ -242,7 +243,7 @@ func TestFileSystemRepository_ReadDiagram(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			diag, err := th.repo.ReadDiagram(models.FileTypePUML, tt.diagName, tt.version, tt.location)
+			diag, err := th.repo.ReadDiagram(smmodels.DiagramTypePUML, tt.diagName, tt.version, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -334,7 +335,7 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			exists, err := th.repo.Exists(models.FileTypePUML, tt.diagName, tt.version, tt.location)
+			exists, err := th.repo.Exists(smmodels.DiagramTypePUML, tt.diagName, tt.version, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -558,7 +559,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := th.repo.MoveDiagram(models.FileTypePUML, tt.diagName, tt.version, tt.from, tt.to)
+			err := th.repo.MoveDiagram(smmodels.DiagramTypePUML, tt.diagName, tt.version, tt.from, tt.to)
 
 			if tt.expectError {
 				if err == nil {
@@ -578,7 +579,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 				}
 
 				// Verify source no longer exists
-				sourceExists, err := th.repo.Exists(models.FileTypePUML, tt.diagName, tt.version, tt.from)
+				sourceExists, err := th.repo.Exists(smmodels.DiagramTypePUML, tt.diagName, tt.version, tt.from)
 				if err != nil {
 					t.Errorf("Error checking source existence: %v", err)
 				}
@@ -587,7 +588,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 				}
 
 				// Verify destination exists
-				destExists, err := th.repo.Exists(models.FileTypePUML, tt.diagName, tt.version, tt.to)
+				destExists, err := th.repo.Exists(smmodels.DiagramTypePUML, tt.diagName, tt.version, tt.to)
 				if err != nil {
 					t.Errorf("Error checking destination existence: %v", err)
 				}
@@ -596,7 +597,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 				}
 
 				// Verify content is preserved
-				diagram, err := th.repo.ReadDiagram(models.FileTypePUML, tt.diagName, tt.version, tt.to)
+				diagram, err := th.repo.ReadDiagram(smmodels.DiagramTypePUML, tt.diagName, tt.version, tt.to)
 				if err != nil {
 					t.Errorf("Error reading moved state-machine diagram: %v", err)
 				}
@@ -669,7 +670,7 @@ func TestFileSystemRepository_DeleteDiagram(t *testing.T) {
 				}
 			}
 
-			err := th.repo.DeleteDiagram(models.FileTypePUML, tt.diagName, tt.version, tt.location)
+			err := th.repo.DeleteDiagram(smmodels.DiagramTypePUML, tt.diagName, tt.version, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -689,7 +690,7 @@ func TestFileSystemRepository_DeleteDiagram(t *testing.T) {
 				}
 
 				// Verify state-machine diagram no longer exists
-				exists, err := th.repo.Exists(models.FileTypePUML, tt.diagName, tt.version, tt.location)
+				exists, err := th.repo.Exists(smmodels.DiagramTypePUML, tt.diagName, tt.version, tt.location)
 				if err != nil {
 					t.Errorf("Error checking existence after delete: %v", err)
 				}
@@ -748,7 +749,7 @@ func TestFileSystemRepository_ListStateMachines(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			diagrams, err := th.repo.ListStateMachines(models.FileTypePUML, tt.location)
+			diagrams, err := th.repo.ListStateMachines(smmodels.DiagramTypePUML, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -790,7 +791,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 2. Verify it exists
-	exists, err := th.repo.Exists(models.FileTypePUML, testDiag.Name, testDiag.Version, testDiag.Location)
+	exists, err := th.repo.Exists(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, testDiag.Location)
 	if err != nil {
 		t.Fatalf("Failed to check existence: %v", err)
 	}
@@ -799,7 +800,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 3. Read it back
-	readDiag, err := th.repo.ReadDiagram(models.FileTypePUML, testDiag.Name, testDiag.Version, testDiag.Location)
+	readDiag, err := th.repo.ReadDiagram(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, testDiag.Location)
 	if err != nil {
 		t.Fatalf("Failed to read state-machine diagram: %v", err)
 	}
@@ -808,7 +809,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 4. List state-machine diagrams
-	diagrams, err := th.repo.ListStateMachines(models.FileTypePUML, models.LocationInProgress)
+	diagrams, err := th.repo.ListStateMachines(smmodels.DiagramTypePUML, models.LocationInProgress)
 	if err != nil {
 		t.Fatalf("Failed to list state-machine diagrams: %v", err)
 	}
@@ -817,13 +818,13 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 5. Move to products
-	err = th.repo.MoveDiagram(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationInProgress, models.LocationProducts)
+	err = th.repo.MoveDiagram(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationInProgress, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to move state-machine diagram: %v", err)
 	}
 
 	// 6. Verify it's in products now
-	exists, err = th.repo.Exists(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
+	exists, err = th.repo.Exists(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to check existence in products: %v", err)
 	}
@@ -832,7 +833,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 7. Verify it's no longer in in-progress
-	exists, err = th.repo.Exists(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationInProgress)
+	exists, err = th.repo.Exists(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationInProgress)
 	if err != nil {
 		t.Fatalf("Failed to check existence in in-progress: %v", err)
 	}
@@ -841,13 +842,13 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 8. Delete from products
-	err = th.repo.DeleteDiagram(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
+	err = th.repo.DeleteDiagram(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to delete state-machine diagram: %v", err)
 	}
 
 	// 9. Verify it's gone
-	exists, err = th.repo.Exists(models.FileTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
+	exists, err = th.repo.Exists(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to check existence after delete: %v", err)
 	}

@@ -45,7 +45,7 @@ func main() {
     Active --> Idle : stop()
     @enduml`
     
-    diag, err := svc.Create(diagram.FileTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
+    diag, err := svc.Create(models.DiagramTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
     if err != nil {
         log.Fatal(err)
     }
@@ -137,16 +137,16 @@ config.MergeWithEnv()
 
 ```go
 // Create in in-progress location
-diag, err := svc.Create(diagram.FileTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationInProgress)
+diag, err := svc.Create(models.DiagramTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationInProgress)
 
 // Create in products location (for direct production deployment)
-diag, err := svc.Create(diagram.FileTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationProducts)
+diag, err := svc.Create(models.DiagramTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationProducts)
 ```
 
 ### Reading State-Machine Diagrams
 
 ```go
-diag, err := svc.Read(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
+diag, err := svc.Read(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     log.Printf("Error reading state-machine diagram: %v", err)
 }
@@ -162,17 +162,17 @@ err := svc.Update(diag)
 ### Deleting State-Machine Diagrams
 
 ```go
-err := svc.Delete(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
+err := svc.Delete(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
 ```
 
 ### Listing State-Machine Diagrams
 
 ```go
 // List all in-progress state-machine diagrams
-inProgressDiags, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
+inProgressDiags, err := svc.ListAll(models.DiagramTypePUML, diagram.LocationInProgress)
 
 // List all production state-machine diagrams
-productDiags, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationProducts)
+productDiags, err := svc.ListAll(models.DiagramTypePUML, diagram.LocationProducts)
 ```
 
 ## Validation
@@ -186,7 +186,7 @@ The module supports two validation strictness levels:
 - Used for development and testing
 
 ```go
-result, err := svc.Validate(diagram.FileTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
+result, err := svc.Validate(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
 if result.HasErrors() {
     fmt.Println("Validation failed with errors:")
     for _, err := range result.Errors {
@@ -207,7 +207,7 @@ Move state-machine diagrams from in-progress to products with validation:
 
 ```go
 // Promotes only if validation passes
-err := svc.Promote(diagram.FileTypePUML, "user-auth", "1.0.0")
+err := svc.Promote(models.DiagramTypePUML, "user-auth", "1.0.0")
 if err != nil {
     log.Printf("Promotion failed: %v", err)
 }
@@ -295,7 +295,7 @@ for _, ref := range diagram.References {
 The module provides comprehensive error handling with context:
 
 ```go
-diag, err := svc.Read(diagram.FileTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
+diag, err := svc.Read(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     // Error includes context about the operation, component, and parameters
     fmt.Printf("Error: %v\n", err)
@@ -622,15 +622,15 @@ import "github.com/kengibson1111/go-uml-statemachine-parsers/diagram"
 
 type DiagramService interface {
     // CRUD operations
-    Create(fileType FileType, name, version string, content string, location Location) (*diagram, error)
-    Read(fileType FileType, name, version string, location Location) (*diagram, error)
+    Create(diagramType models.DiagramType, name, version string, content string, location Location) (*diagram, error)
+    Read(diagramType models.DiagramType, name, version string, location Location) (*diagram, error)
     Update(diag *StateMachineDiagram) error
-    Delete(fileType FileType, name, version string, location Location) error
+    Delete(diagramType models.DiagramType, name, version string, location Location) error
 
     // Business operations
-    Promote(fileType FileType, name, version string) error
-    Validate(fileType FileType, name, version string, location Location) (*ValidationResult, error)
-    ListAll(fileType FileType, location Location) ([]diagram, error)
+    Promote(diagramType models.DiagramType, name, version string) error
+    Validate(diagramType models.DiagramType, name, version string, location Location) (*ValidationResult, error)
+    ListAll(diagramType models.DiagramType, location Location) ([]diagram, error)
 
     // Reference operations
     ResolveReferences(diagram *StateMachineDiagram) error
@@ -642,21 +642,15 @@ type DiagramService interface {
 ```go
 import "github.com/kengibson1111/go-uml-statemachine-parsers/diagram"
 
-// FileType indicates the type of file being processed
-type FileType int
-const (
-    FileTypePUML FileType = iota // PlantUML files
-)
-
 // diagram represents a UML state-machine diagram
 type diagram struct {
-    Name       string
-    Version    string
-    Content    string
-    References []Reference
-    Location   Location
-    FileType   FileType
-    Metadata   Metadata
+    Name        string
+    Version     string
+    Content     string
+    References  []Reference
+    Location    Location
+    DiagramType models.DiagramType
+    Metadata    Metadata
 }
 
 // Location indicates storage location

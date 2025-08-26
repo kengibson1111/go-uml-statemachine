@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/kengibson1111/go-uml-statemachine-models/models"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/diagram"
 )
 
@@ -115,7 +116,7 @@ OrderCancelled --> [*]
 
 @enduml`
 
-	diag, err := svc.Create(diagram.FileTypePUML, "ecommerce-order", "1.0.0", content, diagram.LocationInProgress)
+	diag, err := svc.Create(models.DiagramTypePUML, "ecommerce-order", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
@@ -124,7 +125,7 @@ OrderCancelled --> [*]
 
 	// Read
 	fmt.Println("Reading the state-machine diagram...")
-	readDiag, err := svc.Read(diagram.FileTypePUML, "ecommerce-order", "1.0.0", diagram.LocationInProgress)
+	readDiag, err := svc.Read(models.DiagramTypePUML, "ecommerce-order", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error reading state-machine diagram: %v", err)
 		return
@@ -149,7 +150,7 @@ RefundCompleted --> [*]`
 
 	// Clean up for next demo
 	defer func() {
-		svc.Delete(diagram.FileTypePUML, "ecommerce-order", "1.0.0", diagram.LocationInProgress)
+		svc.Delete(models.DiagramTypePUML, "ecommerce-order", "1.0.0", diagram.LocationInProgress)
 	}()
 }
 
@@ -178,7 +179,7 @@ AccountLocked --> Anonymous : unlock_timeout()
 
 @enduml`
 
-	diag, err := svc.Create(diagram.FileTypePUML, "user-session", "1.0.0", content, diagram.LocationInProgress)
+	diag, err := svc.Create(models.DiagramTypePUML, "user-session", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
@@ -187,7 +188,7 @@ AccountLocked --> Anonymous : unlock_timeout()
 
 	// Validate
 	fmt.Println("Validating state-machine diagram...")
-	result, err := svc.Validate(diagram.FileTypePUML, "user-session", "1.0.0", diagram.LocationInProgress)
+	result, err := svc.Validate(models.DiagramTypePUML, "user-session", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating state-machine diagram: %v", err)
 		return
@@ -215,7 +216,7 @@ AccountLocked --> Anonymous : unlock_timeout()
 	// Promote if validation passes
 	if result.IsValid && !result.HasErrors() {
 		fmt.Println("Promoting to products...")
-		err = svc.Promote(diagram.FileTypePUML, "user-session", "1.0.0")
+		err = svc.Promote(models.DiagramTypePUML, "user-session", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting state-machine diagram: %v", err)
 		} else {
@@ -227,8 +228,8 @@ AccountLocked --> Anonymous : unlock_timeout()
 
 	// Clean up
 	defer func() {
-		svc.Delete(diagram.FileTypePUML, "user-session", "1.0.0", diagram.LocationProducts)
-		svc.Delete(diagram.FileTypePUML, "user-session", "1.0.0", diagram.LocationInProgress)
+		svc.Delete(models.DiagramTypePUML, "user-session", "1.0.0", diagram.LocationProducts)
+		svc.Delete(models.DiagramTypePUML, "user-session", "1.0.0", diagram.LocationInProgress)
 	}()
 }
 
@@ -251,7 +252,7 @@ Authenticated --> [*]
 
 @enduml`
 
-	baseDiag, err := svc.Create(diagram.FileTypePUML, "auth-component", "1.0.0", baseContent, diagram.LocationInProgress)
+	baseDiag, err := svc.Create(models.DiagramTypePUML, "auth-component", "1.0.0", baseContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating base component: %v", err)
 		return
@@ -259,9 +260,9 @@ Authenticated --> [*]
 	fmt.Printf("✓ Created base component: %s-%s\n", baseDiag.Name, baseDiag.Version)
 
 	// Promote base component to products
-	result, err := svc.Validate(diagram.FileTypePUML, "auth-component", "1.0.0", diagram.LocationInProgress)
+	result, err := svc.Validate(models.DiagramTypePUML, "auth-component", "1.0.0", diagram.LocationInProgress)
 	if err == nil && result.IsValid && !result.HasErrors() {
-		err = svc.Promote(diagram.FileTypePUML, "auth-component", "1.0.0")
+		err = svc.Promote(models.DiagramTypePUML, "auth-component", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting base component: %v", err)
 			return
@@ -290,7 +291,7 @@ Authenticated --> [*]
 
 @enduml`
 
-	complexDiag, err := svc.Create(diagram.FileTypePUML, "mfa-system", "1.0.0", complexContent, diagram.LocationInProgress)
+	complexDiag, err := svc.Create(models.DiagramTypePUML, "mfa-system", "1.0.0", complexContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating complex system: %v", err)
 		return
@@ -311,8 +312,8 @@ Authenticated --> [*]
 
 	// Clean up
 	defer func() {
-		svc.Delete(diagram.FileTypePUML, "mfa-system", "1.0.0", diagram.LocationInProgress)
-		svc.Delete(diagram.FileTypePUML, "auth-component", "1.0.0", diagram.LocationProducts)
+		svc.Delete(models.DiagramTypePUML, "mfa-system", "1.0.0", diagram.LocationInProgress)
+		svc.Delete(models.DiagramTypePUML, "auth-component", "1.0.0", diagram.LocationProducts)
 	}()
 }
 
@@ -371,7 +372,7 @@ Rejected --> [*]
 	// Create all state-machine diagrams
 	fmt.Printf("Creating %d business process state-machine diagrams...\n", len(processes))
 	for _, process := range processes {
-		_, err := svc.Create(diagram.FileTypePUML, process.name, process.version, process.content, diagram.LocationInProgress)
+		_, err := svc.Create(models.DiagramTypePUML, process.name, process.version, process.content, diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Error creating %s: %v", process.name, err)
 			continue
@@ -381,7 +382,7 @@ Rejected --> [*]
 
 	// List all in-progress state-machine diagrams
 	fmt.Println("Listing all in-progress state-machine diagrams...")
-	allDiagrams, err := svc.ListAll(diagram.FileTypePUML, diagram.LocationInProgress)
+	allDiagrams, err := svc.ListAll(models.DiagramTypePUML, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error listing state-machine diagrams: %v", err)
 		return
@@ -397,7 +398,7 @@ Rejected --> [*]
 	fmt.Println("Batch validation of all state-machine diagrams...")
 	validCount := 0
 	for _, process := range processes {
-		result, err := svc.Validate(diagram.FileTypePUML, process.name, process.version, diagram.LocationInProgress)
+		result, err := svc.Validate(models.DiagramTypePUML, process.name, process.version, diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Error validating %s: %v", process.name, err)
 			continue
@@ -417,7 +418,7 @@ Rejected --> [*]
 	// Clean up all created state-machine diagrams
 	fmt.Println("Cleaning up batch-created state-machine diagrams...")
 	for _, process := range processes {
-		err := svc.Delete(diagram.FileTypePUML, process.name, process.version, diagram.LocationInProgress)
+		err := svc.Delete(models.DiagramTypePUML, process.name, process.version, diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Warning: Could not delete %s: %v", process.name, err)
 		} else {
@@ -437,34 +438,34 @@ func demonstrateErrorHandling() {
 
 	// 1. Invalid parameters
 	fmt.Println("1. Testing invalid parameters...")
-	_, err = svc.Create(diagram.FileTypePUML, "", "1.0.0", "content", diagram.LocationInProgress)
+	_, err = svc.Create(models.DiagramTypePUML, "", "1.0.0", "content", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled empty name error")
 	}
 
-	_, err = svc.Create(diagram.FileTypePUML, "test", "", "content", diagram.LocationInProgress)
+	_, err = svc.Create(models.DiagramTypePUML, "test", "", "content", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled empty version error")
 	}
 
-	_, err = svc.Create(diagram.FileTypePUML, "test", "1.0.0", "", diagram.LocationInProgress)
+	_, err = svc.Create(models.DiagramTypePUML, "test", "1.0.0", "", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled empty content error")
 	}
 
 	// 2. Non-existent operations
 	fmt.Println("2. Testing non-existent resource operations...")
-	_, err = svc.Read(diagram.FileTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
+	_, err = svc.Read(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled non-existent read error")
 	}
 
-	err = svc.Delete(diagram.FileTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
+	err = svc.Delete(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled non-existent delete error")
 	}
 
-	err = svc.Promote(diagram.FileTypePUML, "non-existent", "1.0.0")
+	err = svc.Promote(models.DiagramTypePUML, "non-existent", "1.0.0")
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled non-existent promote error")
 	}
@@ -476,13 +477,13 @@ func demonstrateErrorHandling() {
 Test --> [*]
 @enduml`
 
-	_, err = svc.Create(diagram.FileTypePUML, "duplicate-test", "1.0.0", content, diagram.LocationInProgress)
+	_, err = svc.Create(models.DiagramTypePUML, "duplicate-test", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating first instance: %v", err)
 		return
 	}
 
-	_, err = svc.Create(diagram.FileTypePUML, "duplicate-test", "1.0.0", content, diagram.LocationInProgress)
+	_, err = svc.Create(models.DiagramTypePUML, "duplicate-test", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled duplicate creation error")
 	}
@@ -490,11 +491,11 @@ Test --> [*]
 	// 4. Update non-existent
 	fmt.Println("4. Testing update of non-existent state-machine diagram...")
 	nonExistentDiag := &diagram.StateMachineDiagram{
-		Name:     "non-existent",
-		Version:  "1.0.0",
-		Content:  content,
-		Location: diagram.LocationInProgress,
-		FileType: diagram.FileTypePUML,
+		Name:        "non-existent",
+		Version:     "1.0.0",
+		Content:     content,
+		Location:    diagram.LocationInProgress,
+		DiagramType: models.DiagramTypePUML,
 	}
 	err = svc.Update(nonExistentDiag)
 	if err != nil {
@@ -502,7 +503,7 @@ Test --> [*]
 	}
 
 	// Clean up
-	svc.Delete(diagram.FileTypePUML, "duplicate-test", "1.0.0", diagram.LocationInProgress)
+	svc.Delete(models.DiagramTypePUML, "duplicate-test", "1.0.0", diagram.LocationInProgress)
 
 	fmt.Println("✓ Error handling demonstration completed")
 }
@@ -539,14 +540,14 @@ title Environment Test
 EnvConfigured --> [*]
 @enduml`
 
-	diag, err := svc.Create(diagram.FileTypePUML, "env-config-test", "1.0.0", content, diagram.LocationInProgress)
+	diag, err := svc.Create(models.DiagramTypePUML, "env-config-test", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating test state-machine diagram: %v", err)
 	} else {
 		fmt.Printf("✓ Created state-machine diagram using environment configuration: %s-%s\n", diag.Name, diag.Version)
 
 		// Clean up
-		svc.Delete(diagram.FileTypePUML, "env-config-test", "1.0.0", diagram.LocationInProgress)
+		svc.Delete(models.DiagramTypePUML, "env-config-test", "1.0.0", diagram.LocationInProgress)
 	}
 
 	// Restore original environment variables

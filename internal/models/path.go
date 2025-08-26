@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	smmodels "github.com/kengibson1111/go-uml-statemachine-models/models"
 )
 
 const (
@@ -48,10 +50,10 @@ func (pm *PathManager) GetLocationPath(location Location) string {
 	}
 }
 
-// GetLocationWithFileTypePath returns the path for a specific location and file type
-func (pm *PathManager) GetLocationWithFileTypePath(location Location, fileType FileType) string {
+// GetLocationWithDiagramTypePath returns the path for a specific location and diagram type
+func (pm *PathManager) GetLocationWithDiagramTypePath(location Location, diagramType smmodels.DiagramType) string {
 	locationPath := pm.GetLocationPath(location)
-	return filepath.Join(locationPath, fileType.String())
+	return filepath.Join(locationPath, diagramType.String())
 }
 
 // GetStateMachineDirectoryPath returns the directory path for a state-machine diagram
@@ -64,9 +66,9 @@ func (pm *PathManager) GetStateMachineDirectoryPath(name, version string, locati
 	return filepath.Join(locationPath, fmt.Sprintf("%s-%s", name, version))
 }
 
-// GetStateMachineDirectoryPathWithFileType returns the directory path for a state-machine diagram with file type
-func (pm *PathManager) GetStateMachineDirectoryPathWithFileType(name, version string, location Location, fileType FileType) string {
-	locationPath := pm.GetLocationWithFileTypePath(location, fileType)
+// GetStateMachineDirectoryPathWithDiagramType returns the directory path for a state-machine diagram with diagram type
+func (pm *PathManager) GetStateMachineDirectoryPathWithDiagramType(name, version string, location Location, diagramType smmodels.DiagramType) string {
+	locationPath := pm.GetLocationWithDiagramTypePath(location, diagramType)
 	if location == LocationNested {
 		// Nested state-machine diagrams don't include version in directory name
 		return filepath.Join(locationPath, name)
@@ -84,9 +86,9 @@ func (pm *PathManager) GetStateMachineFilePath(name, version string, location Lo
 	return filepath.Join(dirPath, fmt.Sprintf("%s-%s%s", name, version, PlantUMLExtension))
 }
 
-// GetStateMachineFilePathWithFileType returns the full file path for a state-machine diagram with file type
-func (pm *PathManager) GetDiagramFilePathWithFileType(name, version string, location Location, fileType FileType) string {
-	dirPath := pm.GetStateMachineDirectoryPathWithFileType(name, version, location, fileType)
+// GetDiagramFilePathWithDiagramType returns the full file path for a state-machine diagram with diagram type
+func (pm *PathManager) GetDiagramFilePathWithDiagramType(name, version string, location Location, diagramType smmodels.DiagramType) string {
+	dirPath := pm.GetStateMachineDirectoryPathWithDiagramType(name, version, location, diagramType)
 	if location == LocationNested {
 		// Nested state-machine diagrams don't include version in filename
 		return filepath.Join(dirPath, name+PlantUMLExtension)

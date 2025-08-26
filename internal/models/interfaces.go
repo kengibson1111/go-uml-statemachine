@@ -1,16 +1,18 @@
 package models
 
+import smmodels "github.com/kengibson1111/go-uml-statemachine-models/models"
+
 // Repository interface defines the contract for data persistence operations
 type Repository interface {
 	// Read operations
-	ReadDiagram(fileType FileType, name, version string, location Location) (*StateMachineDiagram, error)
-	ListStateMachines(fileType FileType, location Location) ([]StateMachineDiagram, error)
-	Exists(fileType FileType, name, version string, location Location) (bool, error)
+	ReadDiagram(diagramType smmodels.DiagramType, name, version string, location Location) (*StateMachineDiagram, error)
+	ListStateMachines(diagramType smmodels.DiagramType, location Location) ([]StateMachineDiagram, error)
+	Exists(diagramType smmodels.DiagramType, name, version string, location Location) (bool, error)
 
 	// Write operations
 	WriteDiagram(diag *StateMachineDiagram) error
-	MoveDiagram(fileType FileType, name, version string, from, to Location) error
-	DeleteDiagram(fileType FileType, name, version string, location Location) error
+	MoveDiagram(diagramType smmodels.DiagramType, name, version string, from, to Location) error
+	DeleteDiagram(diagramType smmodels.DiagramType, name, version string, location Location) error
 
 	// Directory operations
 	CreateDirectory(path string) error
@@ -26,15 +28,15 @@ type Validator interface {
 // DiagramService interface defines the contract for business operations
 type DiagramService interface {
 	// CRUD operations
-	Create(fileType FileType, name, version string, content string, location Location) (*StateMachineDiagram, error)
-	Read(fileType FileType, name, version string, location Location) (*StateMachineDiagram, error)
+	Create(diagramType smmodels.DiagramType, name, version string, content string, location Location) (*StateMachineDiagram, error)
+	Read(diagramType smmodels.DiagramType, name, version string, location Location) (*StateMachineDiagram, error)
 	Update(diag *StateMachineDiagram) error
-	Delete(fileType FileType, name, version string, location Location) error
+	Delete(diagramType smmodels.DiagramType, name, version string, location Location) error
 
 	// Business operations
-	Promote(fileType FileType, name, version string) error // Move from in-progress to products
-	Validate(fileType FileType, name, version string, location Location) (*ValidationResult, error)
-	ListAll(fileType FileType, location Location) ([]StateMachineDiagram, error)
+	Promote(diagramType smmodels.DiagramType, name, version string) error // Move from in-progress to products
+	Validate(diagramType smmodels.DiagramType, name, version string, location Location) (*ValidationResult, error)
+	ListAll(diagramType smmodels.DiagramType, location Location) ([]StateMachineDiagram, error)
 
 	// Reference operations
 	ResolveReferences(diagram *StateMachineDiagram) error

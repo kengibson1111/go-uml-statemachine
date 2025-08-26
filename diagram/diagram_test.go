@@ -3,6 +3,8 @@ package diagram
 import (
 	"os"
 	"testing"
+
+	"github.com/kengibson1111/go-uml-statemachine-models/models"
 )
 
 func TestNewService(t *testing.T) {
@@ -283,7 +285,7 @@ Error --> Idle : reset()
 @enduml`
 
 	// Test Create
-	diag, err := svc.Create(FileTypePUML, "test-integration", "1.0.0", content, LocationInProgress)
+	diag, err := svc.Create(models.DiagramTypePUML, "test-integration", "1.0.0", content, LocationInProgress)
 	if err != nil {
 		t.Fatalf("Create() failed: %v", err)
 	}
@@ -298,7 +300,7 @@ Error --> Idle : reset()
 	}
 
 	// Test Read
-	readDiag, err := svc.Read(FileTypePUML, "test-integration", "1.0.0", LocationInProgress)
+	readDiag, err := svc.Read(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
 	if err != nil {
 		t.Fatalf("Read() failed: %v", err)
 	}
@@ -307,7 +309,7 @@ Error --> Idle : reset()
 	}
 
 	// Test Validate
-	result, err := svc.Validate(FileTypePUML, "test-integration", "1.0.0", LocationInProgress)
+	result, err := svc.Validate(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
 	if err != nil {
 		t.Fatalf("Validate() failed: %v", err)
 	}
@@ -316,7 +318,7 @@ Error --> Idle : reset()
 	}
 
 	// Test ListAll
-	diagrams, err := svc.ListAll(FileTypePUML, LocationInProgress)
+	diagrams, err := svc.ListAll(models.DiagramTypePUML, LocationInProgress)
 	if err != nil {
 		t.Fatalf("ListAll() failed: %v", err)
 	}
@@ -340,7 +342,7 @@ Error --> Idle : reset()
 	}
 
 	// Verify update
-	updatedDiag, err := svc.Read(FileTypePUML, "test-integration", "1.0.0", LocationInProgress)
+	updatedDiag, err := svc.Read(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
 	if err != nil {
 		t.Fatalf("Read() after update failed: %v", err)
 	}
@@ -350,13 +352,13 @@ Error --> Idle : reset()
 
 	// Test Promote (if validation passes)
 	if result.IsValid && !result.HasErrors() {
-		err = svc.Promote(FileTypePUML, "test-integration", "1.0.0")
+		err = svc.Promote(models.DiagramTypePUML, "test-integration", "1.0.0")
 		if err != nil {
 			t.Fatalf("Promote() failed: %v", err)
 		}
 
 		// Verify promotion
-		productDiags, err := svc.ListAll(FileTypePUML, LocationProducts)
+		productDiags, err := svc.ListAll(models.DiagramTypePUML, LocationProducts)
 		if err != nil {
 			t.Fatalf("ListAll(LocationProducts) failed: %v", err)
 		}
@@ -372,13 +374,13 @@ Error --> Idle : reset()
 		}
 
 		// Clean up from products
-		err = svc.Delete(FileTypePUML, "test-integration", "1.0.0", LocationProducts)
+		err = svc.Delete(models.DiagramTypePUML, "test-integration", "1.0.0", LocationProducts)
 		if err != nil {
 			t.Logf("Warning: Could not clean up from products: %v", err)
 		}
 	} else {
 		// Clean up from in-progress
-		err = svc.Delete(FileTypePUML, "test-integration", "1.0.0", LocationInProgress)
+		err = svc.Delete(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
 		if err != nil {
 			t.Logf("Warning: Could not clean up from in-progress: %v", err)
 		}
@@ -392,41 +394,41 @@ func TestPublicAPIErrorHandling(t *testing.T) {
 	}
 
 	// Test Create with invalid parameters
-	_, err = svc.Create(FileTypePUML, "", "1.0.0", "content", LocationInProgress)
+	_, err = svc.Create(models.DiagramTypePUML, "", "1.0.0", "content", LocationInProgress)
 	if err == nil {
 		t.Error("Create() with empty name should fail")
 	}
 
-	_, err = svc.Create(FileTypePUML, "test", "", "content", LocationInProgress)
+	_, err = svc.Create(models.DiagramTypePUML, "test", "", "content", LocationInProgress)
 	if err == nil {
 		t.Error("Create() with empty version should fail")
 	}
 
-	_, err = svc.Create(FileTypePUML, "test", "1.0.0", "", LocationInProgress)
+	_, err = svc.Create(models.DiagramTypePUML, "test", "1.0.0", "", LocationInProgress)
 	if err == nil {
 		t.Error("Create() with empty content should fail")
 	}
 
 	// Test Read non-existent
-	_, err = svc.Read(FileTypePUML, "non-existent", "1.0.0", LocationInProgress)
+	_, err = svc.Read(models.DiagramTypePUML, "non-existent", "1.0.0", LocationInProgress)
 	if err == nil {
 		t.Error("Read() of non-existent state-machine diagram should fail")
 	}
 
 	// Test Delete non-existent
-	err = svc.Delete(FileTypePUML, "non-existent", "1.0.0", LocationInProgress)
+	err = svc.Delete(models.DiagramTypePUML, "non-existent", "1.0.0", LocationInProgress)
 	if err == nil {
 		t.Error("Delete() of non-existent state-machine diagram should fail")
 	}
 
 	// Test Promote non-existent
-	err = svc.Promote(FileTypePUML, "non-existent", "1.0.0")
+	err = svc.Promote(models.DiagramTypePUML, "non-existent", "1.0.0")
 	if err == nil {
 		t.Error("Promote() of non-existent state-machine diagram should fail")
 	}
 
 	// Test Validate non-existent
-	_, err = svc.Validate(FileTypePUML, "non-existent", "1.0.0", LocationInProgress)
+	_, err = svc.Validate(models.DiagramTypePUML, "non-existent", "1.0.0", LocationInProgress)
 	if err == nil {
 		t.Error("Validate() of non-existent state-machine diagram should fail")
 	}

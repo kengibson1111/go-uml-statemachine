@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/kengibson1111/go-uml-statemachine-models/models"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/diagram"
 )
 
@@ -36,7 +37,7 @@ func main() {
 Test --> [*]
 @enduml`
 
-	diag, err := svc.Create(diagram.FileTypePUML, "api-test", "1.0.0", content, diagram.LocationInProgress)
+	diag, err := svc.Create(models.DiagramTypePUML, "api-test", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +45,7 @@ Test --> [*]
 	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", diag.Name, diag.Version)
 
 	// Clean up
-	err = svc.Delete(diagram.FileTypePUML, "api-test", "1.0.0", diagram.LocationInProgress)
+	err = svc.Delete(models.DiagramTypePUML, "api-test", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not clean up: %v", err)
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	smmodels "github.com/kengibson1111/go-uml-statemachine-models/models"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/repository"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/service"
@@ -42,7 +43,7 @@ Authenticated --> Idle : logout()
 
 @enduml`
 
-	baseDiag, err := svc.Create(models.FileTypePUML, "base-auth", "1.0.0", baseAuthContent, models.LocationInProgress)
+	baseDiag, err := svc.Create(smmodels.DiagramTypePUML, "base-auth", "1.0.0", baseAuthContent, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating base auth: %v", err)
 		return
@@ -50,14 +51,14 @@ Authenticated --> Idle : logout()
 	fmt.Printf("✓ Created: %s-%s\n", baseDiag.Name, baseDiag.Version)
 
 	// Validate and promote base auth to products
-	validationResult, err := svc.Validate(models.FileTypePUML, "base-auth", "1.0.0", models.LocationInProgress)
+	validationResult, err := svc.Validate(smmodels.DiagramTypePUML, "base-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating base auth: %v", err)
 		return
 	}
 
 	if validationResult.IsValid && !validationResult.HasErrors() {
-		err = svc.Promote(models.FileTypePUML, "base-auth", "1.0.0")
+		err = svc.Promote(smmodels.DiagramTypePUML, "base-auth", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting base auth: %v", err)
 			return
@@ -85,7 +86,7 @@ Failed --> RequireAuth : retry
 
 @enduml`
 
-	advancedDiag, err := svc.Create(models.FileTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
+	advancedDiag, err := svc.Create(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating advanced auth: %v", err)
 		return
@@ -140,7 +141,7 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Println("\n5. Testing validation strictness...")
 
 	// Validate with in-progress strictness (errors and warnings)
-	inProgressResult, err := svc.Validate(models.FileTypePUML, "advanced-auth", "1.0.0", models.LocationInProgress)
+	inProgressResult, err := svc.Validate(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating with in-progress strictness: %v", err)
 	} else {
@@ -152,19 +153,19 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Println("\n6. Demonstrating error handling...")
 
 	// Try to create a duplicate
-	_, err = svc.Create(models.FileTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
+	_, err = svc.Create(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
 	if err != nil {
 		fmt.Printf("✓ Expected error for duplicate creation: %v\n", err)
 	}
 
 	// Try to read non-existent state-machine diagram
-	_, err = svc.Read(models.FileTypePUML, "non-existent", "1.0.0", models.LocationInProgress)
+	_, err = svc.Read(smmodels.DiagramTypePUML, "non-existent", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		fmt.Printf("✓ Expected error for non-existent read: %v\n", err)
 	}
 
 	// Try to promote without validation
-	err = svc.Promote(models.FileTypePUML, "non-existent", "1.0.0")
+	err = svc.Promote(smmodels.DiagramTypePUML, "non-existent", "1.0.0")
 	if err != nil {
 		fmt.Printf("✓ Expected error for non-existent promotion: %v\n", err)
 	}
@@ -183,7 +184,7 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Println("\n8. Cleaning up test data...")
 
 	// Delete from products first
-	err = svc.Delete(models.FileTypePUML, "base-auth", "1.0.0", models.LocationProducts)
+	err = svc.Delete(smmodels.DiagramTypePUML, "base-auth", "1.0.0", models.LocationProducts)
 	if err != nil {
 		log.Printf("Warning: Could not delete base-auth from products: %v", err)
 	} else {
@@ -191,7 +192,7 @@ SessionTimeout --> RequireAuth : session_expired
 	}
 
 	// Delete from in-progress
-	err = svc.Delete(models.FileTypePUML, "advanced-auth", "1.0.0", models.LocationInProgress)
+	err = svc.Delete(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not delete advanced-auth from in-progress: %v", err)
 	} else {

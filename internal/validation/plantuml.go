@@ -282,7 +282,7 @@ func (v *PlantUMLValidator) resolveReference(ref models.Reference, diag *models.
 	}
 
 	// Check if the referenced state-machine diagram exists
-	exists, err := v.repository.Exists(diag.FileType, ref.Name, checkVersion, targetLocation)
+	exists, err := v.repository.Exists(diag.DiagramType, ref.Name, checkVersion, targetLocation)
 	if err != nil {
 		result.AddWarning("REFERENCE_CHECK_ERROR",
 			fmt.Sprintf("Failed to check existence of reference '%s': %v", ref.Name, err), 1, 1)
@@ -302,7 +302,7 @@ func (v *PlantUMLValidator) resolveReference(ref models.Reference, diag *models.
 	}
 
 	// Try to read the referenced state-machine diagram to ensure it's accessible
-	referencedDiag, err := v.repository.ReadDiagram(diag.FileType, ref.Name, checkVersion, targetLocation)
+	referencedDiag, err := v.repository.ReadDiagram(diag.DiagramType, ref.Name, checkVersion, targetLocation)
 	if err != nil {
 		result.AddWarning("REFERENCE_READ_ERROR",
 			fmt.Sprintf("Referenced state-machine diagram '%s' exists but cannot be read: %v", ref.Name, err), 1, 1)
@@ -364,7 +364,7 @@ func (v *PlantUMLValidator) checkCircularReference(ref models.Reference, referen
 		}
 
 		// Try to read the nested referenced state-machine diagram
-		nestedReferencedDiag, err := v.repository.ReadDiagram(originalDiag.FileType, nestedRef.Name, checkVersion, targetLocation)
+		nestedReferencedDiag, err := v.repository.ReadDiagram(originalDiag.DiagramType, nestedRef.Name, checkVersion, targetLocation)
 		if err != nil {
 			continue // Skip if we can't read it
 		}

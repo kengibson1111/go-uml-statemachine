@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	smmodels "github.com/kengibson1111/go-uml-statemachine-models/models"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/logging"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
 )
@@ -53,14 +54,14 @@ func NewFileSystemRepository(config *models.Config) *FileSystemRepository {
 }
 
 // ReadDiagram reads a state-machine diagram from the file system
-func (r *FileSystemRepository) ReadDiagram(fileType models.FileType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+func (r *FileSystemRepository) ReadDiagram(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	// Create operation logger with context
 	opLogger := r.logger.WithFields(map[string]interface{}{
-		"operation": "ReadStateMachine",
-		"fileType":  fileType.String(),
-		"name":      name,
-		"version":   version,
-		"location":  location.String(),
+		"operation":   "ReadStateMachine",
+		"diagramType": diagramType.String(),
+		"name":        name,
+		"version":     version,
+		"location":    location.String(),
 	})
 
 	opLogger.Debug("Starting state-machine diagram read operation")
@@ -89,7 +90,7 @@ func (r *FileSystemRepository) ReadDiagram(fileType models.FileType, name, versi
 	opLogger.Debug("Input validation passed")
 
 	// Get the file path
-	filePath := r.pathManager.GetDiagramFilePathWithFileType(name, version, location, fileType)
+	filePath := r.pathManager.GetDiagramFilePathWithDiagramType(name, version, location, diagramType)
 	opLogger.WithField("filePath", filePath).Debug("Resolved file path")
 
 	// Check if file exists
@@ -158,11 +159,11 @@ func (r *FileSystemRepository) ReadDiagram(fileType models.FileType, name, versi
 	// Create StateMachineDiagram object
 	opLogger.Debug("Creating state-machine diagram object")
 	diag := &models.StateMachineDiagram{
-		Name:     name,
-		Version:  version,
-		Content:  string(content),
-		Location: location,
-		FileType: fileType,
+		Name:        name,
+		Version:     version,
+		Content:     string(content),
+		Location:    location,
+		DiagramType: diagramType,
 		Metadata: models.Metadata{
 			ModifiedAt: fileInfo.ModTime(),
 			// CreatedAt and Author would need additional metadata storage
@@ -206,8 +207,8 @@ func (r *FileSystemRepository) WriteDiagram(diag *models.StateMachineDiagram) er
 	}
 
 	// Get directory and file paths
-	dirPath := r.pathManager.GetStateMachineDirectoryPathWithFileType(diag.Name, diag.Version, diag.Location, diag.FileType)
-	filePath := r.pathManager.GetDiagramFilePathWithFileType(diag.Name, diag.Version, diag.Location, diag.FileType)
+	dirPath := r.pathManager.GetStateMachineDirectoryPathWithDiagramType(diag.Name, diag.Version, diag.Location, diag.DiagramType)
+	filePath := r.pathManager.GetDiagramFilePathWithDiagramType(diag.Name, diag.Version, diag.Location, diag.DiagramType)
 
 	// Create directory if it doesn't exist
 	if err := r.CreateDirectory(dirPath); err != nil {
@@ -224,7 +225,7 @@ func (r *FileSystemRepository) WriteDiagram(diag *models.StateMachineDiagram) er
 }
 
 // Exists checks if a state-machine diagram exists
-func (r *FileSystemRepository) Exists(fileType models.FileType, name, version string, location models.Location) (bool, error) {
+func (r *FileSystemRepository) Exists(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
 		return false, err
@@ -237,7 +238,7 @@ func (r *FileSystemRepository) Exists(fileType models.FileType, name, version st
 	}
 
 	// Get the file path
-	filePath := r.pathManager.GetDiagramFilePathWithFileType(name, version, location, fileType)
+	filePath := r.pathManager.GetDiagramFilePathWithDiagramType(name, version, location, diagramType)
 
 	// Check if file exists
 	_, err := os.Stat(filePath)
@@ -298,7 +299,7 @@ func (r *FileSystemRepository) DirectoryExists(path string) (bool, error) {
 }
 
 // MoveDiagram moves a state-machine diagram from one location to another
-func (r *FileSystemRepository) MoveDiagram(fileType models.FileType, name, version string, from, to models.Location) error {
+func (r *FileSystemRepository) MoveDiagram(diagramType smmodels.DiagramType, name, version string, from, to models.Location) error {
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
 		return err
@@ -316,8 +317,8 @@ func (r *FileSystemRepository) MoveDiagram(fileType models.FileType, name, versi
 	}
 
 	// Get source and destination paths
-	sourcePath := r.pathManager.GetStateMachineDirectoryPathWithFileType(name, version, from, fileType)
-	destPath := r.pathManager.GetStateMachineDirectoryPathWithFileType(name, version, to, fileType)
+	sourcePath := r.pathManager.GetStateMachineDirectoryPathWithDiagramType(name, version, from, diagramType)
+	destPath := r.pathManager.GetStateMachineDirectoryPathWithDiagramType(name, version, to, diagramType)
 
 	// Check if source exists
 	sourceExists, err := r.DirectoryExists(sourcePath)
@@ -346,7 +347,7 @@ func (r *FileSystemRepository) MoveDiagram(fileType models.FileType, name, versi
 	}
 
 	// Create destination parent directory if needed
-	destParent := r.pathManager.GetLocationWithFileTypePath(to, fileType)
+	destParent := r.pathManager.GetLocationWithDiagramTypePath(to, diagramType)
 	if err := r.CreateDirectory(destParent); err != nil {
 		return fmt.Errorf("failed to create destination parent directory: %w", err)
 	}
@@ -362,7 +363,7 @@ func (r *FileSystemRepository) MoveDiagram(fileType models.FileType, name, versi
 }
 
 // DeleteDiagram deletes a state-machine diagram and its directory
-func (r *FileSystemRepository) DeleteDiagram(fileType models.FileType, name, version string, location models.Location) error {
+func (r *FileSystemRepository) DeleteDiagram(diagramType smmodels.DiagramType, name, version string, location models.Location) error {
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
 		return err
@@ -375,7 +376,7 @@ func (r *FileSystemRepository) DeleteDiagram(fileType models.FileType, name, ver
 	}
 
 	// Get the directory path
-	dirPath := r.pathManager.GetStateMachineDirectoryPathWithFileType(name, version, location, fileType)
+	dirPath := r.pathManager.GetStateMachineDirectoryPathWithDiagramType(name, version, location, diagramType)
 
 	// Check if directory exists
 	exists, err := r.DirectoryExists(dirPath)
@@ -400,9 +401,9 @@ func (r *FileSystemRepository) DeleteDiagram(fileType models.FileType, name, ver
 }
 
 // ListStateMachines lists all state-machine diagrams in a location
-func (r *FileSystemRepository) ListStateMachines(fileType models.FileType, location models.Location) ([]models.StateMachineDiagram, error) {
+func (r *FileSystemRepository) ListStateMachines(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 	// Get the location path
-	locationPath := r.pathManager.GetLocationWithFileTypePath(location, fileType)
+	locationPath := r.pathManager.GetLocationWithDiagramTypePath(location, diagramType)
 
 	// Check if location directory exists
 	exists, err := r.DirectoryExists(locationPath)
@@ -442,7 +443,7 @@ func (r *FileSystemRepository) ListStateMachines(fileType models.FileType, locat
 		}
 
 		// Try to read the state-machine diagram
-		diag, err := r.ReadDiagram(fileType, pathInfo.Name, pathInfo.Version, location)
+		diag, err := r.ReadDiagram(diagramType, pathInfo.Name, pathInfo.Version, location)
 		if err != nil {
 			// Skip state-machine diagrams that can't be read, but continue processing others
 			continue

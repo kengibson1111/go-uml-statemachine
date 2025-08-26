@@ -1,23 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
 
-// FileType indicates the type of file being processed
-type FileType int
-
-const (
-	FileTypePUML FileType = iota
+	smmodels "github.com/kengibson1111/go-uml-statemachine-models/models"
 )
-
-// String returns the string representation of FileType
-func (ft FileType) String() string {
-	switch ft {
-	case FileTypePUML:
-		return "puml"
-	default:
-		return "unknown"
-	}
-}
 
 // Location indicates where the state-machine diagram is stored
 type Location int
@@ -64,13 +51,13 @@ func (rt ReferenceType) String() string {
 
 // StateMachineDiagram represents a UML state-machine diagram
 type StateMachineDiagram struct {
-	Name       string
-	Version    string
-	Content    string
-	References []Reference
-	Location   Location
-	FileType   FileType
-	Metadata   Metadata
+	Name        string
+	Version     string
+	Content     string
+	References  []Reference
+	Location    Location
+	DiagramType smmodels.DiagramType
+	Metadata    Metadata
 }
 
 // Reference represents a reference to another state-machine diagram

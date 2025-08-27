@@ -207,7 +207,7 @@ func (r *FileSystemRepository) WriteDiagram(diag *models.StateMachineDiagram) er
 	}
 
 	// Get directory and file paths
-	dirPath := r.pathManager.GetStateMachineDirectoryPathWithDiagramType(diag.Name, diag.Version, diag.Location, diag.DiagramType)
+	dirPath := r.pathManager.GetLocationWithDiagramTypePath(diag.Location, diag.DiagramType)
 	filePath := r.pathManager.GetDiagramFilePathWithDiagramType(diag.Name, diag.Version, diag.Location, diag.DiagramType)
 
 	// Create directory if it doesn't exist
@@ -342,7 +342,7 @@ func (r *FileSystemRepository) MoveDiagram(diagramType smmodels.DiagramType, nam
 	}
 
 	// Create destination directory if needed
-	destDir := r.pathManager.GetStateMachineDirectoryPathWithDiagramType(name, version, to, diagramType)
+	destDir := r.pathManager.GetLocationWithDiagramTypePath(to, diagramType)
 	if err := r.CreateDirectory(destDir); err != nil {
 		return fmt.Errorf("failed to create destination directory: %w", err)
 	}

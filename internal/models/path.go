@@ -53,27 +53,9 @@ func (pm *PathManager) GetLocationWithDiagramTypePath(location Location, diagram
 	return filepath.Join(locationPath, diagramType.String())
 }
 
-// GetStateMachineDirectoryPath returns the directory path for a state-machine diagram
-func (pm *PathManager) GetStateMachineDirectoryPath(name, version string, location Location) string {
-	locationPath := pm.GetLocationPath(location)
-	return filepath.Join(locationPath, fmt.Sprintf("%s-%s", name, version))
-}
-
-// GetStateMachineDirectoryPathWithDiagramType returns the directory path for a state-machine diagram with diagram type
-func (pm *PathManager) GetStateMachineDirectoryPathWithDiagramType(name, version string, location Location, diagramType smmodels.DiagramType) string {
-	// Return the diagram type directory directly (flattened structure)
-	return pm.GetLocationWithDiagramTypePath(location, diagramType)
-}
-
-// GetStateMachineFilePath returns the full file path for a state-machine diagram
-func (pm *PathManager) GetStateMachineFilePath(name, version string, location Location) string {
-	dirPath := pm.GetStateMachineDirectoryPath(name, version, location)
-	return filepath.Join(dirPath, fmt.Sprintf("%s-%s%s", name, version, PlantUMLExtension))
-}
-
 // GetDiagramFilePathWithDiagramType returns the full file path for a state-machine diagram with diagram type
 func (pm *PathManager) GetDiagramFilePathWithDiagramType(name, version string, location Location, diagramType smmodels.DiagramType) string {
-	dirPath := pm.GetStateMachineDirectoryPathWithDiagramType(name, version, location, diagramType)
+	dirPath := pm.GetLocationWithDiagramTypePath(location, diagramType)
 	return filepath.Join(dirPath, fmt.Sprintf("%s-%s%s", name, version, PlantUMLExtension))
 }
 

@@ -83,12 +83,8 @@ func (v *PlantUMLValidator) parseReferences(content string) ([]models.Reference,
 	var references []models.Reference
 	lines := strings.Split(content, "\n")
 
-	// Regular expressions for different reference patterns
-	// Product references: !include products/{name}-{version}/{name}-{version}.puml
+	// Regular expression for product references: !include products/{name}-{version}/{name}-{version}.puml
 	productRefRegex := regexp.MustCompile(`!include\s+products/([a-zA-Z_][a-zA-Z0-9_-]*)-([a-zA-Z0-9_.-]+)/([a-zA-Z_][a-zA-Z0-9_-]*)-([a-zA-Z0-9_.-]+)\.puml`)
-
-	// Nested references: !include nested/{name}/{name}.puml
-	nestedRefRegex := regexp.MustCompile(`!include\s+nested/([a-zA-Z_][a-zA-Z0-9_-]*)/([a-zA-Z_][a-zA-Z0-9_-]*)\.puml`)
 
 	for _, line := range lines {
 		trimmedLine := strings.TrimSpace(line)
@@ -114,27 +110,8 @@ func (v *PlantUMLValidator) parseReferences(content string) ([]models.Reference,
 			}
 		}
 
-		// Check for nested references
-		if matches := nestedRefRegex.FindStringSubmatch(trimmedLine); matches != nil {
-			if len(matches) >= 3 {
-				dirName := matches[1]
-				fileName := matches[2]
-
-				// Validate that directory name matches file name
-				if dirName == fileName {
-					reference := models.Reference{
-						Name:    dirName,
-						Version: "", // Nested references don't have versions
-						Type:    models.ReferenceTypeNested,
-						Path:    fmt.Sprintf("nested/%s/%s.puml", dirName, fileName),
-					}
-					references = append(references, reference)
-				}
-			}
-		}
-
 		// Check for invalid reference patterns and warn
-		if strings.Contains(trimmedLine, "!include") && !productRefRegex.MatchString(trimmedLine) && !nestedRefRegex.MatchString(trimmedLine) {
+		if strings.Contains(trimmedLine, "!include") && !productRefRegex.MatchString(trimmedLine) {
 			// This might be an invalid reference pattern
 			if strings.Contains(trimmedLine, ".puml") {
 				// Log this as a potential issue but don't fail validation
@@ -159,8 +136,6 @@ func (v *PlantUMLValidator) validateReference(ref models.Reference, diag *models
 	switch ref.Type {
 	case models.ReferenceTypeProduct:
 		v.validateProductReference(ref, diag, result)
-	case models.ReferenceTypeNested:
-		v.validateNestedReference(ref, diag, result)
 	default:
 		result.AddError("UNKNOWN_REFERENCE_TYPE",
 			fmt.Sprintf("Unknown reference type for '%s'", ref.Name), 1, 1)
@@ -195,29 +170,6 @@ func (v *PlantUMLValidator) validateProductReference(ref models.Reference, diag 
 	if ref.Path != expectedPath {
 		result.AddWarning("INCORRECT_REFERENCE_PATH",
 			fmt.Sprintf("Reference path '%s' should be '%s'", ref.Path, expectedPath), 1, 1)
-	}
-}
-
-// validateNestedReference validates a nested reference
-func (v *PlantUMLValidator) validateNestedReference(ref models.Reference, diag *models.StateMachineDiagram, result *models.ValidationResult) {
-	// Nested references should not have a version
-	if ref.Version != "" {
-		result.AddWarning("UNEXPECTED_NESTED_VERSION",
-			fmt.Sprintf("Nested reference '%s' should not have a version", ref.Name), 1, 1)
-	}
-
-	// Check for self-reference (nested can't reference the parent)
-	if ref.Name == diag.Name {
-		result.AddError("NESTED_SELF_REFERENCE",
-			fmt.Sprintf("Nested state-machine diagram cannot reference parent '%s'", ref.Name), 1, 1)
-		return
-	}
-
-	// Validate path format
-	expectedPath := fmt.Sprintf("nested/%s/%s.puml", ref.Name, ref.Name)
-	if ref.Path != expectedPath {
-		result.AddWarning("INCORRECT_NESTED_PATH",
-			fmt.Sprintf("Nested reference path '%s' should be '%s'", ref.Path, expectedPath), 1, 1)
 	}
 }
 
@@ -270,11 +222,6 @@ func (v *PlantUMLValidator) resolveReference(ref models.Reference, diag *models.
 	case models.ReferenceTypeProduct:
 		targetLocation = models.LocationProducts
 		checkVersion = ref.Version
-	case models.ReferenceTypeNested:
-		// For nested references, we need to check within the same parent directory
-		// This is more complex as nested references are relative to the current state-machine diagram
-		targetLocation = models.LocationNested
-		checkVersion = "" // Nested references don't have versions
 	default:
 		result.AddError("UNKNOWN_REFERENCE_TYPE",
 			fmt.Sprintf("Cannot resolve unknown reference type for '%s'", ref.Name), 1, 1)
@@ -290,14 +237,8 @@ func (v *PlantUMLValidator) resolveReference(ref models.Reference, diag *models.
 	}
 
 	if !exists {
-		// For nested references, the error is more critical since they should be in the same directory structure
-		if ref.Type == models.ReferenceTypeNested {
-			result.AddError("NESTED_REFERENCE_NOT_FOUND",
-				fmt.Sprintf("Nested reference '%s' not found", ref.Name), 1, 1)
-		} else {
-			result.AddError("PRODUCT_REFERENCE_NOT_FOUND",
-				fmt.Sprintf("Product reference '%s-%s' not found", ref.Name, ref.Version), 1, 1)
-		}
+		result.AddError("PRODUCT_REFERENCE_NOT_FOUND",
+			fmt.Sprintf("Product reference '%s-%s' not found", ref.Name, ref.Version), 1, 1)
 		return
 	}
 
@@ -356,9 +297,6 @@ func (v *PlantUMLValidator) checkCircularReference(ref models.Reference, referen
 		case models.ReferenceTypeProduct:
 			targetLocation = models.LocationProducts
 			checkVersion = nestedRef.Version
-		case models.ReferenceTypeNested:
-			targetLocation = models.LocationNested
-			checkVersion = ""
 		default:
 			continue // Skip unknown reference types
 		}
@@ -659,7 +597,6 @@ func (v *PlantUMLValidator) isCriticalError(code string) bool {
 		"REFERENCE_PARSE_ERROR":     true,
 
 		// Critical reference validation errors
-		"NESTED_SELF_REFERENCE":  true,
 		"UNKNOWN_REFERENCE_TYPE": true,
 	}
 

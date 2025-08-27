@@ -12,7 +12,6 @@ type Location int
 const (
 	LocationInProgress Location = iota
 	LocationProducts
-	LocationNested
 )
 
 // String returns the string representation of Location
@@ -22,8 +21,6 @@ func (l Location) String() string {
 		return "in-progress"
 	case LocationProducts:
 		return "products"
-	case LocationNested:
-		return "nested"
 	default:
 		return "unknown"
 	}
@@ -34,7 +31,6 @@ type ReferenceType int
 
 const (
 	ReferenceTypeProduct ReferenceType = iota
-	ReferenceTypeNested
 )
 
 // String returns the string representation of ReferenceType
@@ -42,8 +38,6 @@ func (rt ReferenceType) String() string {
 	switch rt {
 	case ReferenceTypeProduct:
 		return "product"
-	case ReferenceTypeNested:
-		return "nested"
 	default:
 		return "unknown"
 	}
@@ -63,7 +57,7 @@ type StateMachineDiagram struct {
 // Reference represents a reference to another state-machine diagram
 type Reference struct {
 	Name    string
-	Version string // empty for nested references
+	Version string // always required for product references
 	Type    ReferenceType
 	Path    string
 }

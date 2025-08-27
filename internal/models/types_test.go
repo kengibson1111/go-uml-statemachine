@@ -22,11 +22,6 @@ func TestLocation_String(t *testing.T) {
 			expected: "products",
 		},
 		{
-			name:     "nested location",
-			location: LocationNested,
-			expected: "nested",
-		},
-		{
 			name:     "unknown location",
 			location: Location(999),
 			expected: "unknown",
@@ -53,11 +48,6 @@ func TestReferenceType_String(t *testing.T) {
 			name:     "product reference type",
 			refType:  ReferenceTypeProduct,
 			expected: "product",
-		},
-		{
-			name:     "nested reference type",
-			refType:  ReferenceTypeNested,
-			expected: "nested",
 		},
 		{
 			name:     "unknown reference type",
@@ -92,11 +82,6 @@ func TestStateMachineDiagram_Creation(t *testing.T) {
 			Type:    ReferenceTypeProduct,
 			Path:    "/path/to/ref1",
 		},
-		{
-			Name: "nested-ref",
-			Type: ReferenceTypeNested,
-			Path: "/path/to/nested",
-		},
 	}
 
 	diag := StateMachineDiagram{
@@ -118,8 +103,8 @@ func TestStateMachineDiagram_Creation(t *testing.T) {
 	if diag.Content != "@startuml\n[*] --> State1\n@enduml" {
 		t.Errorf("StateMachine.Content = %v, want %v", diag.Content, "@startuml\n[*] --> State1\n@enduml")
 	}
-	if len(diag.References) != 2 {
-		t.Errorf("StateMachine.References length = %v, want %v", len(diag.References), 2)
+	if len(diag.References) != 1 {
+		t.Errorf("StateMachine.References length = %v, want %v", len(diag.References), 1)
 	}
 	if diag.Location != LocationInProgress {
 		t.Errorf("StateMachine.Location = %v, want %v", diag.Location, LocationInProgress)
@@ -148,28 +133,6 @@ func TestReference_ProductReference(t *testing.T) {
 	}
 	if ref.Path != "/products/user-auth-2.1.0" {
 		t.Errorf("Reference.Path = %v, want %v", ref.Path, "/products/user-auth-2.1.0")
-	}
-}
-
-func TestReference_NestedReference(t *testing.T) {
-	ref := Reference{
-		Name:    "validation-states",
-		Version: "", // nested references don't have versions
-		Type:    ReferenceTypeNested,
-		Path:    "/nested/validation-states",
-	}
-
-	if ref.Name != "validation-states" {
-		t.Errorf("Reference.Name = %v, want %v", ref.Name, "validation-states")
-	}
-	if ref.Version != "" {
-		t.Errorf("Reference.Version = %v, want empty string", ref.Version)
-	}
-	if ref.Type != ReferenceTypeNested {
-		t.Errorf("Reference.Type = %v, want %v", ref.Type, ReferenceTypeNested)
-	}
-	if ref.Path != "/nested/validation-states" {
-		t.Errorf("Reference.Path = %v, want %v", ref.Path, "/nested/validation-states")
 	}
 }
 

@@ -661,7 +661,6 @@ type Location int
 const (
     LocationInProgress Location = iota
     LocationProducts
-    LocationNested
 )
 
 // ValidationResult contains validation outcomes

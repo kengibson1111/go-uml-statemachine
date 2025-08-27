@@ -130,7 +130,7 @@ func TestFileSystemRepository_WriteDiagram(t *testing.T) {
 			errorType:   models.ErrorTypeValidation,
 		},
 		{
-			name: "missing version for non-nested",
+			name: "missing version",
 			diagram: &models.StateMachineDiagram{
 				Name:     "test-diag",
 				Version:  "",
@@ -139,6 +139,16 @@ func TestFileSystemRepository_WriteDiagram(t *testing.T) {
 			},
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
+		},
+		{
+			name: "invalid location",
+			diagram: &models.StateMachineDiagram{
+				Name:     "test-diag",
+				Version:  "1.0.0",
+				Content:  "test content",
+				Location: models.Location(999), // Invalid location - will use root directory
+			},
+			expectError: false, // Should succeed, just uses root directory
 		},
 	}
 
@@ -232,12 +242,20 @@ func TestFileSystemRepository_ReadDiagram(t *testing.T) {
 			errorType:   models.ErrorTypeValidation,
 		},
 		{
-			name:        "missing version for non-nested",
+			name:        "missing version",
 			diagName:    "test-read",
 			version:     "",
 			location:    models.LocationInProgress,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
+		},
+		{
+			name:        "invalid location",
+			diagName:    "test-read",
+			version:     "1.0.0",
+			location:    models.Location(999), // Invalid location - will use root directory
+			expectError: true,
+			errorType:   models.ErrorTypeFileNotFound, // File won't exist in root directory
 		},
 	}
 
@@ -330,6 +348,14 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 			location:    models.LocationInProgress,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
+		},
+		{
+			name:         "invalid location",
+			diagName:     "test-exists",
+			version:      "1.0.0",
+			location:     models.Location(999), // Invalid location - will use root directory
+			expectExists: false,                // File won't exist in root directory
+			expectError:  false,
 		},
 	}
 
@@ -555,6 +581,24 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 			expectError: true,
 			errorType:   models.ErrorTypeFileNotFound,
 		},
+		{
+			name:        "invalid from location",
+			diagName:    "test-move",
+			version:     "1.0.0",
+			from:        models.Location(999), // Invalid location - will use root directory
+			to:          models.LocationProducts,
+			expectError: true,
+			errorType:   models.ErrorTypeFileNotFound, // Source file won't exist in root directory
+		},
+		{
+			name:        "invalid to location",
+			diagName:    "test-move",
+			version:     "1.0.0",
+			from:        models.LocationInProgress,
+			to:          models.Location(999), // Invalid location - will use root directory
+			expectError: true,
+			errorType:   models.ErrorTypeFileNotFound, // Will fail when trying to read from destination
+		},
 	}
 
 	for _, tt := range tests {
@@ -649,13 +693,22 @@ func TestFileSystemRepository_DeleteDiagram(t *testing.T) {
 			errorType:   models.ErrorTypeValidation,
 		},
 		{
-			name:        "missing version for non-nested",
+			name:        "missing version",
 			setupDiag:   false,
 			diagName:    "test-delete",
 			version:     "",
 			location:    models.LocationInProgress,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
+		},
+		{
+			name:        "invalid location",
+			setupDiag:   false,
+			diagName:    "test-delete",
+			version:     "1.0.0",
+			location:    models.Location(999), // Invalid location - will use root directory
+			expectError: true,
+			errorType:   models.ErrorTypeFileNotFound, // File won't exist in root directory
 		},
 	}
 
@@ -740,9 +793,9 @@ func TestFileSystemRepository_ListStateMachines(t *testing.T) {
 			expectError:   false,
 		},
 		{
-			name:          "list from non-existent location",
-			location:      models.LocationNested, // No nested state-machine diagrams created
-			expectedCount: 0,
+			name:          "invalid location",
+			location:      models.Location(999), // Invalid location - will use root directory
+			expectedCount: 0,                    // No diagrams in root directory
 			expectError:   false,
 		},
 	}

@@ -279,47 +279,6 @@ func TestPlantUMLValidator_ValidateReferences_ProductReference(t *testing.T) {
 	}
 }
 
-func TestPlantUMLValidator_ValidateReferences_NestedReference(t *testing.T) {
-	validator := NewPlantUMLValidator()
-
-	diag := &models.StateMachineDiagram{
-		Name:    "test",
-		Version: "1.0.0",
-		Content: `@startuml
-!include nested/sub-process/sub-process.puml
-[*] --> Idle
-@enduml`,
-	}
-
-	result, err := validator.ValidateReferences(diag)
-	if err != nil {
-		t.Fatalf("ValidateReferences() error = %v", err)
-	}
-
-	if !result.IsValid {
-		t.Error("ValidateReferences() should return valid result for valid nested reference")
-	}
-
-	if len(result.Errors) != 0 {
-		t.Errorf("ValidateReferences() should return no errors, got %d", len(result.Errors))
-	}
-
-	if len(diag.References) != 1 {
-		t.Errorf("StateMachineDiagram should have 1 reference, got %d", len(diag.References))
-	}
-
-	ref := diag.References[0]
-	if ref.Name != "sub-process" {
-		t.Errorf("Reference name should be 'sub-process', got '%s'", ref.Name)
-	}
-	if ref.Version != "" {
-		t.Errorf("Nested reference version should be empty, got '%s'", ref.Version)
-	}
-	if ref.Type != models.ReferenceTypeNested {
-		t.Errorf("Reference type should be Nested, got %v", ref.Type)
-	}
-}
-
 func TestPlantUMLValidator_ValidateReferences_InvalidProductVersion(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
@@ -400,7 +359,6 @@ func TestPlantUMLValidator_ValidateReferences_MultipleReferences(t *testing.T) {
 		Version: "1.0.0",
 		Content: `@startuml
 !include products/auth-service-1.2.0/auth-service-1.2.0.puml
-!include nested/sub-process/sub-process.puml
 !include products/payment-service-2.1.0/payment-service-2.1.0.puml
 [*] --> Idle
 @enduml`,
@@ -419,27 +377,21 @@ func TestPlantUMLValidator_ValidateReferences_MultipleReferences(t *testing.T) {
 		t.Errorf("ValidateReferences() should return no errors, got %d", len(result.Errors))
 	}
 
-	if len(diag.References) != 3 {
-		t.Errorf("StateMachineDiagram should have 3 references, got %d", len(diag.References))
+	if len(diag.References) != 2 {
+		t.Errorf("StateMachineDiagram should have 2 references, got %d", len(diag.References))
 	}
 
-	// Check that we have both product and nested references
+	// Check that we have only product references
 	productCount := 0
-	nestedCount := 0
 	for _, ref := range diag.References {
 		switch ref.Type {
 		case models.ReferenceTypeProduct:
 			productCount++
-		case models.ReferenceTypeNested:
-			nestedCount++
 		}
 	}
 
 	if productCount != 2 {
 		t.Errorf("Expected 2 product references, got %d", productCount)
-	}
-	if nestedCount != 1 {
-		t.Errorf("Expected 1 nested reference, got %d", nestedCount)
 	}
 }
 
@@ -450,7 +402,6 @@ func TestPlantUMLValidator_ParseReferences_InvalidPatterns(t *testing.T) {
 	content := `@startuml
 !include some/invalid/path.puml
 !include products/invalid-name/file.puml
-!include nested/invalid.puml
 [*] --> Idle
 @enduml`
 
@@ -697,42 +648,6 @@ func TestPlantUMLValidator_ResolveReferences_CircularReference(t *testing.T) {
 	}
 	if !foundCircularReference {
 		t.Error("Expected CIRCULAR_REFERENCE or DIRECT_CIRCULAR_REFERENCE error")
-	}
-}
-
-func TestPlantUMLValidator_ResolveReferences_NestedReference(t *testing.T) {
-	mockRepo := NewMockRepository()
-	validator := NewPlantUMLValidatorWithRepository(mockRepo)
-
-	// Add a nested state-machine diagram to the mock repository
-	nestedDiag := &models.StateMachineDiagram{
-		Name:     "sub-process",
-		Version:  "",
-		Location: models.LocationNested,
-		Content:  "@startuml\n[*] --> SubState\n@enduml",
-	}
-	mockRepo.AddStateMachine(nestedDiag)
-
-	diag := &models.StateMachineDiagram{
-		Name:    "test",
-		Version: "1.0.0",
-		Content: `@startuml
-!include nested/sub-process/sub-process.puml
-[*] --> Idle
-@enduml`,
-	}
-
-	result, err := validator.ResolveReferences(diag)
-	if err != nil {
-		t.Fatalf("ResolveReferences() error = %v", err)
-	}
-
-	if !result.IsValid {
-		t.Error("ResolveReferences() should return valid result for existing nested reference")
-	}
-
-	if len(result.Errors) != 0 {
-		t.Errorf("ResolveReferences() should return no errors, got %d", len(result.Errors))
 	}
 }
 

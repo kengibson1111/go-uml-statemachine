@@ -615,55 +615,30 @@ func (s *service) ResolveReferences(diag *models.StateMachineDiagram) error {
 
 // resolveReference resolves a single reference within a state-machine diagram
 func (s *service) resolveReference(diag *models.StateMachineDiagram, ref *models.Reference) error {
-	switch ref.Type {
-	case models.ReferenceTypeProduct:
-		// For product references, check if the referenced state-machine diagram exists in products
-		exists, err := s.repo.Exists(diag.DiagramType, ref.Name, ref.Version, models.LocationProducts)
-		if err != nil {
-			return models.NewStateMachineError(models.ErrorTypeFileSystem,
-				"failed to check product reference existence", err).
-				WithContext("reference_name", ref.Name).
-				WithContext("reference_version", ref.Version)
-		}
-		if !exists {
-			return models.NewStateMachineError(models.ErrorTypeReferenceResolution,
-				"product reference not found", nil).
-				WithContext("reference_name", ref.Name).
-				WithContext("reference_version", ref.Version)
-		}
-
-		// Set the resolved path for the reference
-		ref.Path = s.buildProductReferencePath(diag.DiagramType, ref.Name, ref.Version)
-
-	case models.ReferenceTypeNested:
-		// For nested references, check if the referenced state-machine diagram exists as a nested item
-		// within the same parent directory as the current state-machine diagram
-		nestedPath := s.buildNestedReferencePath(diag, ref.Name)
-
-		// Check if the nested reference exists by attempting to read it
-		// Note: For nested references, we don't use version in the path
-		exists, err := s.checkNestedReferenceExists(diag, ref.Name)
-		if err != nil {
-			return models.NewStateMachineError(models.ErrorTypeFileSystem,
-				"failed to check nested reference existence", err).
-				WithContext("reference_name", ref.Name).
-				WithContext("parent_state_machine", diag.Name)
-		}
-		if !exists {
-			return models.NewStateMachineError(models.ErrorTypeReferenceResolution,
-				"nested reference not found", nil).
-				WithContext("reference_name", ref.Name).
-				WithContext("parent_state_machine", diag.Name)
-		}
-
-		// Set the resolved path for the reference
-		ref.Path = nestedPath
-
-	default:
+	// Only handle product references now that nested references are removed
+	if ref.Type != models.ReferenceTypeProduct {
 		return models.NewStateMachineError(models.ErrorTypeReferenceResolution,
-			"unknown reference type", nil).
+			"unsupported reference type", nil).
 			WithContext("reference_type", ref.Type.String())
 	}
+
+	// For product references, check if the referenced state-machine diagram exists in products
+	exists, err := s.repo.Exists(diag.DiagramType, ref.Name, ref.Version, models.LocationProducts)
+	if err != nil {
+		return models.NewStateMachineError(models.ErrorTypeFileSystem,
+			"failed to check product reference existence", err).
+			WithContext("reference_name", ref.Name).
+			WithContext("reference_version", ref.Version)
+	}
+	if !exists {
+		return models.NewStateMachineError(models.ErrorTypeReferenceResolution,
+			"product reference not found", nil).
+			WithContext("reference_name", ref.Name).
+			WithContext("reference_version", ref.Version)
+	}
+
+	// Set the resolved path for the reference
+	ref.Path = s.buildProductReferencePath(diag.DiagramType, ref.Name, ref.Version)
 
 	return nil
 }
@@ -672,36 +647,4 @@ func (s *service) resolveReference(diag *models.StateMachineDiagram, ref *models
 func (s *service) buildProductReferencePath(diagramType smmodels.DiagramType, name, version string) string {
 	// Product references are in the format: products/{diagramType}/{name}-{version}/{name}-{version}.puml
 	return "products\\" + diagramType.String() + "\\" + name + "-" + version + "\\" + name + "-" + version + ".puml"
-}
-
-// buildNestedReferencePath builds the path for a nested reference
-func (s *service) buildNestedReferencePath(diag *models.StateMachineDiagram, refName string) string {
-	// Nested references are in the format: {location}/{diagramType}/{parent-name}-{parent-version}/nested/{ref-name}/{ref-name}.puml
-	locationStr := diag.Location.String()
-	return locationStr + "\\" + diag.DiagramType.String() + "\\" + diag.Name + "-" + diag.Version + "\\nested\\" + refName + "\\" + refName + ".puml"
-}
-
-// checkNestedReferenceExists checks if a nested reference exists within the parent state-machine diagram's directory
-func (s *service) checkNestedReferenceExists(diag *models.StateMachineDiagram, refName string) (bool, error) {
-	// For nested references, we need to check if the nested directory and file exist
-	// This is a simplified check - in a real implementation, we might need more sophisticated
-	// directory traversal logic depending on how the repository is implemented
-
-	// We'll use the repository's directory checking capabilities
-	nestedDirPath := s.buildNestedDirectoryPath(diag, refName)
-
-	// Check if the nested directory exists
-	exists, err := s.repo.DirectoryExists(nestedDirPath)
-	if err != nil {
-		return false, err
-	}
-
-	return exists, nil
-}
-
-// buildNestedDirectoryPath builds the directory path for a nested reference
-func (s *service) buildNestedDirectoryPath(diag *models.StateMachineDiagram, refName string) string {
-	// Nested directory path: {location}/{diagramType}/{parent-name}-{parent-version}/nested/{ref-name}
-	locationStr := diag.Location.String()
-	return locationStr + "\\" + diag.DiagramType.String() + "\\" + diag.Name + "-" + diag.Version + "\\nested\\" + refName
 }

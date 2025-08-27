@@ -1510,31 +1510,7 @@ func TestService_ResolveReferences(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		{
-			name: "successful resolve nested reference",
-			input: &models.StateMachineDiagram{
-				Name:     "test-diag",
-				Version:  "1.0.0",
-				Content:  "@startuml\n[*] --> Idle\n@enduml",
-				Location: models.LocationInProgress,
-				References: []models.Reference{
-					{
-						Name: "nested-diag",
-						Type: models.ReferenceTypeNested,
-					},
-				},
-			},
-			setupMock: func(repo *mockRepository) {
-				repo.directoryExistsFunc = func(path string) (bool, error) {
-					expectedPath := "in-progress\\puml\\test-diag-1.0.0\\nested\\nested-diag"
-					if path == expectedPath {
-						return true, nil
-					}
-					return false, nil
-				}
-			},
-			wantErr: false,
-		},
+
 		{
 			name: "successful resolve multiple references",
 			input: &models.StateMachineDiagram{
@@ -1549,21 +1525,16 @@ func TestService_ResolveReferences(t *testing.T) {
 						Type:    models.ReferenceTypeProduct,
 					},
 					{
-						Name: "nested-diag",
-						Type: models.ReferenceTypeNested,
+						Name:    "payment-diag",
+						Version: "1.5.0",
+						Type:    models.ReferenceTypeProduct,
 					},
 				},
 			},
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-					if name == "auth-diag" && version == "2.0.0" && location == models.LocationProducts {
-						return true, nil
-					}
-					return false, nil
-				}
-				repo.directoryExistsFunc = func(path string) (bool, error) {
-					expectedPath := "in-progress\\puml\\test-diag-1.0.0\\nested\\nested-diag"
-					if path == expectedPath {
+					if (name == "auth-diag" && version == "2.0.0" && location == models.LocationProducts) ||
+						(name == "payment-diag" && version == "1.5.0" && location == models.LocationProducts) {
 						return true, nil
 					}
 					return false, nil
@@ -1601,28 +1572,7 @@ func TestService_ResolveReferences(t *testing.T) {
 			wantErr:     true,
 			wantErrType: models.ErrorTypeReferenceResolution,
 		},
-		{
-			name: "nested reference not found",
-			input: &models.StateMachineDiagram{
-				Name:     "test-diag",
-				Version:  "1.0.0",
-				Content:  "@startuml\n[*] --> Idle\n@enduml",
-				Location: models.LocationInProgress,
-				References: []models.Reference{
-					{
-						Name: "missing-nested",
-						Type: models.ReferenceTypeNested,
-					},
-				},
-			},
-			setupMock: func(repo *mockRepository) {
-				repo.directoryExistsFunc = func(path string) (bool, error) {
-					return false, nil // not found
-				}
-			},
-			wantErr:     true,
-			wantErrType: models.ErrorTypeReferenceResolution,
-		},
+
 		{
 			name: "repository error checking product reference",
 			input: &models.StateMachineDiagram{
@@ -1647,7 +1597,7 @@ func TestService_ResolveReferences(t *testing.T) {
 			wantErrType: models.ErrorTypeFileSystem,
 		},
 		{
-			name: "repository error checking nested reference",
+			name: "verify only product references are processed",
 			input: &models.StateMachineDiagram{
 				Name:     "test-diag",
 				Version:  "1.0.0",
@@ -1655,18 +1605,22 @@ func TestService_ResolveReferences(t *testing.T) {
 				Location: models.LocationInProgress,
 				References: []models.Reference{
 					{
-						Name: "nested-diag",
-						Type: models.ReferenceTypeNested,
+						Name:    "product-diag",
+						Version: "1.0.0",
+						Type:    models.ReferenceTypeProduct,
 					},
 				},
 			},
 			setupMock: func(repo *mockRepository) {
-				repo.directoryExistsFunc = func(path string) (bool, error) {
-					return false, models.NewStateMachineError(models.ErrorTypeFileSystem, "filesystem error", nil)
+				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
+					// Only product references should be checked
+					if location == models.LocationProducts {
+						return true, nil
+					}
+					return false, nil
 				}
 			},
-			wantErr:     true,
-			wantErrType: models.ErrorTypeFileSystem,
+			wantErr: false,
 		},
 	}
 
@@ -1708,18 +1662,14 @@ func TestService_ResolveReferences(t *testing.T) {
 							t.Errorf("ResolveReferences() reference path not set for %s", ref.Name)
 						}
 
-						// Verify path format based on reference type
-						switch ref.Type {
-						case models.ReferenceTypeProduct:
-							expectedPath := "products\\puml\\" + ref.Name + "-" + ref.Version + "\\" + ref.Name + "-" + ref.Version + ".puml"
-							if ref.Path != expectedPath {
-								t.Errorf("ResolveReferences() product reference path = %v, want %v", ref.Path, expectedPath)
-							}
-						case models.ReferenceTypeNested:
-							expectedPath := tt.input.Location.String() + "\\puml\\" + tt.input.Name + "-" + tt.input.Version + "\\nested\\" + ref.Name + "\\" + ref.Name + ".puml"
-							if ref.Path != expectedPath {
-								t.Errorf("ResolveReferences() nested reference path = %v, want %v", ref.Path, expectedPath)
-							}
+						// Verify path format - should only be product references now
+						if ref.Type != models.ReferenceTypeProduct {
+							t.Errorf("ResolveReferences() should only handle product references, got %v", ref.Type)
+						}
+
+						expectedPath := "products\\puml\\" + ref.Name + "-" + ref.Version + "\\" + ref.Name + "-" + ref.Version + ".puml"
+						if ref.Path != expectedPath {
+							t.Errorf("ResolveReferences() product reference path = %v, want %v", ref.Path, expectedPath)
 						}
 					}
 				}
@@ -1748,32 +1698,6 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 				Type:    models.ReferenceTypeProduct,
 			},
 			expectedPath: "products\\puml\\auth-service-2.1.0\\auth-service-2.1.0.puml",
-		},
-		{
-			name: "nested reference path building in-progress",
-			diagram: &models.StateMachineDiagram{
-				Name:     "main-diag",
-				Version:  "3.0.0",
-				Location: models.LocationInProgress,
-			},
-			reference: models.Reference{
-				Name: "sub-component",
-				Type: models.ReferenceTypeNested,
-			},
-			expectedPath: "in-progress\\puml\\main-diag-3.0.0\\nested\\sub-component\\sub-component.puml",
-		},
-		{
-			name: "nested reference path building products",
-			diagram: &models.StateMachineDiagram{
-				Name:     "prod-diag",
-				Version:  "1.5.0",
-				Location: models.LocationProducts,
-			},
-			reference: models.Reference{
-				Name: "helper",
-				Type: models.ReferenceTypeNested,
-			},
-			expectedPath: "products\\puml\\prod-diag-1.5.0\\nested\\helper\\helper.puml",
 		},
 	}
 

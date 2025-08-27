@@ -15,9 +15,6 @@ const (
 
 	// PlantUMLExtension is the file extension for PlantUML files
 	PlantUMLExtension = ".puml"
-
-	// NestedDirectoryName is the subdirectory name for nested state-machine diagrams
-	NestedDirectoryName = "nested"
 )
 
 // PathManager provides utilities for managing directory paths and file names
@@ -59,59 +56,25 @@ func (pm *PathManager) GetLocationWithDiagramTypePath(location Location, diagram
 // GetStateMachineDirectoryPath returns the directory path for a state-machine diagram
 func (pm *PathManager) GetStateMachineDirectoryPath(name, version string, location Location) string {
 	locationPath := pm.GetLocationPath(location)
-	if location == LocationNested {
-		// Nested state-machine diagrams don't include version in directory name
-		return filepath.Join(locationPath, name)
-	}
 	return filepath.Join(locationPath, fmt.Sprintf("%s-%s", name, version))
 }
 
 // GetStateMachineDirectoryPathWithDiagramType returns the directory path for a state-machine diagram with diagram type
 func (pm *PathManager) GetStateMachineDirectoryPathWithDiagramType(name, version string, location Location, diagramType smmodels.DiagramType) string {
 	locationPath := pm.GetLocationWithDiagramTypePath(location, diagramType)
-	if location == LocationNested {
-		// Nested state-machine diagrams don't include version in directory name
-		return filepath.Join(locationPath, name)
-	}
 	return filepath.Join(locationPath, fmt.Sprintf("%s-%s", name, version))
 }
 
 // GetStateMachineFilePath returns the full file path for a state-machine diagram
 func (pm *PathManager) GetStateMachineFilePath(name, version string, location Location) string {
 	dirPath := pm.GetStateMachineDirectoryPath(name, version, location)
-	if location == LocationNested {
-		// Nested state-machine diagrams don't include version in filename
-		return filepath.Join(dirPath, name+PlantUMLExtension)
-	}
 	return filepath.Join(dirPath, fmt.Sprintf("%s-%s%s", name, version, PlantUMLExtension))
 }
 
 // GetDiagramFilePathWithDiagramType returns the full file path for a state-machine diagram with diagram type
 func (pm *PathManager) GetDiagramFilePathWithDiagramType(name, version string, location Location, diagramType smmodels.DiagramType) string {
 	dirPath := pm.GetStateMachineDirectoryPathWithDiagramType(name, version, location, diagramType)
-	if location == LocationNested {
-		// Nested state-machine diagrams don't include version in filename
-		return filepath.Join(dirPath, name+PlantUMLExtension)
-	}
 	return filepath.Join(dirPath, fmt.Sprintf("%s-%s%s", name, version, PlantUMLExtension))
-}
-
-// GetNestedDirectoryPath returns the path for nested state-machine diagrams within a parent
-func (pm *PathManager) GetNestedDirectoryPath(parentName, parentVersion string, parentLocation Location) string {
-	parentDir := pm.GetStateMachineDirectoryPath(parentName, parentVersion, parentLocation)
-	return filepath.Join(parentDir, NestedDirectoryName)
-}
-
-// GetNestedStateMachineDirectoryPath returns the directory path for a nested state-machine diagram
-func (pm *PathManager) GetNestedStateMachineDirectoryPath(parentName, parentVersion string, parentLocation Location, nestedName string) string {
-	nestedDir := pm.GetNestedDirectoryPath(parentName, parentVersion, parentLocation)
-	return filepath.Join(nestedDir, nestedName)
-}
-
-// GetNestedStateMachineFilePath returns the file path for a nested state-machine diagram
-func (pm *PathManager) GetNestedStateMachineFilePath(parentName, parentVersion string, parentLocation Location, nestedName string) string {
-	nestedDir := pm.GetNestedStateMachineDirectoryPath(parentName, parentVersion, parentLocation, nestedName)
-	return filepath.Join(nestedDir, nestedName+PlantUMLExtension)
 }
 
 // PathInfo contains parsed information from a path
@@ -119,8 +82,6 @@ type PathInfo struct {
 	Name     string
 	Version  string
 	Location Location
-	IsNested bool
-	Parent   *PathInfo // For nested state-machine diagrams
 }
 
 // ValidatePath validates a path to prevent directory traversal attacks
@@ -205,13 +166,11 @@ func (pm *PathManager) ParseDirectoryName(dirName string) (*PathInfo, error) {
 		return nil, NewStateMachineError(ErrorTypeValidation, "directory name cannot be empty", nil)
 	}
 
-	// Check if it's a nested directory (no version)
+	// All directories must have version format (name-version)
 	if !strings.Contains(dirName, "-") {
-		return &PathInfo{
-			Name:     dirName,
-			Version:  "",
-			IsNested: true,
-		}, nil
+		return nil, NewStateMachineError(ErrorTypeValidation, "invalid directory name format", nil).
+			WithContext("dirName", dirName).
+			WithContext("expectedFormat", "name-version")
 	}
 
 	// Try to find a valid version by working backwards through possible splits
@@ -235,19 +194,16 @@ func (pm *PathManager) ParseDirectoryName(dirName string) (*PathInfo, error) {
 			}
 
 			return &PathInfo{
-				Name:     name,
-				Version:  version,
-				IsNested: false,
+				Name:    name,
+				Version: version,
 			}, nil
 		}
 	}
 
-	// No valid version found, treat as nested (no version)
-	return &PathInfo{
-		Name:     dirName,
-		Version:  "",
-		IsNested: true,
-	}, nil
+	// No valid version found
+	return nil, NewStateMachineError(ErrorTypeValidation, "invalid directory name format", nil).
+		WithContext("dirName", dirName).
+		WithContext("expectedFormat", "name-version")
 }
 
 // ParseFileName parses a PlantUML file name to extract name and version
@@ -265,13 +221,11 @@ func (pm *PathManager) ParseFileName(fileName string) (*PathInfo, error) {
 
 	baseName := strings.TrimSuffix(fileName, PlantUMLExtension)
 
-	// Check if it's a nested file (no version)
+	// All files must have version format (name-version)
 	if !strings.Contains(baseName, "-") {
-		return &PathInfo{
-			Name:     baseName,
-			Version:  "",
-			IsNested: true,
-		}, nil
+		return nil, NewStateMachineError(ErrorTypeValidation, "invalid file name format", nil).
+			WithContext("fileName", fileName).
+			WithContext("expectedFormat", "name-version.puml")
 	}
 
 	// Try to find a valid version by working backwards through possible splits
@@ -295,19 +249,16 @@ func (pm *PathManager) ParseFileName(fileName string) (*PathInfo, error) {
 			}
 
 			return &PathInfo{
-				Name:     name,
-				Version:  version,
-				IsNested: false,
+				Name:    name,
+				Version: version,
 			}, nil
 		}
 	}
 
-	// No valid version found, treat as nested (no version)
-	return &PathInfo{
-		Name:     baseName,
-		Version:  "",
-		IsNested: true,
-	}, nil
+	// No valid version found
+	return nil, NewStateMachineError(ErrorTypeValidation, "invalid file name format", nil).
+		WithContext("fileName", fileName).
+		WithContext("expectedFormat", "name-version.puml")
 }
 
 // ParseFullPath parses a full path to extract location and path information
@@ -358,25 +309,6 @@ func (pm *PathManager) ParseFullPath(fullPath string) (*PathInfo, error) {
 	}
 
 	pathInfo.Location = location
-
-	// Check if this is a nested state-machine diagram path
-	if len(pathParts) > 3 && pathParts[2] == NestedDirectoryName {
-		// This is a nested state-machine diagram
-		if len(pathParts) < 4 {
-			return nil, NewStateMachineError(ErrorTypeValidation, "missing nested state-machine diagram directory", nil).
-				WithContext("path", fullPath)
-		}
-
-		nestedInfo := &PathInfo{
-			Name:     pathParts[3],
-			Version:  "",
-			Location: LocationNested,
-			IsNested: true,
-			Parent:   pathInfo,
-		}
-
-		return nestedInfo, nil
-	}
 
 	return pathInfo, nil
 }

@@ -56,14 +56,8 @@ var referencedFixtures = []TestFixture{
 	{
 		Name:     "main-workflow",
 		Version:  "1.0.0",
-		Content:  "@startuml\n!include products/user-auth-1.0.0/user-auth-1.0.0.puml\n!include nested/validation/validation.puml\n[*] --> Start\nStart --> UserAuth\nUserAuth --> Validation\nValidation --> [*]\n@enduml",
+		Content:  "@startuml\n!include products/user-auth-1.0.0/user-auth-1.0.0.puml\n[*] --> Start\nStart --> UserAuth\nUserAuth --> [*]\n@enduml",
 		Location: models.LocationInProgress,
-	},
-	{
-		Name:     "validation",
-		Version:  "",
-		Content:  "@startuml\n[*] --> ValidateInput\nValidateInput --> Valid : success\nValidateInput --> Invalid : failure\nInvalid --> [*]\nValid --> [*]\n@enduml",
-		Location: models.LocationNested,
 	},
 }
 
@@ -677,13 +671,9 @@ func TestReferenceResolutionWorkflow(t *testing.T) {
 
 		// Check for the product reference
 		foundProductRef := false
-		foundNestedRef := false
 		for _, ref := range diagram.References {
 			if ref.Type == models.ReferenceTypeProduct && ref.Name == "user-auth" && ref.Version == "1.0.0" {
 				foundProductRef = true
-			}
-			if ref.Type == models.ReferenceTypeNested && ref.Name == "validation" {
-				foundNestedRef = true
 			}
 		}
 
@@ -691,48 +681,24 @@ func TestReferenceResolutionWorkflow(t *testing.T) {
 			t.Errorf("Expected to find product reference to user-auth-1.0.0")
 		}
 
-		if !foundNestedRef {
-			t.Errorf("Expected to find nested reference to validation")
-		}
-
-		// The resolution should fail due to the missing nested reference
+		// The resolution should succeed since we only have a valid product reference
 		if err != nil {
-			// This is expected due to the missing nested reference
-			t.Logf("Reference resolution failed as expected: %v", err)
-
-			// Verify it's the expected error type
-			if diagErr, ok := err.(*models.StateMachineError); ok {
-				if diagErr.Type != models.ErrorTypeReferenceResolution {
-					t.Errorf("Expected ErrorTypeReferenceResolution, got %v", diagErr.Type)
-				}
-			} else {
-				t.Errorf("Expected StateMachineError, got %T", err)
-			}
+			t.Errorf("Reference resolution should succeed, but got error: %v", err)
 		} else {
-			t.Errorf("Expected reference resolution to fail due to missing nested reference")
+			t.Logf("Reference resolution succeeded as expected")
 		}
 	})
 
 	t.Run("Test validation with references", func(t *testing.T) {
-		// Validate the main workflow - should have warnings about unresolved nested reference
+		// Validate the main workflow - should pass since we only have valid product references
 		result, err := svc.Validate(smmodels.DiagramTypePUML, "main-workflow", "1.0.0", models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to validate main-workflow: %v", err)
 		}
 
-		// The validation should pass structurally but may have warnings about references
-		if !result.IsValid && len(result.Errors) > 0 {
-			// Check if errors are only about references
-			hasNonReferenceErrors := false
-			for _, err := range result.Errors {
-				if err.Code != "NESTED_REFERENCE_NOT_FOUND" && err.Code != "PRODUCT_REFERENCE_NOT_FOUND" {
-					hasNonReferenceErrors = true
-					break
-				}
-			}
-			if hasNonReferenceErrors {
-				t.Errorf("Validation should only fail on reference resolution, but found other errors: %v", result.Errors)
-			}
+		// The validation should pass since all references are valid
+		if !result.IsValid {
+			t.Errorf("Validation should pass with valid product references. Errors: %v", result.Errors)
 		}
 	})
 }

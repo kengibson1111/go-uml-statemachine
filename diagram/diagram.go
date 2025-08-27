@@ -53,16 +53,10 @@
 //	.go-uml-statemachine-parsers/
 //	├── in-progress/
 //	│   └── {name}-{version}/
-//	│       ├── {name}-{version}.puml
-//	│       └── nested/
-//	│           └── {nested-name}/
-//	│               └── {nested-name}.puml
+//	│       └── {name}-{version}.puml
 //	└── products/
 //	    └── {name}-{version}/
-//	        ├── {name}-{version}.puml
-//	        └── nested/
-//	            └── {nested-name}/
-//	                └── {nested-name}.puml
+//	        └── {name}-{version}.puml
 //
 // # Configuration
 //
@@ -93,8 +87,6 @@ const (
 	LocationInProgress = models.LocationInProgress
 	// LocationProducts indicates the state-machine diagram is production-ready.
 	LocationProducts = models.LocationProducts
-	// LocationNested indicates the state-machine diagram is nested within another state-machine diagram.
-	LocationNested = models.LocationNested
 )
 
 // ReferenceType indicates the type of reference between state-machine diagrams.
@@ -104,8 +96,6 @@ type ReferenceType = models.ReferenceType
 const (
 	// ReferenceTypeProduct indicates a reference to a state-machine diagram in the products directory.
 	ReferenceTypeProduct = models.ReferenceTypeProduct
-	// ReferenceTypeNested indicates a reference to a nested state-machine diagram within the same parent.
-	ReferenceTypeNested = models.ReferenceTypeNested
 )
 
 // ValidationStrictness defines the level of validation strictness.

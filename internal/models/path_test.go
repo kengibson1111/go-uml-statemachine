@@ -93,13 +93,6 @@ func TestPathManager_GetStateMachineDirectoryPath(t *testing.T) {
 			location: LocationProducts,
 			expected: filepath.Join(RootDirectoryName, "products", "payment-flow-2.1.0"),
 		},
-		{
-			name:     "nested state-machine diagram",
-			diagName: "child-diagram",
-			version:  "1.0.0",
-			location: LocationNested,
-			expected: filepath.Join(RootDirectoryName, "child-diagram"),
-		},
 	}
 
 	for _, tt := range tests {
@@ -136,13 +129,6 @@ func TestPathManager_GetStateMachineFilePath(t *testing.T) {
 			location: LocationProducts,
 			expected: filepath.Join(RootDirectoryName, "products", "payment-flow-2.1.0", "payment-flow-2.1.0.puml"),
 		},
-		{
-			name:     "nested state-machine diagram file",
-			diagName: "child-diagram",
-			version:  "1.0.0",
-			location: LocationNested,
-			expected: filepath.Join(RootDirectoryName, "child-diagram", "child-diagram.puml"),
-		},
 	}
 
 	for _, tt := range tests {
@@ -155,33 +141,6 @@ func TestPathManager_GetStateMachineFilePath(t *testing.T) {
 	}
 }
 
-func TestPathManager_GetNestedPaths(t *testing.T) {
-	pm := NewPathManager("")
-
-	t.Run("nested directory path", func(t *testing.T) {
-		expected := filepath.Join(RootDirectoryName, "in-progress", "parent-1.0.0", "nested")
-		result := pm.GetNestedDirectoryPath("parent", "1.0.0", LocationInProgress)
-		if result != expected {
-			t.Errorf("GetNestedDirectoryPath() = %v, want %v", result, expected)
-		}
-	})
-
-	t.Run("nested state-machine diagram directory path", func(t *testing.T) {
-		expected := filepath.Join(RootDirectoryName, "in-progress", "parent-1.0.0", "nested", "child")
-		result := pm.GetNestedStateMachineDirectoryPath("parent", "1.0.0", LocationInProgress, "child")
-		if result != expected {
-			t.Errorf("GetNestedStateMachineDirectoryPath() = %v, want %v", result, expected)
-		}
-	})
-
-	t.Run("nested state-machine diagram file path", func(t *testing.T) {
-		expected := filepath.Join(RootDirectoryName, "in-progress", "parent-1.0.0", "nested", "child", "child.puml")
-		result := pm.GetNestedStateMachineFilePath("parent", "1.0.0", LocationInProgress, "child")
-		if result != expected {
-			t.Errorf("GetNestedStateMachineFilePath() = %v, want %v", result, expected)
-		}
-	})
-}
 func TestPathManager_ValidatePath(t *testing.T) {
 	pm := NewPathManager("test-root")
 
@@ -341,29 +300,18 @@ func TestPathManager_ParseDirectoryName(t *testing.T) {
 			name:    "valid versioned directory",
 			dirName: "user-auth-1.0.0",
 			want: &PathInfo{
-				Name:     "user-auth",
-				Version:  "1.0.0",
-				IsNested: false,
+				Name:    "user-auth",
+				Version: "1.0.0",
 			},
 			wantError: false,
 		},
-		{
-			name:    "valid nested directory",
-			dirName: "child-diagram",
-			want: &PathInfo{
-				Name:     "child-diagram",
-				Version:  "",
-				IsNested: true,
-			},
-			wantError: false,
-		},
+
 		{
 			name:    "complex name with hyphens",
 			dirName: "user-auth-system-1.2.3",
 			want: &PathInfo{
-				Name:     "user-auth-system",
-				Version:  "1.2.3",
-				IsNested: false,
+				Name:    "user-auth-system",
+				Version: "1.2.3",
 			},
 			wantError: false,
 		},
@@ -375,14 +323,11 @@ func TestPathManager_ParseDirectoryName(t *testing.T) {
 			errorType: ErrorTypeValidation,
 		},
 		{
-			name:    "invalid version treated as nested",
-			dirName: "user-auth-invalid-version",
-			want: &PathInfo{
-				Name:     "user-auth-invalid-version",
-				Version:  "",
-				IsNested: true,
-			},
-			wantError: false,
+			name:      "invalid version format",
+			dirName:   "user-auth-invalid-version",
+			want:      nil,
+			wantError: true,
+			errorType: ErrorTypeValidation,
 		},
 	}
 
@@ -415,9 +360,7 @@ func TestPathManager_ParseDirectoryName(t *testing.T) {
 			if got.Version != tt.want.Version {
 				t.Errorf("ParseDirectoryName() version = %v, want %v", got.Version, tt.want.Version)
 			}
-			if got.IsNested != tt.want.IsNested {
-				t.Errorf("ParseDirectoryName() isNested = %v, want %v", got.IsNested, tt.want.IsNested)
-			}
+
 		})
 	}
 }
@@ -436,29 +379,18 @@ func TestPathManager_ParseFileName(t *testing.T) {
 			name:     "valid versioned file",
 			fileName: "user-auth-1.0.0.puml",
 			want: &PathInfo{
-				Name:     "user-auth",
-				Version:  "1.0.0",
-				IsNested: false,
+				Name:    "user-auth",
+				Version: "1.0.0",
 			},
 			wantError: false,
 		},
-		{
-			name:     "valid nested file",
-			fileName: "child-diagram.puml",
-			want: &PathInfo{
-				Name:     "child-diagram",
-				Version:  "",
-				IsNested: true,
-			},
-			wantError: false,
-		},
+
 		{
 			name:     "complex name with hyphens",
 			fileName: "user-auth-system-1.2.3.puml",
 			want: &PathInfo{
-				Name:     "user-auth-system",
-				Version:  "1.2.3",
-				IsNested: false,
+				Name:    "user-auth-system",
+				Version: "1.2.3",
 			},
 			wantError: false,
 		},
@@ -477,14 +409,11 @@ func TestPathManager_ParseFileName(t *testing.T) {
 			errorType: ErrorTypeValidation,
 		},
 		{
-			name:     "invalid version treated as nested",
-			fileName: "user-auth-invalid-version.puml",
-			want: &PathInfo{
-				Name:     "user-auth-invalid-version",
-				Version:  "",
-				IsNested: true,
-			},
-			wantError: false,
+			name:      "invalid version format",
+			fileName:  "user-auth-invalid-version.puml",
+			want:      nil,
+			wantError: true,
+			errorType: ErrorTypeValidation,
 		},
 	}
 
@@ -517,9 +446,7 @@ func TestPathManager_ParseFileName(t *testing.T) {
 			if got.Version != tt.want.Version {
 				t.Errorf("ParseFileName() version = %v, want %v", got.Version, tt.want.Version)
 			}
-			if got.IsNested != tt.want.IsNested {
-				t.Errorf("ParseFileName() isNested = %v, want %v", got.IsNested, tt.want.IsNested)
-			}
+
 		})
 	}
 }
@@ -541,7 +468,6 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 				Name:     "user-auth",
 				Version:  "1.0.0",
 				Location: LocationInProgress,
-				IsNested: false,
 			},
 			wantError: false,
 		},
@@ -552,27 +478,10 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 				Name:     "payment-flow",
 				Version:  "2.1.0",
 				Location: LocationProducts,
-				IsNested: false,
 			},
 			wantError: false,
 		},
-		{
-			name:     "valid nested path",
-			fullPath: filepath.Join("test-root", "in-progress", "parent-1.0.0", "nested", "child"),
-			want: &PathInfo{
-				Name:     "child",
-				Version:  "",
-				Location: LocationNested,
-				IsNested: true,
-				Parent: &PathInfo{
-					Name:     "parent",
-					Version:  "1.0.0",
-					Location: LocationInProgress,
-					IsNested: false,
-				},
-			},
-			wantError: false,
-		},
+
 		{
 			name:      "invalid location",
 			fullPath:  filepath.Join("test-root", "invalid-location", "user-auth-1.0.0"),
@@ -621,26 +530,7 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 			if got.Location != tt.want.Location {
 				t.Errorf("ParseFullPath() location = %v, want %v", got.Location, tt.want.Location)
 			}
-			if got.IsNested != tt.want.IsNested {
-				t.Errorf("ParseFullPath() isNested = %v, want %v", got.IsNested, tt.want.IsNested)
-			}
 
-			// Check parent information for nested paths
-			if tt.want.Parent != nil {
-				if got.Parent == nil {
-					t.Errorf("ParseFullPath() expected parent but got none")
-					return
-				}
-				if got.Parent.Name != tt.want.Parent.Name {
-					t.Errorf("ParseFullPath() parent name = %v, want %v", got.Parent.Name, tt.want.Parent.Name)
-				}
-				if got.Parent.Version != tt.want.Parent.Version {
-					t.Errorf("ParseFullPath() parent version = %v, want %v", got.Parent.Version, tt.want.Parent.Version)
-				}
-				if got.Parent.Location != tt.want.Parent.Location {
-					t.Errorf("ParseFullPath() parent location = %v, want %v", got.Parent.Location, tt.want.Parent.Location)
-				}
-			}
 		})
 	}
 }

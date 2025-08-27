@@ -39,7 +39,6 @@ type Location int
 const (
     LocationInProgress Location = iota // Development/testing phase
     LocationProducts                   // Production-ready
-    LocationNested                     // Nested within a state-machine diagram
 )
 ```
 
@@ -50,7 +49,7 @@ Represents a reference to another state-machine diagram.
 ```go
 type Reference struct {
     Name    string        // Referenced state-machine diagram name
-    Version string        // Version (empty for nested references)
+    Version string        // Version (required for product references)
     Type    ReferenceType // Type of reference
     Path    string        // Resolved file path
 }
@@ -65,7 +64,6 @@ type ReferenceType int
 
 const (
     ReferenceTypeProduct ReferenceType = iota // Reference to products directory
-    ReferenceTypeNested                       // Reference to nested state-machine diagram
 )
 ```
 

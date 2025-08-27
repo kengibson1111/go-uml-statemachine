@@ -442,16 +442,9 @@ func TestConstants(t *testing.T) {
 	if LocationProducts != 1 {
 		t.Errorf("LocationProducts = %d, want 1", LocationProducts)
 	}
-	if LocationNested != 2 {
-		t.Errorf("LocationNested = %d, want 2", LocationNested)
-	}
-
 	// Test ReferenceType constants
 	if ReferenceTypeProduct != 0 {
 		t.Errorf("ReferenceTypeProduct = %d, want 0", ReferenceTypeProduct)
-	}
-	if ReferenceTypeNested != 1 {
-		t.Errorf("ReferenceTypeNested = %d, want 1", ReferenceTypeNested)
 	}
 
 	// Test ValidationStrictness constants

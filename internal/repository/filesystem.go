@@ -76,8 +76,8 @@ func (r *FileSystemRepository) ReadDiagram(diagramType smmodels.DiagramType, nam
 		return nil, wrappedErr
 	}
 
-	if location != models.LocationNested && version == "" {
-		err := models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state-machine diagrams", nil).
+	if version == "" {
+		err := models.NewStateMachineError(models.ErrorTypeValidation, "version is required for all state-machine diagrams", nil).
 			WithContext("name", name).
 			WithContext("location", location.String()).
 			WithOperation("ReadStateMachine").
@@ -193,8 +193,8 @@ func (r *FileSystemRepository) WriteDiagram(diag *models.StateMachineDiagram) er
 		return err
 	}
 
-	if diag.Location != models.LocationNested && diag.Version == "" {
-		return models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state-machine diagrams", nil).
+	if diag.Version == "" {
+		return models.NewStateMachineError(models.ErrorTypeValidation, "version is required for all state-machine diagrams", nil).
 			WithContext("name", diag.Name).
 			WithContext("location", diag.Location.String())
 	}
@@ -231,8 +231,8 @@ func (r *FileSystemRepository) Exists(diagramType smmodels.DiagramType, name, ve
 		return false, err
 	}
 
-	if location != models.LocationNested && version == "" {
-		return false, models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state-machine diagrams", nil).
+	if version == "" {
+		return false, models.NewStateMachineError(models.ErrorTypeValidation, "version is required for all state-machine diagrams", nil).
 			WithContext("name", name).
 			WithContext("location", location.String())
 	}
@@ -369,8 +369,8 @@ func (r *FileSystemRepository) DeleteDiagram(diagramType smmodels.DiagramType, n
 		return err
 	}
 
-	if location != models.LocationNested && version == "" {
-		return models.NewStateMachineError(models.ErrorTypeValidation, "version is required for non-nested state-machine diagrams", nil).
+	if version == "" {
+		return models.NewStateMachineError(models.ErrorTypeValidation, "version is required for all state-machine diagrams", nil).
 			WithContext("name", name).
 			WithContext("location", location.String())
 	}
@@ -434,11 +434,6 @@ func (r *FileSystemRepository) ListStateMachines(diagramType smmodels.DiagramTyp
 		pathInfo, err := r.pathManager.ParseDirectoryName(entry.Name())
 		if err != nil {
 			// Skip directories that don't match our naming convention
-			continue
-		}
-
-		// Skip nested directories (they should be handled separately)
-		if pathInfo.IsNested {
 			continue
 		}
 

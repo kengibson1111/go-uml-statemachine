@@ -66,17 +66,11 @@ The module organizes state-machine diagrams in a standardized directory structur
 ├── in-progress\
 │   └── puml\
 │       └── {name}-{version}\
-│           ├── {name}-{version}.puml
-│           └── nested\
-│               └── {nested-name}\
-│                   └── {nested-name}.puml
+│           └── {name}-{version}.puml
 └── products\
     └── puml\
         └── {name}-{version}\
-            ├── {name}-{version}.puml
-            └── nested\
-                └── {nested-name}\
-                    └── {nested-name}.puml
+            └── {name}-{version}.puml
 ```
 
 **Linux/macOS:**
@@ -86,17 +80,11 @@ The module organizes state-machine diagrams in a standardized directory structur
 ├── in-progress/
 │   └── puml/
 │       └── {name}-{version}/
-│           ├── {name}-{version}.puml
-│           └── nested/
-│               └── {nested-name}/
-│                   └── {nested-name}.puml
+│           └── {name}-{version}.puml
 └── products/
     └── puml/
         └── {name}-{version}/
-            ├── {name}-{version}.puml
-            └── nested/
-                └── {nested-name}/
-                    └── {nested-name}.puml
+            └── {name}-{version}.puml
 ```
 
 ## Configuration
@@ -249,30 +237,6 @@ base-auth --> TwoFactor : success
 
 [*] --> base-auth
 base-auth --> TwoFactor : success
-@enduml
-```
-
-### Nested References
-
-Reference state-machine diagrams within the same parent directory:
-
-**Windows:**
-
-```plantuml
-@startuml
-!include nested\sub-process\sub-process.puml
-
-[*] --> sub-process
-@enduml
-```
-
-**Linux/macOS:**
-
-```plantuml
-@startuml
-!include nested/sub-process/sub-process.puml
-
-[*] --> sub-process
 @enduml
 ```
 
@@ -696,7 +660,7 @@ type ValidationResult struct {
 - **Reference Resolution Errors**
   - Verify referenced state-machine diagrams exist in the expected locations
   - Check that product references use correct version numbers
-  - Ensure nested references are in the correct directory structure
+
 
 - **Promotion Failures**
   - Validate the state-machine diagram passes all validation checks

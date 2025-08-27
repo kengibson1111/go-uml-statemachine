@@ -484,7 +484,6 @@ ResolveReferences(diag *StateMachineDiagram) error
 
 **Reference Types:**
 - **Product References**: References to state-machine diagrams in products directory
-- **Nested References**: References to nested state-machine diagrams within same parent
 
 **Example:**
 ```go

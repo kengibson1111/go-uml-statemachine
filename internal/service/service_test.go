@@ -1352,7 +1352,7 @@ func TestService_ListAllFiles(t *testing.T) {
 			name:     "successful list in-progress",
 			inputLoc: models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.listStateMachinesFunc = func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
+				repo.listDiagramsFunc = func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 					return []models.StateMachineDiagram{
 						{
 							Name:     "diag1",
@@ -1376,7 +1376,7 @@ func TestService_ListAllFiles(t *testing.T) {
 			name:     "successful list products",
 			inputLoc: models.LocationProducts,
 			setupMock: func(repo *mockRepository) {
-				repo.listStateMachinesFunc = func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
+				repo.listDiagramsFunc = func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 					return []models.StateMachineDiagram{
 						{
 							Name:     "prod-diag",
@@ -1394,7 +1394,7 @@ func TestService_ListAllFiles(t *testing.T) {
 			name:     "empty list",
 			inputLoc: models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.listStateMachinesFunc = func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
+				repo.listDiagramsFunc = func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 					return []models.StateMachineDiagram{}, nil
 				}
 			},
@@ -1405,7 +1405,7 @@ func TestService_ListAllFiles(t *testing.T) {
 			name:     "repository error",
 			inputLoc: models.LocationInProgress,
 			setupMock: func(repo *mockRepository) {
-				repo.listStateMachinesFunc = func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
+				repo.listDiagramsFunc = func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 					return nil, errors.New("directory read error")
 				}
 			},

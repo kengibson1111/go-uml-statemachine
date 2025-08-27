@@ -755,7 +755,7 @@ func TestFileSystemRepository_DeleteDiagram(t *testing.T) {
 	}
 }
 
-func TestFileSystemRepository_ListStateMachines(t *testing.T) {
+func TestFileSystemRepository_ListDiagrams(t *testing.T) {
 	th := NewTestHelper(t)
 	defer th.Cleanup()
 
@@ -802,7 +802,7 @@ func TestFileSystemRepository_ListStateMachines(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			diagrams, err := th.repo.ListStateMachines(smmodels.DiagramTypePUML, tt.location)
+			diagrams, err := th.repo.ListDiagrams(smmodels.DiagramTypePUML, tt.location)
 
 			if tt.expectError {
 				if err == nil {
@@ -862,7 +862,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 4. List state-machine diagrams
-	diagrams, err := th.repo.ListStateMachines(smmodels.DiagramTypePUML, models.LocationInProgress)
+	diagrams, err := th.repo.ListDiagrams(smmodels.DiagramTypePUML, models.LocationInProgress)
 	if err != nil {
 		t.Fatalf("Failed to list state-machine diagrams: %v", err)
 	}

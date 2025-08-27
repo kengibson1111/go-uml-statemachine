@@ -6,7 +6,7 @@ import smmodels "github.com/kengibson1111/go-uml-statemachine-models/models"
 type Repository interface {
 	// Read operations
 	ReadDiagram(diagramType smmodels.DiagramType, name, version string, location Location) (*StateMachineDiagram, error)
-	ListStateMachines(diagramType smmodels.DiagramType, location Location) ([]StateMachineDiagram, error)
+	ListDiagrams(diagramType smmodels.DiagramType, location Location) ([]StateMachineDiagram, error)
 	Exists(diagramType smmodels.DiagramType, name, version string, location Location) (bool, error)
 
 	// Write operations

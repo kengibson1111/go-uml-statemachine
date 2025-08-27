@@ -394,8 +394,8 @@ func (r *FileSystemRepository) DeleteDiagram(diagramType smmodels.DiagramType, n
 	return nil
 }
 
-// ListStateMachines lists all state-machine diagrams in a location
-func (r *FileSystemRepository) ListStateMachines(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
+// ListDiagrams lists all state-machine diagrams in a location
+func (r *FileSystemRepository) ListDiagrams(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 	// Get the location path
 	locationPath := r.pathManager.GetLocationWithDiagramTypePath(location, diagramType)
 

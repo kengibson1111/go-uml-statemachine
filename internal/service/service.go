@@ -561,7 +561,7 @@ func (s *service) ListAllFiles(diagramType smmodels.DiagramType, location models
 	defer s.mu.RUnlock()
 
 	// Use the repository to list all state-machine diagrams in the specified location
-	diagrams, err := s.repo.ListStateMachines(diagramType, location)
+	diagrams, err := s.repo.ListDiagrams(diagramType, location)
 	if err != nil {
 		return nil, models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to list state-machine diagrams", err).

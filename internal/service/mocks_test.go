@@ -8,7 +8,7 @@ import (
 // mockRepository is a mock implementation of the Repository interface for testing
 type mockRepository struct {
 	readStateMachineFunc   func(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error)
-	listStateMachinesFunc  func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error)
+	listDiagramsFunc       func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error)
 	existsFunc             func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error)
 	writeStateMachineFunc  func(diag *models.StateMachineDiagram) error
 	moveStateMachineFunc   func(diagramType smmodels.DiagramType, name, version string, from, to models.Location) error
@@ -24,9 +24,9 @@ func (m *mockRepository) ReadDiagram(diagramType smmodels.DiagramType, name, ver
 	return nil, nil
 }
 
-func (m *mockRepository) ListStateMachines(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
-	if m.listStateMachinesFunc != nil {
-		return m.listStateMachinesFunc(diagramType, location)
+func (m *mockRepository) ListDiagrams(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
+	if m.listDiagramsFunc != nil {
+		return m.listDiagramsFunc(diagramType, location)
 	}
 	return nil, nil
 }

@@ -65,7 +65,7 @@ func (m *MockErrorRepository) DeleteDiagram(diagramType smmodels.DiagramType, na
 	return nil
 }
 
-func (m *MockErrorRepository) ListStateMachines(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
+func (m *MockErrorRepository) ListDiagrams(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 	if m.shouldFailList {
 		return nil, errors.New("mock list error")
 	}

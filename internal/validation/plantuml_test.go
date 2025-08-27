@@ -483,7 +483,7 @@ func (m *MockRepository) Exists(diagramType smmodels.DiagramType, name, version 
 }
 
 // Implement other Repository methods as no-ops for testing
-func (m *MockRepository) ListStateMachines(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
+func (m *MockRepository) ListDiagrams(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 	return nil, nil
 }
 func (m *MockRepository) WriteDiagram(diag *models.StateMachineDiagram) error { return nil }

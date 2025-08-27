@@ -286,7 +286,7 @@ Authenticated --> [*]
 	fmt.Printf("✓ Created complex system: %s-%s\n", complexDiag.Name, complexDiag.Version)
 
 	// Resolve references in the complex system
-	err = svc.ResolveReferences(complexDiag)
+	err = svc.ResolveFileReferences(complexDiag)
 	if err != nil {
 		log.Printf("Error resolving references: %v", err)
 	} else {

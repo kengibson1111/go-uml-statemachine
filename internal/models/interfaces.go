@@ -39,5 +39,5 @@ type DiagramService interface {
 	ListAllFiles(diagramType smmodels.DiagramType, location Location) ([]StateMachineDiagram, error)
 
 	// Reference operations
-	ResolveReferences(diagram *StateMachineDiagram) error
+	ResolveFileReferences(diagram *StateMachineDiagram) error
 }

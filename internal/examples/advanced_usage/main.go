@@ -95,7 +95,7 @@ Failed --> RequireAuth : retry
 
 	// Example 3: Resolve references in the advanced auth system
 	fmt.Println("\n3. Resolving references...")
-	err = svc.ResolveReferences(advancedDiag)
+	err = svc.ResolveFileReferences(advancedDiag)
 	if err != nil {
 		log.Printf("Error resolving references: %v", err)
 	} else {

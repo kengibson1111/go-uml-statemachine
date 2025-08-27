@@ -129,7 +129,7 @@ type DiagramService interface {
     ListAllFiles(diagramType models.DiagramType, location Location) ([]diagram, error)
 
     // Reference operations
-    ResolveReferences(diagram *StateMachineDiagram) error
+    ResolveFileReferences(diagram *StateMachineDiagram) error
 }
 ```
 
@@ -466,12 +466,12 @@ for _, diag := range diagrams {
 
 ### Reference Operations
 
-#### ResolveReferences
+#### ResolveFileReferences
 
 Resolves all references in a state-machine diagram.
 
 ```go
-ResolveReferences(diag *StateMachineDiagram) error
+ResolveFileReferences(diag *StateMachineDiagram) error
 ```
 
 **Parameters:**
@@ -490,7 +490,7 @@ ResolveReferences(diag *StateMachineDiagram) error
 
 **Example:**
 ```go
-err := svc.ResolveReferences(diagram)
+err := svc.ResolveFileReferences(diagram)
 if err != nil {
     log.Fatal(err)
 }

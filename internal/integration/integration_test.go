@@ -657,7 +657,7 @@ func TestReferenceResolutionWorkflow(t *testing.T) {
 		}
 
 		// Try to resolve references - this will parse them first and then resolve
-		err = svc.ResolveReferences(diagram)
+		err = svc.ResolveFileReferences(diagram)
 
 		// Verify references were parsed (even if resolution failed)
 		if len(diagram.References) == 0 {

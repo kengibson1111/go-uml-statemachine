@@ -300,7 +300,7 @@ Authenticated --> [*]
 
 	// Resolve references
 	fmt.Println("Resolving references...")
-	err = svc.ResolveReferences(complexDiag)
+	err = svc.ResolveFileReferences(complexDiag)
 	if err != nil {
 		log.Printf("Error resolving references: %v", err)
 	} else {

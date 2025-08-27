@@ -1465,7 +1465,7 @@ func TestService_ListAllFiles(t *testing.T) {
 	}
 }
 
-func TestService_ResolveReferences(t *testing.T) {
+func TestService_ResolveFileReferences(t *testing.T) {
 	tests := []struct {
 		name        string
 		input       *models.StateMachineDiagram
@@ -1632,26 +1632,26 @@ func TestService_ResolveReferences(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			err := svc.ResolveReferences(tt.input)
+			err := svc.ResolveFileReferences(tt.input)
 
 			if tt.wantErr {
 				if err == nil {
-					t.Errorf("ResolveReferences() expected error but got none")
+					t.Errorf("ResolveFileReferences() expected error but got none")
 					return
 				}
 
 				var diagErr *models.StateMachineError
 				if !errors.As(err, &diagErr) {
-					t.Errorf("ResolveReferences() expected StateMachineError but got %T", err)
+					t.Errorf("ResolveFileReferences() expected StateMachineError but got %T", err)
 					return
 				}
 
 				if diagErr.Type != tt.wantErrType {
-					t.Errorf("ResolveReferences() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
+					t.Errorf("ResolveFileReferences() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
-					t.Errorf("ResolveReferences() unexpected error: %v", err)
+					t.Errorf("ResolveFileReferences() unexpected error: %v", err)
 					return
 				}
 
@@ -1659,17 +1659,17 @@ func TestService_ResolveReferences(t *testing.T) {
 				if tt.input != nil && len(tt.input.References) > 0 {
 					for _, ref := range tt.input.References {
 						if ref.Path == "" {
-							t.Errorf("ResolveReferences() reference path not set for %s", ref.Name)
+							t.Errorf("ResolveFileReferences() reference path not set for %s", ref.Name)
 						}
 
 						// Verify path format - should only be product references now
 						if ref.Type != models.ReferenceTypeProduct {
-							t.Errorf("ResolveReferences() should only handle product references, got %v", ref.Type)
+							t.Errorf("ResolveFileReferences() should only handle product references, got %v", ref.Type)
 						}
 
 						expectedPath := "products\\puml\\" + ref.Name + "-" + ref.Version + "\\" + ref.Name + "-" + ref.Version + ".puml"
 						if ref.Path != expectedPath {
-							t.Errorf("ResolveReferences() product reference path = %v, want %v", ref.Path, expectedPath)
+							t.Errorf("ResolveFileReferences() product reference path = %v, want %v", ref.Path, expectedPath)
 						}
 					}
 				}
@@ -1678,7 +1678,7 @@ func TestService_ResolveReferences(t *testing.T) {
 	}
 }
 
-func TestService_ResolveReferencesPathBuilding(t *testing.T) {
+func TestService_ResolveFileReferencesPathBuilding(t *testing.T) {
 	tests := []struct {
 		name         string
 		diagram      *models.StateMachineDiagram
@@ -1724,21 +1724,21 @@ func TestService_ResolveReferencesPathBuilding(t *testing.T) {
 				References: []models.Reference{tt.reference},
 			}
 
-			err := svc.ResolveReferences(diag)
+			err := svc.ResolveFileReferences(diag)
 
 			if err != nil {
-				t.Errorf("ResolveReferences() unexpected error: %v", err)
+				t.Errorf("ResolveFileReferences() unexpected error: %v", err)
 				return
 			}
 
 			if len(diag.References) != 1 {
-				t.Errorf("ResolveReferences() expected 1 reference but got %d", len(diag.References))
+				t.Errorf("ResolveFileReferences() expected 1 reference but got %d", len(diag.References))
 				return
 			}
 
 			actualPath := diag.References[0].Path
 			if actualPath != tt.expectedPath {
-				t.Errorf("ResolveReferences() path = %v, want %v", actualPath, tt.expectedPath)
+				t.Errorf("ResolveFileReferences() path = %v, want %v", actualPath, tt.expectedPath)
 			}
 		})
 	}

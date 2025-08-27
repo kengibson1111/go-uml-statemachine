@@ -245,7 +245,7 @@ base-auth --> TwoFactor : success
 ### Reference Resolution
 
 ```go
-err := svc.ResolveReferences(diagram)
+err := svc.ResolveFileReferences(diagram)
 if err != nil {
     log.Printf("Reference resolution failed: %v", err)
 }
@@ -601,7 +601,7 @@ type DiagramService interface {
     ListAllFiles(diagramType models.DiagramType, location Location) ([]diagram, error)
 
     // Reference operations
-    ResolveReferences(diagram *StateMachineDiagram) error
+    ResolveFileReferences(diagram *StateMachineDiagram) error
 }
 ```
 

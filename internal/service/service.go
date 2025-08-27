@@ -571,8 +571,8 @@ func (s *service) ListAllFiles(diagramType smmodels.DiagramType, location models
 	return diagrams, nil
 }
 
-// ResolveReferences resolves all references in a state-machine diagram
-func (s *service) ResolveReferences(diag *models.StateMachineDiagram) error {
+// ResolveFileReferences resolves all references in a state-machine diagram
+func (s *service) ResolveFileReferences(diag *models.StateMachineDiagram) error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 

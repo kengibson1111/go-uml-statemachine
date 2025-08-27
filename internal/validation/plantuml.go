@@ -180,8 +180,8 @@ func (v *PlantUMLValidator) isValidVersion(version string) bool {
 	return versionRegex.MatchString(version)
 }
 
-// ResolveReferences resolves and validates reference accessibility
-func (v *PlantUMLValidator) ResolveReferences(diag *models.StateMachineDiagram) (*models.ValidationResult, error) {
+// ResolveFileReferences resolves and validates reference accessibility
+func (v *PlantUMLValidator) ResolveFileReferences(diag *models.StateMachineDiagram) (*models.ValidationResult, error) {
 	result := &models.ValidationResult{
 		Errors:   []models.ValidationError{},
 		Warnings: []models.ValidationWarning{},

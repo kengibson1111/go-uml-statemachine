@@ -496,7 +496,7 @@ func (m *MockRepository) DeleteDiagram(diagramType smmodels.DiagramType, name, v
 func (m *MockRepository) CreateDirectory(path string) error         { return nil }
 func (m *MockRepository) DirectoryExists(path string) (bool, error) { return false, nil }
 
-func TestPlantUMLValidator_ResolveReferences_NoRepository(t *testing.T) {
+func TestPlantUMLValidator_ResolveFileReferences_NoRepository(t *testing.T) {
 	validator := NewPlantUMLValidator()
 
 	diag := &models.StateMachineDiagram{
@@ -508,13 +508,13 @@ func TestPlantUMLValidator_ResolveReferences_NoRepository(t *testing.T) {
 @enduml`,
 	}
 
-	result, err := validator.ResolveReferences(diag)
+	result, err := validator.ResolveFileReferences(diag)
 	if err != nil {
-		t.Fatalf("ResolveReferences() error = %v", err)
+		t.Fatalf("ResolveFileReferences() error = %v", err)
 	}
 
 	if !result.IsValid {
-		t.Error("ResolveReferences() should return valid result when no repository")
+		t.Error("ResolveFileReferences() should return valid result when no repository")
 	}
 
 	// Should have a warning about no repository
@@ -530,7 +530,7 @@ func TestPlantUMLValidator_ResolveReferences_NoRepository(t *testing.T) {
 	}
 }
 
-func TestPlantUMLValidator_ResolveReferences_ExistingReference(t *testing.T) {
+func TestPlantUMLValidator_ResolveFileReferences_ExistingReference(t *testing.T) {
 	mockRepo := NewMockRepository()
 	validator := NewPlantUMLValidatorWithRepository(mockRepo)
 
@@ -552,21 +552,21 @@ func TestPlantUMLValidator_ResolveReferences_ExistingReference(t *testing.T) {
 @enduml`,
 	}
 
-	result, err := validator.ResolveReferences(diag)
+	result, err := validator.ResolveFileReferences(diag)
 	if err != nil {
-		t.Fatalf("ResolveReferences() error = %v", err)
+		t.Fatalf("ResolveFileReferences() error = %v", err)
 	}
 
 	if !result.IsValid {
-		t.Error("ResolveReferences() should return valid result for existing reference")
+		t.Error("ResolveFileReferences() should return valid result for existing reference")
 	}
 
 	if len(result.Errors) != 0 {
-		t.Errorf("ResolveReferences() should return no errors, got %d", len(result.Errors))
+		t.Errorf("ResolveFileReferences() should return no errors, got %d", len(result.Errors))
 	}
 }
 
-func TestPlantUMLValidator_ResolveReferences_MissingReference(t *testing.T) {
+func TestPlantUMLValidator_ResolveFileReferences_MissingReference(t *testing.T) {
 	mockRepo := NewMockRepository()
 	validator := NewPlantUMLValidatorWithRepository(mockRepo)
 
@@ -579,13 +579,13 @@ func TestPlantUMLValidator_ResolveReferences_MissingReference(t *testing.T) {
 @enduml`,
 	}
 
-	result, err := validator.ResolveReferences(diag)
+	result, err := validator.ResolveFileReferences(diag)
 	if err != nil {
-		t.Fatalf("ResolveReferences() error = %v", err)
+		t.Fatalf("ResolveFileReferences() error = %v", err)
 	}
 
 	if result.IsValid {
-		t.Error("ResolveReferences() should return invalid result for missing reference")
+		t.Error("ResolveFileReferences() should return invalid result for missing reference")
 	}
 
 	// Check for specific error
@@ -601,7 +601,7 @@ func TestPlantUMLValidator_ResolveReferences_MissingReference(t *testing.T) {
 	}
 }
 
-func TestPlantUMLValidator_ResolveReferences_CircularReference(t *testing.T) {
+func TestPlantUMLValidator_ResolveFileReferences_CircularReference(t *testing.T) {
 	mockRepo := NewMockRepository()
 	validator := NewPlantUMLValidatorWithRepository(mockRepo)
 
@@ -629,13 +629,13 @@ func TestPlantUMLValidator_ResolveReferences_CircularReference(t *testing.T) {
 	mockRepo.AddStateMachine(diag1)
 	mockRepo.AddStateMachine(diag2)
 
-	result, err := validator.ResolveReferences(diag1)
+	result, err := validator.ResolveFileReferences(diag1)
 	if err != nil {
-		t.Fatalf("ResolveReferences() error = %v", err)
+		t.Fatalf("ResolveFileReferences() error = %v", err)
 	}
 
 	if result.IsValid {
-		t.Error("ResolveReferences() should return invalid result for circular reference")
+		t.Error("ResolveFileReferences() should return invalid result for circular reference")
 	}
 
 	// Check for circular reference error
@@ -894,15 +894,15 @@ func TestPlantUMLValidator_StrictnessWithCircularReference(t *testing.T) {
 	mockRepo.AddStateMachine(diag)
 
 	// Test both strictness levels
-	resultInProgress, err := validator.ResolveReferences(diag)
+	resultInProgress, err := validator.ResolveFileReferences(diag)
 	if err != nil {
-		t.Fatalf("ResolveReferences() error = %v", err)
+		t.Fatalf("ResolveFileReferences() error = %v", err)
 	}
 	validator.applyStrictnessFiltering(resultInProgress, models.StrictnessInProgress)
 
-	resultProducts, err := validator.ResolveReferences(diag)
+	resultProducts, err := validator.ResolveFileReferences(diag)
 	if err != nil {
-		t.Fatalf("ResolveReferences() error = %v", err)
+		t.Fatalf("ResolveFileReferences() error = %v", err)
 	}
 	validator.applyStrictnessFiltering(resultProducts, models.StrictnessProducts)
 

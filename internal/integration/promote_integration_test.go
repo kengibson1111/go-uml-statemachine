@@ -86,7 +86,7 @@ func TestPromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 	})
 
 	t.Run("List diagrams in products", func(t *testing.T) {
-		diagrams, err := svc.ListAll(smmodels.DiagramTypePUML, models.LocationProducts)
+		diagrams, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationProducts)
 		if err != nil {
 			t.Fatalf("Failed to list diagrams in products: %v", err)
 		}

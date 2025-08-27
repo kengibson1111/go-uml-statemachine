@@ -555,8 +555,8 @@ func (s *service) ValidateFile(diagramType smmodels.DiagramType, name, version s
 	return validationResult, nil
 }
 
-// ListAll lists all state-machine diagrams in the specified location
-func (s *service) ListAll(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
+// ListAllFiles lists all state-machine diagrams in the specified location
+func (s *service) ListAllFiles(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 

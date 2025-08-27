@@ -167,7 +167,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 	})
 
 	t.Run("List state-machine diagrams in in-progress", func(t *testing.T) {
-		diagrams, err := svc.ListAll(smmodels.DiagramTypePUML, models.LocationInProgress)
+		diagrams, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to list state-machine diagrams: %v", err)
 		}
@@ -209,7 +209,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 	})
 
 	t.Run("List state-machine diagrams in products", func(t *testing.T) {
-		diagrams, err := svc.ListAll(smmodels.DiagramTypePUML, models.LocationProducts)
+		diagrams, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationProducts)
 		if err != nil {
 			t.Fatalf("Failed to list state-machine diagrams in products: %v", err)
 		}
@@ -443,7 +443,7 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 		}
 
 		// Verify all state-machine diagrams were created
-		diagrams, err := svc.ListAll(smmodels.DiagramTypePUML, models.LocationInProgress)
+		diagrams, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to list state-machine diagrams: %v", err)
 		}
@@ -589,7 +589,7 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				_, err := svc.ListAll(smmodels.DiagramTypePUML, models.LocationInProgress)
+				_, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationInProgress)
 				if err != nil {
 					errors <- fmt.Errorf("list error: %w", err)
 				}

@@ -1339,7 +1339,7 @@ func TestService_ValidateFile(t *testing.T) {
 	}
 }
 
-func TestService_ListAll(t *testing.T) {
+func TestService_ListAllFiles(t *testing.T) {
 	tests := []struct {
 		name        string
 		inputLoc    models.Location
@@ -1422,42 +1422,42 @@ func TestService_ListAll(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			result, err := svc.ListAll(smmodels.DiagramTypePUML, tt.inputLoc)
+			result, err := svc.ListAllFiles(smmodels.DiagramTypePUML, tt.inputLoc)
 
 			if tt.wantErr {
 				if err == nil {
-					t.Errorf("ListAll() expected error but got none")
+					t.Errorf("ListAllFiles() expected error but got none")
 					return
 				}
 
 				var diagErr *models.StateMachineError
 				if !errors.As(err, &diagErr) {
-					t.Errorf("ListAll() expected StateMachineError but got %T", err)
+					t.Errorf("ListAllFiles() expected StateMachineError but got %T", err)
 					return
 				}
 
 				if diagErr.Type != tt.wantErrType {
-					t.Errorf("ListAll() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
+					t.Errorf("ListAllFiles() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
-					t.Errorf("ListAll() unexpected error: %v", err)
+					t.Errorf("ListAllFiles() unexpected error: %v", err)
 					return
 				}
 
 				if result == nil {
-					t.Error("ListAll() expected result but got nil")
+					t.Error("ListAllFiles() expected result but got nil")
 					return
 				}
 
 				if len(result) != tt.wantCount {
-					t.Errorf("ListAll() count = %v, want %v", len(result), tt.wantCount)
+					t.Errorf("ListAllFiles() count = %v, want %v", len(result), tt.wantCount)
 				}
 
 				// Verify all returned state-machine diagrams have the correct location
 				for _, diag := range result {
 					if diag.Location != tt.inputLoc {
-						t.Errorf("ListAll() state-machine diagram location = %v, want %v", diag.Location, tt.inputLoc)
+						t.Errorf("ListAllFiles() state-machine diagram location = %v, want %v", diag.Location, tt.inputLoc)
 					}
 				}
 			}

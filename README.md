@@ -160,10 +160,10 @@ err := svc.DeleteFile(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.Loca
 
 ```go
 // List all in-progress state-machine diagrams
-inProgressDiags, err := svc.ListAll(models.DiagramTypePUML, diagram.LocationInProgress)
+inProgressDiags, err := svc.ListAllFiles(models.DiagramTypePUML, diagram.LocationInProgress)
 
 // List all production state-machine diagrams
-productDiags, err := svc.ListAll(models.DiagramTypePUML, diagram.LocationProducts)
+productDiags, err := svc.ListAllFiles(models.DiagramTypePUML, diagram.LocationProducts)
 ```
 
 ## Validation
@@ -598,7 +598,7 @@ type DiagramService interface {
     // Business operations
     Promote(diagramType models.DiagramType, name, version string) error
     Validate(diagramType models.DiagramType, name, version string, location Location) (*ValidationResult, error)
-    ListAll(diagramType models.DiagramType, location Location) ([]diagram, error)
+    ListAllFiles(diagramType models.DiagramType, location Location) ([]diagram, error)
 
     // Reference operations
     ResolveReferences(diagram *StateMachineDiagram) error

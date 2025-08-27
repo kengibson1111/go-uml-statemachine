@@ -88,7 +88,7 @@ Authenticated --> Idle : logout()
 
 	// Example 4: List all state-machine diagrams in in-progress
 	fmt.Println("\n4. Listing all in-progress state-machine diagrams...")
-	diagrams, err := svc.ListAll(smmodels.DiagramTypePUML, models.LocationInProgress)
+	diagrams, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error listing state-machine diagrams: %v", err)
 		return
@@ -114,7 +114,7 @@ Authenticated --> Idle : logout()
 
 	// Example 6: List products
 	fmt.Println("\n6. Listing all product state-machine diagrams...")
-	productDiags, err := svc.ListAll(smmodels.DiagramTypePUML, models.LocationProducts)
+	productDiags, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationProducts)
 	if err != nil {
 		log.Printf("Error listing product state-machine diagrams: %v", err)
 		return

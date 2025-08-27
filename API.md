@@ -126,7 +126,7 @@ type DiagramService interface {
     // Business operations
     Promote(diagramType models.DiagramType, name, version string) error
     ValidateFile(diagramType models.DiagramType, name, version string, location Location) (*ValidationResult, error)
-    ListAll(diagramType models.DiagramType, location Location) ([]diagram, error)
+    ListAllFiles(diagramType models.DiagramType, location Location) ([]diagram, error)
 
     // Reference operations
     ResolveReferences(diagram *StateMachineDiagram) error
@@ -436,12 +436,12 @@ if result.HasErrors() {
 }
 ```
 
-#### ListAll
+#### ListAllFiles
 
 Lists all state-machine diagrams in the specified location.
 
 ```go
-ListAll(diagramType models.DiagramType, location Location) ([]diagram, error)
+ListAllFiles(diagramType models.DiagramType, location Location) ([]diagram, error)
 ```
 
 **Parameters:**
@@ -454,7 +454,7 @@ ListAll(diagramType models.DiagramType, location Location) ([]diagram, error)
 
 **Example:**
 ```go
-diagrams, err := svc.ListAll(models.DiagramTypePUML, diagram.LocationInProgress)
+diagrams, err := svc.ListAllFiles(models.DiagramTypePUML, diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }

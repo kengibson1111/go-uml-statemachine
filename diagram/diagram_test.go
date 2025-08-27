@@ -317,10 +317,10 @@ Error --> Idle : reset()
 		t.Fatal("ValidateFile() returned nil result")
 	}
 
-	// Test ListAll
-	diagrams, err := svc.ListAll(models.DiagramTypePUML, LocationInProgress)
+	// Test ListAllFiles
+	diagrams, err := svc.ListAllFiles(models.DiagramTypePUML, LocationInProgress)
 	if err != nil {
-		t.Fatalf("ListAll() failed: %v", err)
+		t.Fatalf("ListAllFiles() failed: %v", err)
 	}
 	found := false
 	for _, diag := range diagrams {
@@ -330,7 +330,7 @@ Error --> Idle : reset()
 		}
 	}
 	if !found {
-		t.Error("Created state-machine diagram not found in ListAll() results")
+		t.Error("Created state-machine diagram not found in ListAllFiles() results")
 	}
 
 	// Test Update
@@ -358,9 +358,9 @@ Error --> Idle : reset()
 		}
 
 		// Verify promotion
-		productDiags, err := svc.ListAll(models.DiagramTypePUML, LocationProducts)
+		productDiags, err := svc.ListAllFiles(models.DiagramTypePUML, LocationProducts)
 		if err != nil {
-			t.Fatalf("ListAll(LocationProducts) failed: %v", err)
+			t.Fatalf("ListAllFiles(LocationProducts) failed: %v", err)
 		}
 		found = false
 		for _, diag := range productDiags {

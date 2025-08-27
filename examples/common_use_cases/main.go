@@ -419,7 +419,7 @@ InTransit --> Delivered : deliver()
 	}
 
 	// List all in-progress state-machine diagrams
-	allDiagrams, err := svc.ListAll(models.DiagramTypePUML, diagram.LocationInProgress)
+	allDiagrams, err := svc.ListAllFiles(models.DiagramTypePUML, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error listing state-machine diagrams: %v", err)
 		return

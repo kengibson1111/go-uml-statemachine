@@ -316,53 +316,48 @@ func (r *FileSystemRepository) MoveDiagram(diagramType smmodels.DiagramType, nam
 			WithContext("to", to.String())
 	}
 
-	// Get source and destination paths
-	sourcePath := r.pathManager.GetStateMachineDirectoryPathWithDiagramType(name, version, from, diagramType)
-	destPath := r.pathManager.GetStateMachineDirectoryPathWithDiagramType(name, version, to, diagramType)
+	// Get source and destination file paths
+	sourceFilePath := r.pathManager.GetDiagramFilePathWithDiagramType(name, version, from, diagramType)
+	destFilePath := r.pathManager.GetDiagramFilePathWithDiagramType(name, version, to, diagramType)
 
-	// Check if source exists
-	sourceExists, err := r.DirectoryExists(sourcePath)
-	if err != nil {
-		return fmt.Errorf("failed to check source directory: %w", err)
-	}
-	if !sourceExists {
-		return models.NewStateMachineError(models.ErrorTypeFileNotFound, "source state-machine diagram directory not found", nil).
+	// Check if source file exists
+	if _, err := os.Stat(sourceFilePath); os.IsNotExist(err) {
+		return models.NewStateMachineError(models.ErrorTypeFileNotFound, "source state-machine diagram file not found", nil).
 			WithContext("name", name).
 			WithContext("version", version).
 			WithContext("location", from.String()).
-			WithContext("sourcePath", sourcePath)
+			WithContext("sourceFilePath", sourceFilePath)
+	} else if err != nil {
+		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to check source file existence", err).
+			WithContext("sourceFilePath", sourceFilePath)
 	}
 
-	// Check if destination already exists
-	destExists, err := r.DirectoryExists(destPath)
-	if err != nil {
-		return fmt.Errorf("failed to check destination directory: %w", err)
-	}
-	if destExists {
-		return models.NewStateMachineError(models.ErrorTypeDirectoryConflict, "destination directory already exists", nil).
+	// Check if destination file already exists
+	if _, err := os.Stat(destFilePath); err == nil {
+		return models.NewStateMachineError(models.ErrorTypeFileConflict, "destination file already exists", nil).
 			WithContext("name", name).
 			WithContext("version", version).
 			WithContext("location", to.String()).
-			WithContext("destPath", destPath)
+			WithContext("destFilePath", destFilePath)
 	}
 
-	// Create destination parent directory if needed
-	destParent := r.pathManager.GetLocationWithDiagramTypePath(to, diagramType)
-	if err := r.CreateDirectory(destParent); err != nil {
-		return fmt.Errorf("failed to create destination parent directory: %w", err)
+	// Create destination directory if needed
+	destDir := r.pathManager.GetStateMachineDirectoryPathWithDiagramType(name, version, to, diagramType)
+	if err := r.CreateDirectory(destDir); err != nil {
+		return fmt.Errorf("failed to create destination directory: %w", err)
 	}
 
-	// Move the directory
-	if err := os.Rename(sourcePath, destPath); err != nil {
-		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to move state-machine diagram directory", err).
-			WithContext("sourcePath", sourcePath).
-			WithContext("destPath", destPath)
+	// Move the file
+	if err := os.Rename(sourceFilePath, destFilePath); err != nil {
+		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to move state-machine diagram file", err).
+			WithContext("sourceFilePath", sourceFilePath).
+			WithContext("destFilePath", destFilePath)
 	}
 
 	return nil
 }
 
-// DeleteDiagram deletes a state-machine diagram and its directory
+// DeleteDiagram deletes a state-machine diagram file
 func (r *FileSystemRepository) DeleteDiagram(diagramType smmodels.DiagramType, name, version string, location models.Location) error {
 	// Validate inputs
 	if err := r.pathManager.ValidateName(name); err != nil {
@@ -375,26 +370,25 @@ func (r *FileSystemRepository) DeleteDiagram(diagramType smmodels.DiagramType, n
 			WithContext("location", location.String())
 	}
 
-	// Get the directory path
-	dirPath := r.pathManager.GetStateMachineDirectoryPathWithDiagramType(name, version, location, diagramType)
+	// Get the file path
+	filePath := r.pathManager.GetDiagramFilePathWithDiagramType(name, version, location, diagramType)
 
-	// Check if directory exists
-	exists, err := r.DirectoryExists(dirPath)
-	if err != nil {
-		return fmt.Errorf("failed to check directory existence: %w", err)
-	}
-	if !exists {
-		return models.NewStateMachineError(models.ErrorTypeFileNotFound, "state-machine diagram directory not found", nil).
+	// Check if file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return models.NewStateMachineError(models.ErrorTypeFileNotFound, "state-machine diagram file not found", nil).
 			WithContext("name", name).
 			WithContext("version", version).
 			WithContext("location", location.String()).
-			WithContext("dirPath", dirPath)
+			WithContext("filePath", filePath)
+	} else if err != nil {
+		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to check file existence", err).
+			WithContext("filePath", filePath)
 	}
 
-	// Remove the entire directory
-	if err := os.RemoveAll(dirPath); err != nil {
-		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to delete state-machine diagram directory", err).
-			WithContext("dirPath", dirPath)
+	// Remove the file
+	if err := os.Remove(filePath); err != nil {
+		return models.NewStateMachineError(models.ErrorTypeFileSystem, "failed to delete state-machine diagram file", err).
+			WithContext("filePath", filePath)
 	}
 
 	return nil
@@ -426,14 +420,14 @@ func (r *FileSystemRepository) ListStateMachines(diagramType smmodels.DiagramTyp
 
 	// Process each directory entry
 	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue // Skip files, we only want directories
+		if entry.IsDir() {
+			continue // Skip directories, we only want files
 		}
 
-		// Parse directory name to get name and version
-		pathInfo, err := r.pathManager.ParseDirectoryName(entry.Name())
+		// Parse file name to get name and version
+		pathInfo, err := r.pathManager.ParseFileName(entry.Name())
 		if err != nil {
-			// Skip directories that don't match our naming convention
+			// Skip files that don't match our naming convention
 			continue
 		}
 

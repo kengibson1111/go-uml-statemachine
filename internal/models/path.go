@@ -61,8 +61,8 @@ func (pm *PathManager) GetStateMachineDirectoryPath(name, version string, locati
 
 // GetStateMachineDirectoryPathWithDiagramType returns the directory path for a state-machine diagram with diagram type
 func (pm *PathManager) GetStateMachineDirectoryPathWithDiagramType(name, version string, location Location, diagramType smmodels.DiagramType) string {
-	locationPath := pm.GetLocationWithDiagramTypePath(location, diagramType)
-	return filepath.Join(locationPath, fmt.Sprintf("%s-%s", name, version))
+	// Return the diagram type directory directly (flattened structure)
+	return pm.GetLocationWithDiagramTypePath(location, diagramType)
 }
 
 // GetStateMachineFilePath returns the full file path for a state-machine diagram
@@ -279,7 +279,7 @@ func (pm *PathManager) ParseFullPath(fullPath string) (*PathInfo, error) {
 
 	// Split the path into components
 	pathParts := strings.Split(filepath.ToSlash(relPath), "/")
-	if len(pathParts) < 2 {
+	if len(pathParts) < 3 {
 		return nil, NewStateMachineError(ErrorTypeValidation, "path is too short", nil).
 			WithContext("path", fullPath)
 	}
@@ -297,13 +297,14 @@ func (pm *PathManager) ParseFullPath(fullPath string) (*PathInfo, error) {
 			WithContext("location", pathParts[0])
 	}
 
-	// Parse the state-machine diagram directory name
-	if len(pathParts) < 2 {
-		return nil, NewStateMachineError(ErrorTypeValidation, "missing state-machine diagram directory", nil).
+	// Verify diagram type directory (pathParts[1] should be "puml")
+	if len(pathParts) < 3 {
+		return nil, NewStateMachineError(ErrorTypeValidation, "missing diagram file", nil).
 			WithContext("path", fullPath)
 	}
 
-	pathInfo, err := pm.ParseDirectoryName(pathParts[1])
+	// Parse the file name to get name and version
+	pathInfo, err := pm.ParseFileName(pathParts[2])
 	if err != nil {
 		return nil, err
 	}

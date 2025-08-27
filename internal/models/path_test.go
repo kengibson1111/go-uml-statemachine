@@ -463,7 +463,7 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 	}{
 		{
 			name:     "valid in-progress path",
-			fullPath: filepath.Join("test-root", "in-progress", "user-auth-1.0.0"),
+			fullPath: filepath.Join("test-root", "in-progress", "puml", "user-auth-1.0.0.puml"),
 			want: &PathInfo{
 				Name:     "user-auth",
 				Version:  "1.0.0",
@@ -473,7 +473,7 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 		},
 		{
 			name:     "valid products path",
-			fullPath: filepath.Join("test-root", "products", "payment-flow-2.1.0"),
+			fullPath: filepath.Join("test-root", "products", "puml", "payment-flow-2.1.0.puml"),
 			want: &PathInfo{
 				Name:     "payment-flow",
 				Version:  "2.1.0",
@@ -484,7 +484,7 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 
 		{
 			name:      "invalid location",
-			fullPath:  filepath.Join("test-root", "invalid-location", "user-auth-1.0.0"),
+			fullPath:  filepath.Join("test-root", "invalid-location", "puml", "user-auth-1.0.0.puml"),
 			want:      nil,
 			wantError: true,
 			errorType: ErrorTypeValidation,

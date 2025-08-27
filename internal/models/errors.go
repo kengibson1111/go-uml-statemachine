@@ -14,6 +14,7 @@ const (
 	ErrorTypeFileNotFound ErrorType = iota
 	ErrorTypeValidation
 	ErrorTypeDirectoryConflict
+	ErrorTypeFileConflict
 	ErrorTypeReferenceResolution
 	ErrorTypeFileSystem
 	ErrorTypeVersionParsing
@@ -33,6 +34,8 @@ func (et ErrorType) String() string {
 		return "validation"
 	case ErrorTypeDirectoryConflict:
 		return "directory_conflict"
+	case ErrorTypeFileConflict:
+		return "file_conflict"
 	case ErrorTypeReferenceResolution:
 		return "reference_resolution"
 	case ErrorTypeFileSystem:

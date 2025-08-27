@@ -65,12 +65,10 @@ The module organizes state-machine diagrams in a standardized directory structur
 .go-uml-statemachine-parsers\
 ├── in-progress\
 │   └── puml\
-│       └── {name}-{version}\
-│           └── {name}-{version}.puml
+│       └── {name}-{version}.puml
 └── products\
     └── puml\
-        └── {name}-{version}\
-            └── {name}-{version}.puml
+        └── {name}-{version}.puml
 ```
 
 **Linux/macOS:**
@@ -79,12 +77,10 @@ The module organizes state-machine diagrams in a standardized directory structur
 .go-uml-statemachine-parsers/
 ├── in-progress/
 │   └── puml/
-│       └── {name}-{version}/
-│           └── {name}-{version}.puml
+│       └── {name}-{version}.puml
 └── products/
     └── puml/
-        └── {name}-{version}/
-            └── {name}-{version}.puml
+        └── {name}-{version}.puml
 ```
 
 ## Configuration

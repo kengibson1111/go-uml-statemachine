@@ -820,8 +820,8 @@ func TestFileSystemEdgeCases(t *testing.T) {
 			t.Fatalf("Failed to create state-machine diagram: %v", err)
 		}
 
-		// Verify the directory structure was created correctly
-		expectedDir := filepath.Join(tempDir, "in-progress", "puml", "dir-structure-test-"+fixture.Version)
+		// Verify the flattened directory structure was created correctly
+		expectedDir := filepath.Join(tempDir, "in-progress", "puml")
 		if _, err := os.Stat(expectedDir); os.IsNotExist(err) {
 			t.Errorf("Expected directory %s was not created", expectedDir)
 		}
@@ -837,7 +837,7 @@ func TestFileSystemEdgeCases(t *testing.T) {
 			t.Fatalf("Failed to promote state-machine diagram: %v", err)
 		}
 
-		expectedProductsDir := filepath.Join(tempDir, "products", "puml", "dir-structure-test-"+fixture.Version)
+		expectedProductsDir := filepath.Join(tempDir, "products", "puml")
 		if _, err := os.Stat(expectedProductsDir); os.IsNotExist(err) {
 			t.Errorf("Expected products directory %s was not created", expectedProductsDir)
 		}
@@ -847,9 +847,9 @@ func TestFileSystemEdgeCases(t *testing.T) {
 			t.Errorf("Expected products file %s was not created", expectedProductsFile)
 		}
 
-		// Verify in-progress directory was removed
-		if _, err := os.Stat(expectedDir); !os.IsNotExist(err) {
-			t.Errorf("In-progress directory %s should have been removed after promotion", expectedDir)
+		// Verify in-progress file was removed
+		if _, err := os.Stat(expectedFile); !os.IsNotExist(err) {
+			t.Errorf("In-progress file %s should have been removed after promotion", expectedFile)
 		}
 	})
 }

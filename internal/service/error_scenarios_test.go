@@ -358,7 +358,7 @@ func TestService_Read_ValidationErrors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := svc.Read(smmodels.DiagramTypePUML, tt.inputName, tt.inputVersion, tt.location)
+			_, err := svc.ReadFile(smmodels.DiagramTypePUML, tt.inputName, tt.inputVersion, tt.location)
 
 			if err == nil {
 				t.Error("Expected error but got nil")
@@ -375,8 +375,8 @@ func TestService_Read_ValidationErrors(t *testing.T) {
 				t.Errorf("Expected ErrorTypeValidation, got %v", diagErr.Type)
 			}
 
-			if diagErr.Operation != "Read" {
-				t.Errorf("Expected operation 'Read', got %v", diagErr.Operation)
+			if diagErr.Operation != "ReadFile" {
+				t.Errorf("Expected operation 'ReadFile', got %v", diagErr.Operation)
 			}
 		})
 	}
@@ -390,7 +390,7 @@ func TestService_Read_RepositoryError(t *testing.T) {
 	config := models.DefaultConfig()
 	svc := NewService(repo, validator, config)
 
-	_, err := svc.Read(smmodels.DiagramTypePUML, "test", "1.0.0", models.LocationInProgress)
+	_, err := svc.ReadFile(smmodels.DiagramTypePUML, "test", "1.0.0", models.LocationInProgress)
 
 	if err == nil {
 		t.Error("Expected error but got nil")
@@ -407,8 +407,8 @@ func TestService_Read_RepositoryError(t *testing.T) {
 		t.Errorf("Expected ErrorTypeFileNotFound, got %v", diagErr.Type)
 	}
 
-	if diagErr.Operation != "Read" {
-		t.Errorf("Expected operation 'Read', got %v", diagErr.Operation)
+	if diagErr.Operation != "ReadFile" {
+		t.Errorf("Expected operation 'ReadFile', got %v", diagErr.Operation)
 	}
 
 	if diagErr.Component != "service" {

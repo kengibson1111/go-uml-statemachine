@@ -300,7 +300,7 @@ Error --> Idle : reset()
 	}
 
 	// Test Read
-	readDiag, err := svc.Read(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
+	readDiag, err := svc.ReadFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
 	if err != nil {
 		t.Fatalf("Read() failed: %v", err)
 	}
@@ -342,7 +342,7 @@ Error --> Idle : reset()
 	}
 
 	// Verify update
-	updatedDiag, err := svc.Read(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
+	updatedDiag, err := svc.ReadFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
 	if err != nil {
 		t.Fatalf("Read() after update failed: %v", err)
 	}
@@ -410,7 +410,7 @@ func TestPublicAPIErrorHandling(t *testing.T) {
 	}
 
 	// Test Read non-existent
-	_, err = svc.Read(models.DiagramTypePUML, "non-existent", "1.0.0", LocationInProgress)
+	_, err = svc.ReadFile(models.DiagramTypePUML, "non-existent", "1.0.0", LocationInProgress)
 	if err == nil {
 		t.Error("Read() of non-existent state-machine diagram should fail")
 	}

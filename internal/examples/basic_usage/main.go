@@ -54,7 +54,7 @@ Authenticated --> Idle : logout()
 
 	// Example 2: Read the state-machine diagram back
 	fmt.Println("\n2. Reading the state-machine diagram...")
-	readDiag, err := svc.Read(smmodels.DiagramTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
+	readDiag, err := svc.ReadFile(smmodels.DiagramTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error reading state-machine diagram: %v", err)
 		return

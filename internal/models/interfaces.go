@@ -29,7 +29,7 @@ type Validator interface {
 type DiagramService interface {
 	// CRUD operations
 	CreateFile(diagramType smmodels.DiagramType, name, version string, content string, location Location) (*StateMachineDiagram, error)
-	Read(diagramType smmodels.DiagramType, name, version string, location Location) (*StateMachineDiagram, error)
+	ReadFile(diagramType smmodels.DiagramType, name, version string, location Location) (*StateMachineDiagram, error)
 	UpdateInProgressFile(diag *StateMachineDiagram) error
 	Delete(diagramType smmodels.DiagramType, name, version string, location Location) error
 

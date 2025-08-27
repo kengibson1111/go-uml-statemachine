@@ -97,7 +97,7 @@ func demonstrateFileSystemErrors(svc models.DiagramService, logger *logging.Logg
 
 	// Try to read a non-existent state-machine diagram
 	logger.Info("Testing file not found error...")
-	_, err := svc.Read(smmodels.DiagramTypePUML, "nonexistent", "1.0.0", models.LocationInProgress)
+	_, err := svc.ReadFile(smmodels.DiagramTypePUML, "nonexistent", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]interface{}{

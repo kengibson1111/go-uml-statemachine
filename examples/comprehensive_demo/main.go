@@ -125,7 +125,7 @@ OrderCancelled --> [*]
 
 	// Read
 	fmt.Println("Reading the state-machine diagram...")
-	readDiag, err := svc.Read(models.DiagramTypePUML, "ecommerce-order", "1.0.0", diagram.LocationInProgress)
+	readDiag, err := svc.ReadFile(models.DiagramTypePUML, "ecommerce-order", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error reading state-machine diagram: %v", err)
 		return
@@ -455,7 +455,7 @@ func demonstrateErrorHandling() {
 
 	// 2. Non-existent operations
 	fmt.Println("2. Testing non-existent resource operations...")
-	_, err = svc.Read(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
+	_, err = svc.ReadFile(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled non-existent read error")
 	}

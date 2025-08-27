@@ -159,7 +159,7 @@ SessionTimeout --> RequireAuth : session_expired
 	}
 
 	// Try to read non-existent state-machine diagram
-	_, err = svc.Read(smmodels.DiagramTypePUML, "non-existent", "1.0.0", models.LocationInProgress)
+	_, err = svc.ReadFile(smmodels.DiagramTypePUML, "non-existent", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		fmt.Printf("✓ Expected error for non-existent read: %v\n", err)
 	}

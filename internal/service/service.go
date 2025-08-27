@@ -214,14 +214,14 @@ func (s *service) CreateFile(diagramType smmodels.DiagramType, name, version str
 	return diag, nil
 }
 
-// Read retrieves a state-machine diagram by name, version, and location
-func (s *service) Read(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
+// ReadFile retrieves a state-machine diagram by name, version, and location
+func (s *service) ReadFile(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	// Create operation logger with context
 	opLogger := s.logger.WithFields(map[string]interface{}{
-		"operation":   "Read",
+		"operation":   "ReadFile",
 		"diagramType": diagramType.String(),
 		"name":        name,
 		"version":     version,
@@ -233,7 +233,7 @@ func (s *service) Read(diagramType smmodels.DiagramType, name, version string, l
 	// Validate input parameters
 	if name == "" {
 		err := models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil).
-			WithOperation("Read").
+			WithOperation("ReadFile").
 			WithComponent("service").
 			WithSeverity(models.ErrorSeverityHigh)
 		opLogger.WithError(err).Error("Validation failed: empty name")
@@ -241,7 +241,7 @@ func (s *service) Read(diagramType smmodels.DiagramType, name, version string, l
 	}
 	if version == "" {
 		err := models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil).
-			WithOperation("Read").
+			WithOperation("ReadFile").
 			WithComponent("service").
 			WithSeverity(models.ErrorSeverityHigh)
 		opLogger.WithError(err).Error("Validation failed: empty version")
@@ -259,7 +259,7 @@ func (s *service) Read(diagramType smmodels.DiagramType, name, version string, l
 			WithContext("name", name).
 			WithContext("version", version).
 			WithContext("location", location.String()).
-			WithOperation("Read").
+			WithOperation("ReadFile").
 			WithComponent("service")
 		opLogger.WithError(wrappedErr).Error("Failed to read state-machine diagram from repository")
 		return nil, wrappedErr

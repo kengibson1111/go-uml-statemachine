@@ -117,7 +117,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 	})
 
 	t.Run("Read state-machine diagram from in-progress", func(t *testing.T) {
-		diagram, err := svc.Read(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
+		diagram, err := svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to read state-machine diagram: %v", err)
 		}
@@ -129,7 +129,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 
 	t.Run("Update state-machine diagram content", func(t *testing.T) {
 		// Read the current state-machine diagram
-		diag, err := svc.Read(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
+		diag, err := svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to read state-machine diagram for update: %v", err)
 		}
@@ -145,7 +145,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		}
 
 		// Verify the update
-		updatedDiag, err := svc.Read(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
+		updatedDiag, err := svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to read updated state-machine diagram: %v", err)
 		}
@@ -192,7 +192,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		}
 
 		// Verify it exists in products
-		diagram, err := svc.Read(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
+		diagram, err := svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
 		if err != nil {
 			t.Fatalf("Failed to read promoted state-machine diagram: %v", err)
 		}
@@ -202,7 +202,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		}
 
 		// Verify it no longer exists in in-progress
-		_, err = svc.Read(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
+		_, err = svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err == nil {
 			t.Errorf("State-machine diagram should no longer exist in in-progress after promotion")
 		}
@@ -234,7 +234,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		}
 
 		// Verify it no longer exists
-		_, err = svc.Read(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
+		_, err = svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
 		if err == nil {
 			t.Errorf("State-machine diagram should not exist after deletion")
 		}
@@ -273,7 +273,7 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 	})
 
 	t.Run("Read non-existent state-machine diagram", func(t *testing.T) {
-		_, err := svc.Read(smmodels.DiagramTypePUML, "non-existent", "1.0.0", models.LocationInProgress)
+		_, err := svc.ReadFile(smmodels.DiagramTypePUML, "non-existent", "1.0.0", models.LocationInProgress)
 		if err == nil {
 			t.Errorf("Should not be able to read non-existent state-machine diagram")
 		}
@@ -477,7 +477,7 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				diag, err := svc.Read(smmodels.DiagramTypePUML, "concurrent-read-test", fixture.Version, models.LocationInProgress)
+				diag, err := svc.ReadFile(smmodels.DiagramTypePUML, "concurrent-read-test", fixture.Version, models.LocationInProgress)
 				if err != nil {
 					errors <- err
 				} else {
@@ -555,13 +555,13 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 		}
 
 		// Verify the state-machine diagram is in products
-		_, err = svc.Read(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version, models.LocationProducts)
+		_, err = svc.ReadFile(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version, models.LocationProducts)
 		if err != nil {
 			t.Errorf("State-machine diagram should be in products after promotion: %v", err)
 		}
 
 		// Verify it's not in in-progress
-		_, err = svc.Read(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version, models.LocationInProgress)
+		_, err = svc.ReadFile(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version, models.LocationInProgress)
 		if err == nil {
 			t.Errorf("State-machine diagram should not be in in-progress after promotion")
 		}
@@ -651,7 +651,7 @@ func TestReferenceResolutionWorkflow(t *testing.T) {
 
 	t.Run("Test reference resolution", func(t *testing.T) {
 		// Read the main workflow
-		diagram, err := svc.Read(smmodels.DiagramTypePUML, "main-workflow", "1.0.0", models.LocationInProgress)
+		diagram, err := svc.ReadFile(smmodels.DiagramTypePUML, "main-workflow", "1.0.0", models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to read main-workflow: %v", err)
 		}
@@ -784,7 +784,7 @@ func TestFileSystemEdgeCases(t *testing.T) {
 		}
 
 		// Verify we can read it back
-		diagram, err := svc.Read(smmodels.DiagramTypePUML, "large-content-test", "1.0.0", models.LocationInProgress)
+		diagram, err := svc.ReadFile(smmodels.DiagramTypePUML, "large-content-test", "1.0.0", models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to read large content state-machine diagram: %v", err)
 		}
@@ -803,7 +803,7 @@ func TestFileSystemEdgeCases(t *testing.T) {
 		}
 
 		// Verify we can read it back correctly
-		diagram, err := svc.Read(smmodels.DiagramTypePUML, "special-chars-test", "1.0.0", models.LocationInProgress)
+		diagram, err := svc.ReadFile(smmodels.DiagramTypePUML, "special-chars-test", "1.0.0", models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to read special characters state-machine diagram: %v", err)
 		}
@@ -888,7 +888,7 @@ func TestVersionHandling(t *testing.T) {
 
 			if tt.valid && err == nil {
 				// Verify we can read it back
-				diag, err := svc.Read(smmodels.DiagramTypePUML, testName, tt.version, models.LocationInProgress)
+				diag, err := svc.ReadFile(smmodels.DiagramTypePUML, testName, tt.version, models.LocationInProgress)
 				if err != nil {
 					t.Errorf("Failed to read back state-machine diagram with version %s: %v", tt.version, err)
 				} else if diag.Version != tt.version {

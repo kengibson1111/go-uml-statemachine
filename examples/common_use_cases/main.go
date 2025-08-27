@@ -73,7 +73,7 @@ Cancelled --> [*]
 	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", diag.Name, diag.Version)
 
 	// Read it back to verify
-	readDiag, err := svc.Read(models.DiagramTypePUML, "order-processing", "1.0.0", diagram.LocationInProgress)
+	readDiag, err := svc.ReadFile(models.DiagramTypePUML, "order-processing", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error reading state-machine diagram: %v", err)
 		return
@@ -312,7 +312,7 @@ func errorHandlingExample() {
 	fmt.Printf("✓ Demonstrating various error scenarios:\n")
 
 	// 1. Try to read non-existent state-machine diagram
-	_, err = svc.Read(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
+	_, err = svc.ReadFile(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Printf("  ✓ Expected error for non-existent read: File not found\n")
 	}

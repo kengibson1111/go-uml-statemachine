@@ -283,7 +283,7 @@ func TestService_Create(t *testing.T) {
 	}
 }
 
-func TestService_Read(t *testing.T) {
+func TestService_ReadFile(t *testing.T) {
 	tests := []struct {
 		name        string
 		inputName   string
@@ -358,45 +358,45 @@ func TestService_Read(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			result, err := svc.Read(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer, tt.inputLoc)
+			result, err := svc.ReadFile(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer, tt.inputLoc)
 
 			if tt.wantErr {
 				if err == nil {
-					t.Errorf("Read() expected error but got none")
+					t.Errorf("ReadFile() expected error but got none")
 					return
 				}
 
 				var diagErr *models.StateMachineError
 				if !errors.As(err, &diagErr) {
-					t.Errorf("Read() expected StateMachineError but got %T", err)
+					t.Errorf("ReadFile() expected StateMachineError but got %T", err)
 					return
 				}
 
 				if diagErr.Type != tt.wantErrType {
-					t.Errorf("Read() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
+					t.Errorf("ReadFile() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
-					t.Errorf("Read() unexpected error: %v", err)
+					t.Errorf("ReadFile() unexpected error: %v", err)
 					return
 				}
 
 				if result == nil {
-					t.Error("Read() expected result but got nil")
+					t.Error("ReadFile() expected result but got nil")
 					return
 				}
 
 				if result.Name != tt.wantResult.Name {
-					t.Errorf("Read() name = %v, want %v", result.Name, tt.wantResult.Name)
+					t.Errorf("ReadFile() name = %v, want %v", result.Name, tt.wantResult.Name)
 				}
 				if result.Version != tt.wantResult.Version {
-					t.Errorf("Read() version = %v, want %v", result.Version, tt.wantResult.Version)
+					t.Errorf("ReadFile() version = %v, want %v", result.Version, tt.wantResult.Version)
 				}
 				if result.Content != tt.wantResult.Content {
-					t.Errorf("Read() content = %v, want %v", result.Content, tt.wantResult.Content)
+					t.Errorf("ReadFile() content = %v, want %v", result.Content, tt.wantResult.Content)
 				}
 				if result.Location != tt.wantResult.Location {
-					t.Errorf("Read() location = %v, want %v", result.Location, tt.wantResult.Location)
+					t.Errorf("ReadFile() location = %v, want %v", result.Location, tt.wantResult.Location)
 				}
 			}
 		})

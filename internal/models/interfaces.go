@@ -35,7 +35,7 @@ type DiagramService interface {
 
 	// Business operations
 	PromoteToProductsFile(diagramType smmodels.DiagramType, name, version string) error // Move from in-progress to products
-	Validate(diagramType smmodels.DiagramType, name, version string, location Location) (*ValidationResult, error)
+	ValidateFile(diagramType smmodels.DiagramType, name, version string, location Location) (*ValidationResult, error)
 	ListAll(diagramType smmodels.DiagramType, location Location) ([]StateMachineDiagram, error)
 
 	// Reference operations

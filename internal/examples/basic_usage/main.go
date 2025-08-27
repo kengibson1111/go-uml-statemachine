@@ -64,7 +64,7 @@ Authenticated --> Idle : logout()
 
 	// Example 3: Validate the state-machine diagram
 	fmt.Println("\n3. Validating the state-machine diagram...")
-	validationResult, err := svc.Validate(smmodels.DiagramTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
+	validationResult, err := svc.ValidateFile(smmodels.DiagramTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating state-machine diagram: %v", err)
 		return

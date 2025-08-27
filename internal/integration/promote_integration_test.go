@@ -37,7 +37,7 @@ func TestPromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 	})
 
 	t.Run("Validate diagram before promotion", func(t *testing.T) {
-		result, err := svc.Validate(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
+		result, err := svc.ValidateFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to validate diagram: %v", err)
 		}
@@ -75,7 +75,7 @@ func TestPromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 	})
 
 	t.Run("Validate diagram in products", func(t *testing.T) {
-		result, err := svc.Validate(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
+		result, err := svc.ValidateFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
 		if err != nil {
 			t.Fatalf("Failed to validate promoted diagram: %v", err)
 		}
@@ -223,7 +223,7 @@ func TestPromoteToProductsFile_ValidationStrictness(t *testing.T) {
 			}
 
 			// Validate before promotion
-			result, err := svc.Validate(smmodels.DiagramTypePUML, diagramName, "1.0.0", models.LocationInProgress)
+			result, err := svc.ValidateFile(smmodels.DiagramTypePUML, diagramName, "1.0.0", models.LocationInProgress)
 			if err != nil {
 				t.Fatalf("Failed to validate diagram: %v", err)
 			}

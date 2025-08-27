@@ -156,7 +156,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 	})
 
 	t.Run("Validate state-machine diagram", func(t *testing.T) {
-		result, err := svc.Validate(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
+		result, err := svc.ValidateFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to validate state-machine diagram: %v", err)
 		}
@@ -603,7 +603,7 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 					time.Sleep(100 * time.Millisecond) // Small delay to ensure creation
 					testName := fmt.Sprintf("mixed-test-%d", idx-1)
 					fixture := testFixtures[(idx-1)%len(testFixtures)]
-					_, err := svc.Validate(smmodels.DiagramTypePUML, testName, fixture.Version, models.LocationInProgress)
+					_, err := svc.ValidateFile(smmodels.DiagramTypePUML, testName, fixture.Version, models.LocationInProgress)
 					if err != nil {
 						errors <- fmt.Errorf("validate error: %w", err)
 					}
@@ -691,7 +691,7 @@ func TestReferenceResolutionWorkflow(t *testing.T) {
 
 	t.Run("Test validation with references", func(t *testing.T) {
 		// Validate the main workflow - should pass since we only have valid product references
-		result, err := svc.Validate(smmodels.DiagramTypePUML, "main-workflow", "1.0.0", models.LocationInProgress)
+		result, err := svc.ValidateFile(smmodels.DiagramTypePUML, "main-workflow", "1.0.0", models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to validate main-workflow: %v", err)
 		}
@@ -721,7 +721,7 @@ func TestValidationStrictnessLevels(t *testing.T) {
 	})
 
 	t.Run("Validate in-progress strictness", func(t *testing.T) {
-		result, err := svc.Validate(smmodels.DiagramTypePUML, "strictness-test", "1.0.0", models.LocationInProgress)
+		result, err := svc.ValidateFile(smmodels.DiagramTypePUML, "strictness-test", "1.0.0", models.LocationInProgress)
 		if err != nil {
 			t.Fatalf("Failed to validate with in-progress strictness: %v", err)
 		}
@@ -751,7 +751,7 @@ func TestValidationStrictnessLevels(t *testing.T) {
 		}
 
 		// Validate with products strictness
-		result, err := svc.Validate(smmodels.DiagramTypePUML, "strictness-test", "1.0.0", models.LocationProducts)
+		result, err := svc.ValidateFile(smmodels.DiagramTypePUML, "strictness-test", "1.0.0", models.LocationProducts)
 		if err != nil {
 			t.Fatalf("Failed to validate with products strictness: %v", err)
 		}

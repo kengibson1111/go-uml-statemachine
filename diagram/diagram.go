@@ -34,7 +34,7 @@
 //	}
 //
 //	// Validate and promote to production
-//	result, err := svc.Validate("my-machine", "1.0.0", diagram.LocationInProgress)
+//	result, err := svc.ValidateFile("my-machine", "1.0.0", diagram.LocationInProgress)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}

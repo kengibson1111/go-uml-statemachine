@@ -309,12 +309,12 @@ Error --> Idle : reset()
 	}
 
 	// Test Validate
-	result, err := svc.Validate(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
+	result, err := svc.ValidateFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
 	if err != nil {
-		t.Fatalf("Validate() failed: %v", err)
+		t.Fatalf("ValidateFile() failed: %v", err)
 	}
 	if result == nil {
-		t.Fatal("Validate() returned nil result")
+		t.Fatal("ValidateFile() returned nil result")
 	}
 
 	// Test ListAll
@@ -428,9 +428,9 @@ func TestPublicAPIErrorHandling(t *testing.T) {
 	}
 
 	// Test Validate non-existent
-	_, err = svc.Validate(models.DiagramTypePUML, "non-existent", "1.0.0", LocationInProgress)
+	_, err = svc.ValidateFile(models.DiagramTypePUML, "non-existent", "1.0.0", LocationInProgress)
 	if err == nil {
-		t.Error("Validate() of non-existent state-machine diagram should fail")
+		t.Error("ValidateFile() of non-existent state-machine diagram should fail")
 	}
 }
 

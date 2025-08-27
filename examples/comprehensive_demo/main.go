@@ -188,7 +188,7 @@ AccountLocked --> Anonymous : unlock_timeout()
 
 	// Validate
 	fmt.Println("Validating state-machine diagram...")
-	result, err := svc.Validate(models.DiagramTypePUML, "user-session", "1.0.0", diagram.LocationInProgress)
+	result, err := svc.ValidateFile(models.DiagramTypePUML, "user-session", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating state-machine diagram: %v", err)
 		return
@@ -260,7 +260,7 @@ Authenticated --> [*]
 	fmt.Printf("✓ Created base component: %s-%s\n", baseDiag.Name, baseDiag.Version)
 
 	// Promote base component to products
-	result, err := svc.Validate(models.DiagramTypePUML, "auth-component", "1.0.0", diagram.LocationInProgress)
+	result, err := svc.ValidateFile(models.DiagramTypePUML, "auth-component", "1.0.0", diagram.LocationInProgress)
 	if err == nil && result.IsValid && !result.HasErrors() {
 		err = svc.PromoteToProductsFile(models.DiagramTypePUML, "auth-component", "1.0.0")
 		if err != nil {
@@ -398,7 +398,7 @@ Rejected --> [*]
 	fmt.Println("Batch validation of all state-machine diagrams...")
 	validCount := 0
 	for _, process := range processes {
-		result, err := svc.Validate(models.DiagramTypePUML, process.name, process.version, diagram.LocationInProgress)
+		result, err := svc.ValidateFile(models.DiagramTypePUML, process.name, process.version, diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Error validating %s: %v", process.name, err)
 			continue

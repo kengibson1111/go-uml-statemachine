@@ -512,8 +512,8 @@ func (s *service) attemptRollback(diagramType smmodels.DiagramType, name, versio
 	}
 }
 
-// Validate validates a state-machine diagram with the specified strictness level
-func (s *service) Validate(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.ValidationResult, error) {
+// ValidateFile validates a state-machine diagram with the specified strictness level
+func (s *service) ValidateFile(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.ValidationResult, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 

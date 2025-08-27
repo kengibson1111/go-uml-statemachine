@@ -125,7 +125,7 @@ type DiagramService interface {
 
     // Business operations
     Promote(diagramType models.DiagramType, name, version string) error
-    Validate(diagramType models.DiagramType, name, version string, location Location) (*ValidationResult, error)
+    ValidateFile(diagramType models.DiagramType, name, version string, location Location) (*ValidationResult, error)
     ListAll(diagramType models.DiagramType, location Location) ([]diagram, error)
 
     // Reference operations
@@ -399,12 +399,12 @@ if err != nil {
 }
 ```
 
-#### Validate
+#### ValidateFile
 
 Validates a state-machine diagram with the specified strictness level.
 
 ```go
-Validate(diagramType models.DiagramType, name, version string, location Location) (*ValidationResult, error)
+ValidateFile(diagramType models.DiagramType, name, version string, location Location) (*ValidationResult, error)
 ```
 
 **Parameters:**
@@ -423,7 +423,7 @@ Validate(diagramType models.DiagramType, name, version string, location Location
 
 **Example:**
 ```go
-result, err := svc.Validate(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
+result, err := svc.ValidateFile(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }

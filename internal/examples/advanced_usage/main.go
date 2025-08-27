@@ -51,7 +51,7 @@ Authenticated --> Idle : logout()
 	fmt.Printf("✓ Created: %s-%s\n", baseDiag.Name, baseDiag.Version)
 
 	// Validate and promote base auth to products
-	validationResult, err := svc.Validate(smmodels.DiagramTypePUML, "base-auth", "1.0.0", models.LocationInProgress)
+	validationResult, err := svc.ValidateFile(smmodels.DiagramTypePUML, "base-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating base auth: %v", err)
 		return
@@ -141,7 +141,7 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Println("\n5. Testing validation strictness...")
 
 	// Validate with in-progress strictness (errors and warnings)
-	inProgressResult, err := svc.Validate(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", models.LocationInProgress)
+	inProgressResult, err := svc.ValidateFile(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating with in-progress strictness: %v", err)
 	} else {

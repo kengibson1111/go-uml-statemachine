@@ -165,7 +165,7 @@ Locked --> Idle : unlock_timeout()
 	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", diag.Name, diag.Version)
 
 	// Validate the state-machine diagram
-	result, err := svc.Validate(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
+	result, err := svc.ValidateFile(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating state-machine diagram: %v", err)
 		return
@@ -243,7 +243,7 @@ Authenticated --> [*]
 	fmt.Printf("✓ Created base component: %s-%s\n", baseDiag.Name, baseDiag.Version)
 
 	// Validate and promote the base component
-	result, err := svc.Validate(models.DiagramTypePUML, "base-auth", "1.0.0", diagram.LocationInProgress)
+	result, err := svc.ValidateFile(models.DiagramTypePUML, "base-auth", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error validating base auth: %v", err)
 		return
@@ -435,7 +435,7 @@ InTransit --> Delivered : deliver()
 	fmt.Printf("✓ Validating all state-machine diagrams:\n")
 	validCount := 0
 	for _, diag := range diagrams {
-		result, err := svc.Validate(models.DiagramTypePUML, diag.name, diag.version, diagram.LocationInProgress)
+		result, err := svc.ValidateFile(models.DiagramTypePUML, diag.name, diag.version, diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Error validating %s: %v", diag.name, err)
 			continue

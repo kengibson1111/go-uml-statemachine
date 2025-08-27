@@ -1156,7 +1156,7 @@ func TestService_PromoteToProductsFileValidationScenarios(t *testing.T) {
 
 // Tests for task 7.4 - Listing and validation operations
 
-func TestService_Validate(t *testing.T) {
+func TestService_ValidateFile(t *testing.T) {
 	tests := []struct {
 		name        string
 		inputName   string
@@ -1297,42 +1297,42 @@ func TestService_Validate(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			result, err := svc.Validate(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer, tt.inputLoc)
+			result, err := svc.ValidateFile(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer, tt.inputLoc)
 
 			if tt.wantErr {
 				if err == nil {
-					t.Errorf("Validate() expected error but got none")
+					t.Errorf("ValidateFile() expected error but got none")
 					return
 				}
 
 				var diagErr *models.StateMachineError
 				if !errors.As(err, &diagErr) {
-					t.Errorf("Validate() expected StateMachineError but got %T", err)
+					t.Errorf("ValidateFile() expected StateMachineError but got %T", err)
 					return
 				}
 
 				if diagErr.Type != tt.wantErrType {
-					t.Errorf("Validate() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
+					t.Errorf("ValidateFile() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
-					t.Errorf("Validate() unexpected error: %v", err)
+					t.Errorf("ValidateFile() unexpected error: %v", err)
 					return
 				}
 
 				if result == nil {
-					t.Error("Validate() expected result but got nil")
+					t.Error("ValidateFile() expected result but got nil")
 					return
 				}
 
 				if result.IsValid != tt.wantResult.IsValid {
-					t.Errorf("Validate() IsValid = %v, want %v", result.IsValid, tt.wantResult.IsValid)
+					t.Errorf("ValidateFile() IsValid = %v, want %v", result.IsValid, tt.wantResult.IsValid)
 				}
 				if len(result.Errors) != len(tt.wantResult.Errors) {
-					t.Errorf("Validate() Errors count = %v, want %v", len(result.Errors), len(tt.wantResult.Errors))
+					t.Errorf("ValidateFile() Errors count = %v, want %v", len(result.Errors), len(tt.wantResult.Errors))
 				}
 				if len(result.Warnings) != len(tt.wantResult.Warnings) {
-					t.Errorf("Validate() Warnings count = %v, want %v", len(result.Warnings), len(tt.wantResult.Warnings))
+					t.Errorf("ValidateFile() Warnings count = %v, want %v", len(result.Warnings), len(tt.wantResult.Warnings))
 				}
 			}
 		})

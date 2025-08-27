@@ -301,7 +301,7 @@ fmt.Printf("Content: %s\n", diagram.Content)
 
 #### Update
 
-Modifies an existing state-machine diagram.
+Modifies an existing state-machine diagram. Updates are only allowed for diagrams in the in-progress location.
 
 ```go
 Update(diag *StateMachineDiagram) error
@@ -315,8 +315,11 @@ Update(diag *StateMachineDiagram) error
 
 **Errors:**
 - Validation error if state-machine diagram is nil or has empty fields
+- Validation error if location is not LocationInProgress
 - File not found error if state-machine diagram doesn't exist
 - File system error if write operation fails
+
+**Important:** Updates are restricted to diagrams in the in-progress location only. Production diagrams cannot be modified directly and must be updated through the promotion workflow.
 
 **Example:**
 ```go
@@ -558,22 +561,27 @@ if err != nil {
 - Handle validation errors appropriately
 - Use appropriate strictness levels for different environments
 
-### 3. Reference Management
+### 3. Update Restrictions
+- Updates are only allowed for diagrams in the in-progress location
+- Production diagrams are immutable and cannot be modified directly
+- To update production diagrams, modify the in-progress version and promote it
+
+### 4. Reference Management
 - Resolve references after creating state-machine diagrams with dependencies
 - Ensure referenced state-machine diagrams exist before creating references
 - Use product references for stable dependencies
 
-### 4. Error Handling
+### 5. Error Handling
 - Check and handle all error conditions
 - Use appropriate error types for different scenarios
 - Provide meaningful error messages to users
 
-### 5. Configuration
+### 6. Configuration
 - Use environment variables for deployment-specific settings
 - Set appropriate file size limits
 - Enable debug logging for troubleshooting
 
-### 6. Resource Management
+### 7. Resource Management
 - Clean up test data in examples and tests
 - Handle concurrent access appropriately
 - Monitor file system usage

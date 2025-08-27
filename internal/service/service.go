@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -268,7 +269,7 @@ func (s *service) Read(diagramType smmodels.DiagramType, name, version string, l
 	return diag, nil
 }
 
-// Update modifies an existing state-machine diagram
+// Update modifies an existing state-machine diagram only in the in-progress directory structure
 func (s *service) Update(diag *models.StateMachineDiagram) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -285,6 +286,10 @@ func (s *service) Update(diag *models.StateMachineDiagram) error {
 	}
 	if diag.Content == "" {
 		return models.NewStateMachineError(models.ErrorTypeValidation, "content cannot be empty", nil)
+	}
+	if diag.Location != models.LocationInProgress {
+		return models.NewStateMachineError(models.ErrorTypeValidation,
+			fmt.Sprintf("location must be %s", models.LocationInProgress.String()), nil)
 	}
 
 	// Check if state-machine diagram exists

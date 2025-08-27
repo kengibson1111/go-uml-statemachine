@@ -143,9 +143,15 @@ if err != nil {
 
 ### Updating State-Machine Diagrams
 
+Updates are only allowed for diagrams in the in-progress location. Production diagrams cannot be modified directly.
+
 ```go
+// Only works for diagrams in LocationInProgress
 diag.Content = updatedPlantUMLContent
 err := svc.Update(diag)
+if err != nil {
+    log.Printf("Update failed: %v", err)
+}
 ```
 
 ### Deleting State-Machine Diagrams
@@ -639,10 +645,11 @@ type ValidationResult struct {
 
 1. **Version Management**: Use semantic versioning (e.g., "1.0.0", "1.2.3")
 2. **Content Validation**: Always validate state-machine diagrams before promotion
-3. **Reference Management**: Resolve references after creating state-machine diagrams with dependencies
-4. **Error Handling**: Check and handle all error conditions appropriately
-5. **Configuration**: Use environment variables for deployment-specific settings
-6. **Testing**: Test state-machine diagram content with both strictness levels
+3. **Update Workflow**: Remember that updates are only allowed for in-progress diagrams; production diagrams are immutable
+4. **Reference Management**: Resolve references after creating state-machine diagrams with dependencies
+5. **Error Handling**: Check and handle all error conditions appropriately
+6. **Configuration**: Use environment variables for deployment-specific settings
+7. **Testing**: Test state-machine diagram content with both strictness levels
 
 ## Troubleshooting
 
@@ -661,6 +668,11 @@ type ValidationResult struct {
   - Verify referenced state-machine diagrams exist in the expected locations
   - Check that product references use correct version numbers
 
+
+- **Update Failures**
+  - Ensure the diagram is in the in-progress location (updates are not allowed for production diagrams)
+  - Verify the diagram exists before attempting to update
+  - Check file system permissions for write operations
 
 - **Promotion Failures**
   - Validate the state-machine diagram passes all validation checks

@@ -102,7 +102,7 @@ Authenticated --> Idle : logout()
 	// Example 5: Promote to products (if validation passes)
 	if validationResult.IsValid && !validationResult.HasErrors() {
 		fmt.Println("\n5. Promoting state-machine diagram to products...")
-		err = svc.Promote(smmodels.DiagramTypePUML, "user-auth", "1.0.0")
+		err = svc.PromoteToProductsFile(smmodels.DiagramTypePUML, "user-auth", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting state-machine diagram: %v", err)
 		} else {

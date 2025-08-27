@@ -34,7 +34,7 @@ type DiagramService interface {
 	DeleteFile(diagramType smmodels.DiagramType, name, version string, location Location) error
 
 	// Business operations
-	Promote(diagramType smmodels.DiagramType, name, version string) error // Move from in-progress to products
+	PromoteToProductsFile(diagramType smmodels.DiagramType, name, version string) error // Move from in-progress to products
 	Validate(diagramType smmodels.DiagramType, name, version string, location Location) (*ValidationResult, error)
 	ListAll(diagramType smmodels.DiagramType, location Location) ([]StateMachineDiagram, error)
 

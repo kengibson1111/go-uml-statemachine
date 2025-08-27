@@ -58,7 +58,7 @@ Authenticated --> Idle : logout()
 	}
 
 	if validationResult.IsValid && !validationResult.HasErrors() {
-		err = svc.Promote(smmodels.DiagramTypePUML, "base-auth", "1.0.0")
+		err = svc.PromoteToProductsFile(smmodels.DiagramTypePUML, "base-auth", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting base auth: %v", err)
 			return
@@ -165,7 +165,7 @@ SessionTimeout --> RequireAuth : session_expired
 	}
 
 	// Try to promote without validation
-	err = svc.Promote(smmodels.DiagramTypePUML, "non-existent", "1.0.0")
+	err = svc.PromoteToProductsFile(smmodels.DiagramTypePUML, "non-existent", "1.0.0")
 	if err != nil {
 		fmt.Printf("✓ Expected error for non-existent promotion: %v\n", err)
 	}

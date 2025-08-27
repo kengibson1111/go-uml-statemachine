@@ -186,7 +186,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 	})
 
 	t.Run("Promote state-machine diagram to products", func(t *testing.T) {
-		err := svc.Promote(smmodels.DiagramTypePUML, fixture.Name, fixture.Version)
+		err := svc.PromoteToProductsFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version)
 		if err != nil {
 			t.Fatalf("Failed to promote state-machine diagram: %v", err)
 		}
@@ -308,7 +308,7 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 	})
 
 	t.Run("Promote non-existent state-machine diagram", func(t *testing.T) {
-		err := svc.Promote(smmodels.DiagramTypePUML, "non-existent", "1.0.0")
+		err := svc.PromoteToProductsFile(smmodels.DiagramTypePUML, "non-existent", "1.0.0")
 		if err == nil {
 			t.Errorf("Should not be able to promote non-existent state-machine diagram")
 		}
@@ -330,7 +330,7 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 		}
 
 		// Try to promote - should fail due to validation errors
-		err = svc.Promote(smmodels.DiagramTypePUML, "invalid-diag", "1.0.0")
+		err = svc.PromoteToProductsFile(smmodels.DiagramTypePUML, "invalid-diag", "1.0.0")
 		if err == nil {
 			t.Errorf("Should not be able to promote state-machine diagram with validation errors")
 		}
@@ -350,7 +350,7 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 			t.Fatalf("Failed to create state-machine diagram: %v", err)
 		}
 
-		err = svc.Promote(smmodels.DiagramTypePUML, "conflict-test", "1.0.0")
+		err = svc.PromoteToProductsFile(smmodels.DiagramTypePUML, "conflict-test", "1.0.0")
 		if err != nil {
 			t.Fatalf("Failed to promote state-machine diagram: %v", err)
 		}
@@ -529,7 +529,7 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				err := svc.Promote(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version)
+				err := svc.PromoteToProductsFile(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version)
 				if err != nil {
 					errors <- err
 				} else {
@@ -636,7 +636,7 @@ func TestReferenceResolutionWorkflow(t *testing.T) {
 			t.Fatalf("Failed to create user-auth state-machine diagram: %v", err)
 		}
 
-		err = svc.Promote(smmodels.DiagramTypePUML, userAuthFixture.Name, userAuthFixture.Version)
+		err = svc.PromoteToProductsFile(smmodels.DiagramTypePUML, userAuthFixture.Name, userAuthFixture.Version)
 		if err != nil {
 			t.Fatalf("Failed to promote user-auth state-machine diagram: %v", err)
 		}
@@ -745,7 +745,7 @@ func TestValidationStrictnessLevels(t *testing.T) {
 
 	t.Run("Promote and validate products strictness", func(t *testing.T) {
 		// Promote the state-machine diagram
-		err := svc.Promote(smmodels.DiagramTypePUML, "strictness-test", "1.0.0")
+		err := svc.PromoteToProductsFile(smmodels.DiagramTypePUML, "strictness-test", "1.0.0")
 		if err != nil {
 			t.Fatalf("Failed to promote state-machine diagram: %v", err)
 		}
@@ -832,7 +832,7 @@ func TestFileSystemEdgeCases(t *testing.T) {
 		}
 
 		// Promote and verify products directory structure
-		err = svc.Promote(smmodels.DiagramTypePUML, "dir-structure-test", fixture.Version)
+		err = svc.PromoteToProductsFile(smmodels.DiagramTypePUML, "dir-structure-test", fixture.Version)
 		if err != nil {
 			t.Fatalf("Failed to promote state-machine diagram: %v", err)
 		}

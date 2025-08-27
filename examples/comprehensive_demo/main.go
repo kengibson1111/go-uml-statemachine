@@ -216,7 +216,7 @@ AccountLocked --> Anonymous : unlock_timeout()
 	// Promote if validation passes
 	if result.IsValid && !result.HasErrors() {
 		fmt.Println("Promoting to products...")
-		err = svc.Promote(models.DiagramTypePUML, "user-session", "1.0.0")
+		err = svc.PromoteToProductsFile(models.DiagramTypePUML, "user-session", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting state-machine diagram: %v", err)
 		} else {
@@ -262,7 +262,7 @@ Authenticated --> [*]
 	// Promote base component to products
 	result, err := svc.Validate(models.DiagramTypePUML, "auth-component", "1.0.0", diagram.LocationInProgress)
 	if err == nil && result.IsValid && !result.HasErrors() {
-		err = svc.Promote(models.DiagramTypePUML, "auth-component", "1.0.0")
+		err = svc.PromoteToProductsFile(models.DiagramTypePUML, "auth-component", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting base component: %v", err)
 			return
@@ -465,7 +465,7 @@ func demonstrateErrorHandling() {
 		fmt.Println("  ✓ Correctly handled non-existent delete error")
 	}
 
-	err = svc.Promote(models.DiagramTypePUML, "non-existent", "1.0.0")
+	err = svc.PromoteToProductsFile(models.DiagramTypePUML, "non-existent", "1.0.0")
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled non-existent promote error")
 	}

@@ -192,7 +192,7 @@ Locked --> Idle : unlock_timeout()
 
 	// Attempt promotion if validation passes
 	if result.IsValid && !result.HasErrors() {
-		err = svc.Promote(models.DiagramTypePUML, "user-auth", "1.0.0")
+		err = svc.PromoteToProductsFile(models.DiagramTypePUML, "user-auth", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting state-machine diagram: %v", err)
 		} else {
@@ -250,7 +250,7 @@ Authenticated --> [*]
 	}
 
 	if result.IsValid && !result.HasErrors() {
-		err = svc.Promote(models.DiagramTypePUML, "base-auth", "1.0.0")
+		err = svc.PromoteToProductsFile(models.DiagramTypePUML, "base-auth", "1.0.0")
 		if err != nil {
 			log.Printf("Error promoting base auth: %v", err)
 			return
@@ -340,7 +340,7 @@ func errorHandlingExample() {
 	}
 
 	// 4. Try to promote non-existent state-machine diagram
-	err = svc.Promote(models.DiagramTypePUML, "non-existent", "1.0.0")
+	err = svc.PromoteToProductsFile(models.DiagramTypePUML, "non-existent", "1.0.0")
 	if err != nil {
 		fmt.Printf("  ✓ Expected error for non-existent promotion: File not found\n")
 	}

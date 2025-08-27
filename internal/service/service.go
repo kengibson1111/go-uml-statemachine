@@ -366,8 +366,8 @@ func (s *service) DeleteFile(diagramType smmodels.DiagramType, name, version str
 	return nil
 }
 
-// Promote moves a state-machine diagram from in-progress to products
-func (s *service) Promote(diagramType smmodels.DiagramType, name, version string) error {
+// PromoteToProductsFile moves a state-machine diagram from in-progress to products
+func (s *service) PromoteToProductsFile(diagramType smmodels.DiagramType, name, version string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

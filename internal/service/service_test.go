@@ -631,7 +631,7 @@ func TestService_Delete(t *testing.T) {
 		})
 	}
 }
-func TestService_Promote(t *testing.T) {
+func TestService_PromoteToProductsFile(t *testing.T) {
 	tests := []struct {
 		name        string
 		inputName   string
@@ -837,22 +837,22 @@ func TestService_Promote(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			err := svc.Promote(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer)
+			err := svc.PromoteToProductsFile(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer)
 
 			if tt.wantErr {
 				if err == nil {
-					t.Errorf("Promote() expected error but got none")
+					t.Errorf("PromoteToProductsFile() expected error but got none")
 					return
 				}
 
 				var diagErr *models.StateMachineError
 				if !errors.As(err, &diagErr) {
-					t.Errorf("Promote() expected StateMachineError but got %T", err)
+					t.Errorf("PromoteToProductsFile() expected StateMachineError but got %T", err)
 					return
 				}
 
 				if diagErr.Type != tt.wantErrType {
-					t.Errorf("Promote() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
+					t.Errorf("PromoteToProductsFile() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
@@ -863,7 +863,7 @@ func TestService_Promote(t *testing.T) {
 	}
 }
 
-func TestService_PromoteWithRollback(t *testing.T) {
+func TestService_PromoteToProductsFileWithRollback(t *testing.T) {
 	tests := []struct {
 		name        string
 		inputName   string
@@ -995,22 +995,22 @@ func TestService_PromoteWithRollback(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			err := svc.Promote(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer)
+			err := svc.PromoteToProductsFile(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer)
 
 			if tt.wantErr {
 				if err == nil {
-					t.Errorf("Promote() expected error but got none")
+					t.Errorf("PromoteToProductsFile() expected error but got none")
 					return
 				}
 
 				var diagErr *models.StateMachineError
 				if !errors.As(err, &diagErr) {
-					t.Errorf("Promote() expected StateMachineError but got %T", err)
+					t.Errorf("PromoteToProductsFile() expected StateMachineError but got %T", err)
 					return
 				}
 
 				if diagErr.Type != tt.wantErrType {
-					t.Errorf("Promote() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
+					t.Errorf("PromoteToProductsFile() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {
@@ -1021,7 +1021,7 @@ func TestService_PromoteWithRollback(t *testing.T) {
 	}
 }
 
-func TestService_PromoteValidationScenarios(t *testing.T) {
+func TestService_PromoteToProductsFileValidationScenarios(t *testing.T) {
 	tests := []struct {
 		name           string
 		inputName      string
@@ -1128,22 +1128,22 @@ func TestService_PromoteValidationScenarios(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			err := svc.Promote(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer)
+			err := svc.PromoteToProductsFile(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer)
 
 			if tt.wantErr {
 				if err == nil {
-					t.Errorf("Promote() expected error but got none")
+					t.Errorf("PromoteToProductsFile() expected error but got none")
 					return
 				}
 
 				var diagErr *models.StateMachineError
 				if !errors.As(err, &diagErr) {
-					t.Errorf("Promote() expected StateMachineError but got %T", err)
+					t.Errorf("PromoteToProductsFile() expected StateMachineError but got %T", err)
 					return
 				}
 
 				if diagErr.Type != tt.wantErrType {
-					t.Errorf("Promote() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
+					t.Errorf("PromoteToProductsFile() expected error type %v but got %v", tt.wantErrType, diagErr.Type)
 				}
 			} else {
 				if err != nil {

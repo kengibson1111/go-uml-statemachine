@@ -352,9 +352,9 @@ Error --> Idle : reset()
 
 	// Test Promote (if validation passes)
 	if result.IsValid && !result.HasErrors() {
-		err = svc.Promote(models.DiagramTypePUML, "test-integration", "1.0.0")
+		err = svc.PromoteToProductsFile(models.DiagramTypePUML, "test-integration", "1.0.0")
 		if err != nil {
-			t.Fatalf("Promote() failed: %v", err)
+			t.Fatalf("PromoteToProductsFile() failed: %v", err)
 		}
 
 		// Verify promotion
@@ -422,9 +422,9 @@ func TestPublicAPIErrorHandling(t *testing.T) {
 	}
 
 	// Test Promote non-existent
-	err = svc.Promote(models.DiagramTypePUML, "non-existent", "1.0.0")
+	err = svc.PromoteToProductsFile(models.DiagramTypePUML, "non-existent", "1.0.0")
 	if err == nil {
-		t.Error("Promote() of non-existent state-machine diagram should fail")
+		t.Error("PromoteToProductsFile() of non-existent state-machine diagram should fail")
 	}
 
 	// Test Validate non-existent

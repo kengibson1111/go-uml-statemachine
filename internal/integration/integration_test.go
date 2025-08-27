@@ -139,7 +139,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		diag.Content = updatedContent
 
 		// Update the state-machine diagram
-		err = svc.Update(diag)
+		err = svc.UpdateInProgressFile(diag)
 		if err != nil {
 			t.Fatalf("Failed to update state-machine diagram: %v", err)
 		}
@@ -294,7 +294,7 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 			Location: models.LocationInProgress,
 		}
 
-		err := svc.Update(diag)
+		err := svc.UpdateInProgressFile(diag)
 		if err == nil {
 			t.Errorf("Should not be able to update non-existent state-machine diagram")
 		}
@@ -389,7 +389,7 @@ func TestErrorScenariosAndEdgeCases(t *testing.T) {
 		}
 
 		// Test nil state-machine diagram for update
-		err = svc.Update(nil)
+		err = svc.UpdateInProgressFile(nil)
 		if err == nil {
 			t.Errorf("Should not accept nil state-machine diagram for update")
 		}

@@ -144,7 +144,7 @@ Updates are only allowed for diagrams in the in-progress location. Production di
 ```go
 // Only works for diagrams in LocationInProgress
 diag.Content = updatedPlantUMLContent
-err := svc.Update(diag)
+err := svc.UpdateInProgressFile(diag)
 if err != nil {
     log.Printf("Update failed: %v", err)
 }
@@ -592,7 +592,7 @@ type DiagramService interface {
     // CRUD operations
     Create(diagramType models.DiagramType, name, version string, content string, location Location) (*diagram, error)
     Read(diagramType models.DiagramType, name, version string, location Location) (*diagram, error)
-    Update(diag *StateMachineDiagram) error
+    UpdateInProgressFile(diag *StateMachineDiagram) error
     Delete(diagramType models.DiagramType, name, version string, location Location) error
 
     // Business operations

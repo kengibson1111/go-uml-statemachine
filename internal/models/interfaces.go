@@ -30,7 +30,7 @@ type DiagramService interface {
 	// CRUD operations
 	Create(diagramType smmodels.DiagramType, name, version string, content string, location Location) (*StateMachineDiagram, error)
 	Read(diagramType smmodels.DiagramType, name, version string, location Location) (*StateMachineDiagram, error)
-	Update(diag *StateMachineDiagram) error
+	UpdateInProgressFile(diag *StateMachineDiagram) error
 	Delete(diagramType smmodels.DiagramType, name, version string, location Location) error
 
 	// Business operations

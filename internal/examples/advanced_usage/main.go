@@ -130,7 +130,7 @@ SessionTimeout --> RequireAuth : session_expired
 @enduml`
 
 	advancedDiag.Content = updatedContent
-	err = svc.Update(advancedDiag)
+	err = svc.UpdateInProgressFile(advancedDiag)
 	if err != nil {
 		log.Printf("Error updating state-machine diagram: %v", err)
 	} else {

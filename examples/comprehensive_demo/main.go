@@ -141,7 +141,7 @@ RefundProcessing --> RefundCompleted : refund_success()
 RefundCompleted --> [*]`
 
 	readDiag.Content = updatedContent
-	err = svc.Update(readDiag)
+	err = svc.UpdateInProgressFile(readDiag)
 	if err != nil {
 		log.Printf("Error updating state-machine diagram: %v", err)
 		return
@@ -497,7 +497,7 @@ Test --> [*]
 		Location:    diagram.LocationInProgress,
 		DiagramType: models.DiagramTypePUML,
 	}
-	err = svc.Update(nonExistentDiag)
+	err = svc.UpdateInProgressFile(nonExistentDiag)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled update of non-existent state-machine diagram")
 	}

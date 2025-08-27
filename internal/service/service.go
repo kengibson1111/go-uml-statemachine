@@ -269,8 +269,8 @@ func (s *service) Read(diagramType smmodels.DiagramType, name, version string, l
 	return diag, nil
 }
 
-// Update modifies an existing state-machine diagram only in the in-progress directory structure
-func (s *service) Update(diag *models.StateMachineDiagram) error {
+// UpdateInProgressFile modifies an existing state-machine diagram only in the in-progress directory structure
+func (s *service) UpdateInProgressFile(diag *models.StateMachineDiagram) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

@@ -498,7 +498,7 @@ func TestService_Update(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			err := svc.Update(tt.input)
+			err := svc.UpdateInProgressFile(tt.input)
 
 			if tt.wantErr {
 				if err == nil {

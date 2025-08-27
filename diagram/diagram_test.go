@@ -336,7 +336,7 @@ Error --> Idle : reset()
 	// Test Update
 	updatedContent := content + "\n' Updated comment"
 	readDiag.Content = updatedContent
-	err = svc.Update(readDiag)
+	err = svc.UpdateInProgressFile(readDiag)
 	if err != nil {
 		t.Fatalf("Update() failed: %v", err)
 	}

@@ -80,8 +80,8 @@ func NewServiceWithEnvOverrides(repo models.Repository, validator models.Validat
 	return NewService(repo, validator, &config)
 }
 
-// Create creates a new state-machine diagram with the specified parameters
-func (s *service) Create(diagramType smmodels.DiagramType, name, version string, content string, location models.Location) (*models.StateMachineDiagram, error) {
+// CreateFile creates a new state-machine diagram with the specified parameters
+func (s *service) CreateFile(diagramType smmodels.DiagramType, name, version string, content string, location models.Location) (*models.StateMachineDiagram, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

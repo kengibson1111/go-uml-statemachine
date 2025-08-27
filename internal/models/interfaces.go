@@ -28,7 +28,7 @@ type Validator interface {
 // DiagramService interface defines the contract for business operations
 type DiagramService interface {
 	// CRUD operations
-	Create(diagramType smmodels.DiagramType, name, version string, content string, location Location) (*StateMachineDiagram, error)
+	CreateFile(diagramType smmodels.DiagramType, name, version string, content string, location Location) (*StateMachineDiagram, error)
 	Read(diagramType smmodels.DiagramType, name, version string, location Location) (*StateMachineDiagram, error)
 	UpdateInProgressFile(diag *StateMachineDiagram) error
 	Delete(diagramType smmodels.DiagramType, name, version string, location Location) error

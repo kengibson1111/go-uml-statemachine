@@ -45,7 +45,7 @@ Authenticated --> Idle : logout()
 
 	// Example 1: Create a new state-machine diagram in in-progress
 	fmt.Println("\n1. Creating a new state-machine diagram...")
-	diag, err := svc.Create(smmodels.DiagramTypePUML, "user-auth", "1.0.0", authContent, models.LocationInProgress)
+	diag, err := svc.CreateFile(smmodels.DiagramTypePUML, "user-auth", "1.0.0", authContent, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return

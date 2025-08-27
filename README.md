@@ -46,7 +46,7 @@ func main() {
     Active --> Idle : stop()
     @enduml`
     
-    diag, err := svc.Create(models.DiagramTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
+    diag, err := svc.CreateFile(models.DiagramTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
     if err != nil {
         log.Fatal(err)
     }
@@ -122,10 +122,10 @@ config.MergeWithEnv()
 
 ```go
 // Create in in-progress location
-diag, err := svc.Create(models.DiagramTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationInProgress)
+diag, err := svc.CreateFile(models.DiagramTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationInProgress)
 
 // Create in products location (for direct production deployment)
-diag, err := svc.Create(models.DiagramTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationProducts)
+diag, err := svc.CreateFile(models.DiagramTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationProducts)
 ```
 
 ### Reading State-Machine Diagrams

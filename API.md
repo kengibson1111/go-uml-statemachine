@@ -118,7 +118,7 @@ The main interface for state-machine diagram operations.
 ```go
 type DiagramService interface {
     // CRUD operations
-    Create(diagramType models.DiagramType, name, version string, content string, location Location) (*diagram, error)
+    CreateFile(diagramType models.DiagramType, name, version string, content string, location Location) (*diagram, error)
     Read(diagramType models.DiagramType, name, version string, location Location) (*diagram, error)
     UpdateInProgressFile(diag *StateMachineDiagram) error
     Delete(diagramType models.DiagramType, name, version string, location Location) error
@@ -235,7 +235,7 @@ func LoadConfigFromEnv() *Config
 Creates a new state-machine diagram with the specified parameters.
 
 ```go
-Create(diagramType models.DiagramType, name, version string, content string, location Location) (*diagram, error)
+CreateFile(diagramType models.DiagramType, name, version string, content string, location Location) (*diagram, error)
 ```
 
 **Parameters:**
@@ -262,7 +262,7 @@ Idle --> Active : start()
 Active --> Idle : stop()
 @enduml`
 
-diag, err := svc.Create(models.DiagramTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
+diag, err := svc.CreateFile(models.DiagramTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }

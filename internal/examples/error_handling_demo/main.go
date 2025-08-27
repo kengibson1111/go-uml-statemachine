@@ -57,7 +57,7 @@ func demonstrateValidationErrors(svc models.DiagramService, logger *logging.Logg
 
 	// Test empty name
 	logger.Info("Testing empty name validation...")
-	_, err := svc.Create(smmodels.DiagramTypePUML, "", "1.0.0", "content", models.LocationInProgress)
+	_, err := svc.CreateFile(smmodels.DiagramTypePUML, "", "1.0.0", "content", models.LocationInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]interface{}{
@@ -75,7 +75,7 @@ func demonstrateValidationErrors(svc models.DiagramService, logger *logging.Logg
 
 	// Test empty version
 	logger.Info("Testing empty version validation...")
-	_, err = svc.Create(smmodels.DiagramTypePUML, "test", "", "content", models.LocationInProgress)
+	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "test", "", "content", models.LocationInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithField("errorType", diagErr.Type.String()).Error("Version validation error caught as expected")
@@ -84,7 +84,7 @@ func demonstrateValidationErrors(svc models.DiagramService, logger *logging.Logg
 
 	// Test empty content
 	logger.Info("Testing empty content validation...")
-	_, err = svc.Create(smmodels.DiagramTypePUML, "test", "1.0.0", "", models.LocationInProgress)
+	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "", models.LocationInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithField("errorType", diagErr.Type.String()).Error("Content validation error caught as expected")
@@ -120,7 +120,7 @@ Idle --> Active : start
 Active --> [*] : stop
 @enduml`
 
-	diag, err := svc.Create(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", validContent, models.LocationInProgress)
+	diag, err := svc.CreateFile(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", validContent, models.LocationInProgress)
 	if err != nil {
 		logger.WithError(err).Error("Failed to create demo state-machine diagram")
 		return
@@ -130,7 +130,7 @@ Active --> [*] : stop
 
 	// Try to create the same state-machine diagram again (should cause conflict)
 	logger.Info("Attempting to create duplicate state-machine diagram...")
-	_, err = svc.Create(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", validContent, models.LocationInProgress)
+	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", validContent, models.LocationInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]interface{}{

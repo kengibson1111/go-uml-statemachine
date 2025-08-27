@@ -28,7 +28,7 @@
 //	Active --> Idle : stop()
 //	@enduml`
 //
-//	diag, err := svc.Create("my-machine", "1.0.0", content, diagram.LocationInProgress)
+//	diag, err := svc.CreateFile("my-machine", "1.0.0", content, diagram.LocationInProgress)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}

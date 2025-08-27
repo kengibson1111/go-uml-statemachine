@@ -65,7 +65,7 @@ Cancelled --> [*]
 @enduml`
 
 	// Create the state-machine diagram
-	diag, err := svc.Create(models.DiagramTypePUML, "order-processing", "1.0.0", orderContent, diagram.LocationInProgress)
+	diag, err := svc.CreateFile(models.DiagramTypePUML, "order-processing", "1.0.0", orderContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
@@ -114,7 +114,7 @@ func environmentConfigExample() {
 Test --> [*]
 @enduml`
 
-	_, err = svc.Create(models.DiagramTypePUML, "env-test", "1.0.0", content, diagram.LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "env-test", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating test state-machine diagram: %v", err)
 		return
@@ -157,7 +157,7 @@ Locked --> Idle : unlock_timeout()
 @enduml`
 
 	// Create the state-machine diagram
-	diag, err := svc.Create(models.DiagramTypePUML, "user-auth", "1.0.0", authContent, diagram.LocationInProgress)
+	diag, err := svc.CreateFile(models.DiagramTypePUML, "user-auth", "1.0.0", authContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
@@ -235,7 +235,7 @@ Authenticated --> [*]
 
 @enduml`
 
-	baseDiag, err := svc.Create(models.DiagramTypePUML, "base-auth", "1.0.0", baseAuthContent, diagram.LocationInProgress)
+	baseDiag, err := svc.CreateFile(models.DiagramTypePUML, "base-auth", "1.0.0", baseAuthContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating base auth: %v", err)
 		return
@@ -278,7 +278,7 @@ Authenticated --> [*]
 
 @enduml`
 
-	complexDiag, err := svc.Create(models.DiagramTypePUML, "complex-auth", "1.0.0", complexAuthContent, diagram.LocationInProgress)
+	complexDiag, err := svc.CreateFile(models.DiagramTypePUML, "complex-auth", "1.0.0", complexAuthContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating complex auth: %v", err)
 		return
@@ -318,7 +318,7 @@ func errorHandlingExample() {
 	}
 
 	// 2. Try to create with invalid parameters
-	_, err = svc.Create(models.DiagramTypePUML, "", "1.0.0", "content", diagram.LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "", "1.0.0", "content", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Printf("  ✓ Expected error for empty name: Validation failed\n")
 	}
@@ -328,13 +328,13 @@ func errorHandlingExample() {
 [*] --> Test
 @enduml`
 
-	_, err = svc.Create(models.DiagramTypePUML, "test-duplicate", "1.0.0", content, diagram.LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "test-duplicate", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating test state-machine diagram: %v", err)
 		return
 	}
 
-	_, err = svc.Create(models.DiagramTypePUML, "test-duplicate", "1.0.0", content, diagram.LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "test-duplicate", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		fmt.Printf("  ✓ Expected error for duplicate creation: Already exists\n")
 	}
@@ -409,7 +409,7 @@ InTransit --> Delivered : deliver()
 	// Create all state-machine diagrams
 	created := []string{}
 	for _, diag := range diagrams {
-		_, err := svc.Create(models.DiagramTypePUML, diag.name, diag.version, diag.content, diagram.LocationInProgress)
+		_, err := svc.CreateFile(models.DiagramTypePUML, diag.name, diag.version, diag.content, diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Error creating %s: %v", diag.name, err)
 			continue

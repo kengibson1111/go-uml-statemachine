@@ -150,7 +150,7 @@ func TestService_Create_ValidationErrors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := svc.Create(smmodels.DiagramTypePUML, tt.inputName, tt.inputVersion, tt.inputContent, tt.location)
+			_, err := svc.CreateFile(smmodels.DiagramTypePUML, tt.inputName, tt.inputVersion, tt.inputContent, tt.location)
 
 			if err == nil {
 				t.Error("Expected error but got nil")
@@ -225,7 +225,7 @@ func TestService_Create_RepositoryErrors(t *testing.T) {
 			config := models.DefaultConfig()
 			svc := NewService(repo, validator, config)
 
-			_, err := svc.Create(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
+			_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
 
 			if err == nil {
 				t.Error("Expected error but got nil")
@@ -272,7 +272,7 @@ func TestService_Create_ProductConflictCheck(t *testing.T) {
 
 		svc := NewService(repo, validator, config)
 
-		_, err := svc.Create(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
+		_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
 
 		if err == nil {
 			t.Error("Expected error but got nil")
@@ -308,7 +308,7 @@ func TestService_Create_ProductConflictCheck(t *testing.T) {
 
 		svc := NewService(repo, validator, config)
 
-		_, err := svc.Create(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
+		_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
 
 		if err == nil {
 			t.Error("Expected error but got nil")
@@ -424,7 +424,7 @@ func TestService_ErrorContextPropagation(t *testing.T) {
 	config := models.DefaultConfig()
 	svc := NewService(repo, validator, config)
 
-	_, err := svc.Create(smmodels.DiagramTypePUML, "test-name", "1.2.3", "content", models.LocationInProgress)
+	_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test-name", "1.2.3", "content", models.LocationInProgress)
 
 	if err == nil {
 		t.Error("Expected error but got nil")
@@ -462,7 +462,7 @@ func TestService_ErrorWrapping(t *testing.T) {
 	config := models.DefaultConfig()
 	svc := NewService(repo, validator, config)
 
-	_, err := svc.Create(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
+	_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
 
 	if err == nil {
 		t.Error("Expected error but got nil")
@@ -520,9 +520,9 @@ func TestService_ErrorSeverityAssignment(t *testing.T) {
 
 			var err error
 			if tt.name == "validation error - high severity" {
-				_, err = svc.Create(smmodels.DiagramTypePUML, "", "1.0.0", "content", models.LocationInProgress) // Empty name
+				_, err = svc.CreateFile(smmodels.DiagramTypePUML, "", "1.0.0", "content", models.LocationInProgress) // Empty name
 			} else {
-				_, err = svc.Create(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
+				_, err = svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
 			}
 
 			if err == nil {

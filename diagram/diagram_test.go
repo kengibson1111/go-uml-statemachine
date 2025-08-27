@@ -285,7 +285,7 @@ Error --> Idle : reset()
 @enduml`
 
 	// Test Create
-	diag, err := svc.Create(models.DiagramTypePUML, "test-integration", "1.0.0", content, LocationInProgress)
+	diag, err := svc.CreateFile(models.DiagramTypePUML, "test-integration", "1.0.0", content, LocationInProgress)
 	if err != nil {
 		t.Fatalf("Create() failed: %v", err)
 	}
@@ -394,17 +394,17 @@ func TestPublicAPIErrorHandling(t *testing.T) {
 	}
 
 	// Test Create with invalid parameters
-	_, err = svc.Create(models.DiagramTypePUML, "", "1.0.0", "content", LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "", "1.0.0", "content", LocationInProgress)
 	if err == nil {
 		t.Error("Create() with empty name should fail")
 	}
 
-	_, err = svc.Create(models.DiagramTypePUML, "test", "", "content", LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "test", "", "content", LocationInProgress)
 	if err == nil {
 		t.Error("Create() with empty version should fail")
 	}
 
-	_, err = svc.Create(models.DiagramTypePUML, "test", "1.0.0", "", LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "test", "1.0.0", "", LocationInProgress)
 	if err == nil {
 		t.Error("Create() with empty content should fail")
 	}

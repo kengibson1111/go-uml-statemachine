@@ -116,7 +116,7 @@ OrderCancelled --> [*]
 
 @enduml`
 
-	diag, err := svc.Create(models.DiagramTypePUML, "ecommerce-order", "1.0.0", content, diagram.LocationInProgress)
+	diag, err := svc.CreateFile(models.DiagramTypePUML, "ecommerce-order", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
@@ -179,7 +179,7 @@ AccountLocked --> Anonymous : unlock_timeout()
 
 @enduml`
 
-	diag, err := svc.Create(models.DiagramTypePUML, "user-session", "1.0.0", content, diagram.LocationInProgress)
+	diag, err := svc.CreateFile(models.DiagramTypePUML, "user-session", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
@@ -252,7 +252,7 @@ Authenticated --> [*]
 
 @enduml`
 
-	baseDiag, err := svc.Create(models.DiagramTypePUML, "auth-component", "1.0.0", baseContent, diagram.LocationInProgress)
+	baseDiag, err := svc.CreateFile(models.DiagramTypePUML, "auth-component", "1.0.0", baseContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating base component: %v", err)
 		return
@@ -291,7 +291,7 @@ Authenticated --> [*]
 
 @enduml`
 
-	complexDiag, err := svc.Create(models.DiagramTypePUML, "mfa-system", "1.0.0", complexContent, diagram.LocationInProgress)
+	complexDiag, err := svc.CreateFile(models.DiagramTypePUML, "mfa-system", "1.0.0", complexContent, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating complex system: %v", err)
 		return
@@ -372,7 +372,7 @@ Rejected --> [*]
 	// Create all state-machine diagrams
 	fmt.Printf("Creating %d business process state-machine diagrams...\n", len(processes))
 	for _, process := range processes {
-		_, err := svc.Create(models.DiagramTypePUML, process.name, process.version, process.content, diagram.LocationInProgress)
+		_, err := svc.CreateFile(models.DiagramTypePUML, process.name, process.version, process.content, diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Error creating %s: %v", process.name, err)
 			continue
@@ -438,17 +438,17 @@ func demonstrateErrorHandling() {
 
 	// 1. Invalid parameters
 	fmt.Println("1. Testing invalid parameters...")
-	_, err = svc.Create(models.DiagramTypePUML, "", "1.0.0", "content", diagram.LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "", "1.0.0", "content", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled empty name error")
 	}
 
-	_, err = svc.Create(models.DiagramTypePUML, "test", "", "content", diagram.LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "test", "", "content", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled empty version error")
 	}
 
-	_, err = svc.Create(models.DiagramTypePUML, "test", "1.0.0", "", diagram.LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "test", "1.0.0", "", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled empty content error")
 	}
@@ -477,13 +477,13 @@ func demonstrateErrorHandling() {
 Test --> [*]
 @enduml`
 
-	_, err = svc.Create(models.DiagramTypePUML, "duplicate-test", "1.0.0", content, diagram.LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "duplicate-test", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating first instance: %v", err)
 		return
 	}
 
-	_, err = svc.Create(models.DiagramTypePUML, "duplicate-test", "1.0.0", content, diagram.LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "duplicate-test", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled duplicate creation error")
 	}
@@ -540,7 +540,7 @@ title Environment Test
 EnvConfigured --> [*]
 @enduml`
 
-	diag, err := svc.Create(models.DiagramTypePUML, "env-config-test", "1.0.0", content, diagram.LocationInProgress)
+	diag, err := svc.CreateFile(models.DiagramTypePUML, "env-config-test", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating test state-machine diagram: %v", err)
 	} else {

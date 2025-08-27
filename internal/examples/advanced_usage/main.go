@@ -43,7 +43,7 @@ Authenticated --> Idle : logout()
 
 @enduml`
 
-	baseDiag, err := svc.Create(smmodels.DiagramTypePUML, "base-auth", "1.0.0", baseAuthContent, models.LocationInProgress)
+	baseDiag, err := svc.CreateFile(smmodels.DiagramTypePUML, "base-auth", "1.0.0", baseAuthContent, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating base auth: %v", err)
 		return
@@ -86,7 +86,7 @@ Failed --> RequireAuth : retry
 
 @enduml`
 
-	advancedDiag, err := svc.Create(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
+	advancedDiag, err := svc.CreateFile(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
 	if err != nil {
 		log.Printf("Error creating advanced auth: %v", err)
 		return
@@ -153,7 +153,7 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Println("\n6. Demonstrating error handling...")
 
 	// Try to create a duplicate
-	_, err = svc.Create(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
+	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
 	if err != nil {
 		fmt.Printf("✓ Expected error for duplicate creation: %v\n", err)
 	}

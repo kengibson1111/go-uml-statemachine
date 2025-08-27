@@ -238,7 +238,7 @@ func TestService_Create(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			result, err := svc.Create(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer, tt.inputContent, tt.inputLoc)
+			result, err := svc.CreateFile(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer, tt.inputContent, tt.inputLoc)
 
 			if tt.wantErr {
 				if err == nil {

@@ -37,7 +37,7 @@ func main() {
 Test --> [*]
 @enduml`
 
-	diag, err := svc.Create(models.DiagramTypePUML, "api-test", "1.0.0", content, diagram.LocationInProgress)
+	diag, err := svc.CreateFile(models.DiagramTypePUML, "api-test", "1.0.0", content, diagram.LocationInProgress)
 	if err != nil {
 		log.Fatal(err)
 	}

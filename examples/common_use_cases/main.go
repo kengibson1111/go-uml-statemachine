@@ -81,7 +81,7 @@ Cancelled --> [*]
 	fmt.Printf("✓ Verified state-machine diagram exists (content length: %d)\n", len(readDiag.Content))
 
 	// Clean up
-	err = svc.Delete(models.DiagramTypePUML, "order-processing", "1.0.0", diagram.LocationInProgress)
+	err = svc.DeleteFile(models.DiagramTypePUML, "order-processing", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not clean up: %v", err)
 	}
@@ -122,7 +122,7 @@ Test --> [*]
 	fmt.Printf("✓ Created test state-machine diagram in custom directory\n")
 
 	// Clean up
-	err = svc.Delete(models.DiagramTypePUML, "env-test", "1.0.0", diagram.LocationInProgress)
+	err = svc.DeleteFile(models.DiagramTypePUML, "env-test", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not clean up: %v", err)
 	}
@@ -199,7 +199,7 @@ Locked --> Idle : unlock_timeout()
 			fmt.Printf("✓ Successfully promoted to products\n")
 
 			// Clean up from products
-			err = svc.Delete(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationProducts)
+			err = svc.DeleteFile(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationProducts)
 			if err != nil {
 				log.Printf("Warning: Could not clean up from products: %v", err)
 			}
@@ -208,7 +208,7 @@ Locked --> Idle : unlock_timeout()
 		fmt.Printf("⚠ Skipping promotion due to validation issues\n")
 
 		// Clean up from in-progress
-		err = svc.Delete(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
+		err = svc.DeleteFile(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Warning: Could not clean up from in-progress: %v", err)
 		}
@@ -297,8 +297,8 @@ Authenticated --> [*]
 	}
 
 	// Clean up
-	svc.Delete(models.DiagramTypePUML, "complex-auth", "1.0.0", diagram.LocationInProgress)
-	svc.Delete(models.DiagramTypePUML, "base-auth", "1.0.0", diagram.LocationProducts)
+	svc.DeleteFile(models.DiagramTypePUML, "complex-auth", "1.0.0", diagram.LocationInProgress)
+	svc.DeleteFile(models.DiagramTypePUML, "base-auth", "1.0.0", diagram.LocationProducts)
 }
 
 // Use Case 5: Error handling and recovery
@@ -346,13 +346,13 @@ func errorHandlingExample() {
 	}
 
 	// 5. Try to delete non-existent state-machine diagram
-	err = svc.Delete(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
+	err = svc.DeleteFile(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Printf("  ✓ Expected error for non-existent deletion: File not found\n")
 	}
 
 	// Clean up
-	err = svc.Delete(models.DiagramTypePUML, "test-duplicate", "1.0.0", diagram.LocationInProgress)
+	err = svc.DeleteFile(models.DiagramTypePUML, "test-duplicate", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not clean up: %v", err)
 	}
@@ -455,7 +455,7 @@ InTransit --> Delivered : deliver()
 	// Clean up all created state-machine diagrams
 	fmt.Printf("✓ Cleaning up created state-machine diagrams:\n")
 	for _, diag := range diagrams {
-		err := svc.Delete(models.DiagramTypePUML, diag.name, diag.version, diagram.LocationInProgress)
+		err := svc.DeleteFile(models.DiagramTypePUML, diag.name, diag.version, diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Warning: Could not delete %s: %v", diag.name, err)
 		} else {

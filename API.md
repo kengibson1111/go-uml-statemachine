@@ -354,7 +354,7 @@ Delete(diagramType models.DiagramType, name, version string, location Location) 
 
 **Example:**
 ```go
-err := svc.Delete(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
+err := svc.DeleteFile(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
 if err != nil {
     log.Fatal(err)
 }

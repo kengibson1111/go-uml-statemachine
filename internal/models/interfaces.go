@@ -31,7 +31,7 @@ type DiagramService interface {
 	CreateFile(diagramType smmodels.DiagramType, name, version string, content string, location Location) (*StateMachineDiagram, error)
 	ReadFile(diagramType smmodels.DiagramType, name, version string, location Location) (*StateMachineDiagram, error)
 	UpdateInProgressFile(diag *StateMachineDiagram) error
-	Delete(diagramType smmodels.DiagramType, name, version string, location Location) error
+	DeleteFile(diagramType smmodels.DiagramType, name, version string, location Location) error
 
 	// Business operations
 	Promote(diagramType smmodels.DiagramType, name, version string) error // Move from in-progress to products

@@ -148,7 +148,7 @@ Active --> [*] : stop
 
 	// Clean up
 	logger.Info("Cleaning up demo state-machine diagram...")
-	if err := svc.Delete(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", models.LocationInProgress); err != nil {
+	if err := svc.DeleteFile(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", models.LocationInProgress); err != nil {
 		logger.WithError(err).Warn("Failed to clean up demo state-machine diagram")
 	}
 }

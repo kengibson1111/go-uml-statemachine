@@ -228,7 +228,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 	})
 
 	t.Run("Delete state-machine diagram from products", func(t *testing.T) {
-		err := svc.Delete(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
+		err := svc.DeleteFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
 		if err != nil {
 			t.Fatalf("Failed to delete state-machine diagram: %v", err)
 		}

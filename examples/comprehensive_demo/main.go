@@ -150,7 +150,7 @@ RefundCompleted --> [*]`
 
 	// Clean up for next demo
 	defer func() {
-		svc.Delete(models.DiagramTypePUML, "ecommerce-order", "1.0.0", diagram.LocationInProgress)
+		svc.DeleteFile(models.DiagramTypePUML, "ecommerce-order", "1.0.0", diagram.LocationInProgress)
 	}()
 }
 
@@ -228,8 +228,8 @@ AccountLocked --> Anonymous : unlock_timeout()
 
 	// Clean up
 	defer func() {
-		svc.Delete(models.DiagramTypePUML, "user-session", "1.0.0", diagram.LocationProducts)
-		svc.Delete(models.DiagramTypePUML, "user-session", "1.0.0", diagram.LocationInProgress)
+		svc.DeleteFile(models.DiagramTypePUML, "user-session", "1.0.0", diagram.LocationProducts)
+		svc.DeleteFile(models.DiagramTypePUML, "user-session", "1.0.0", diagram.LocationInProgress)
 	}()
 }
 
@@ -312,8 +312,8 @@ Authenticated --> [*]
 
 	// Clean up
 	defer func() {
-		svc.Delete(models.DiagramTypePUML, "mfa-system", "1.0.0", diagram.LocationInProgress)
-		svc.Delete(models.DiagramTypePUML, "auth-component", "1.0.0", diagram.LocationProducts)
+		svc.DeleteFile(models.DiagramTypePUML, "mfa-system", "1.0.0", diagram.LocationInProgress)
+		svc.DeleteFile(models.DiagramTypePUML, "auth-component", "1.0.0", diagram.LocationProducts)
 	}()
 }
 
@@ -418,7 +418,7 @@ Rejected --> [*]
 	// Clean up all created state-machine diagrams
 	fmt.Println("Cleaning up batch-created state-machine diagrams...")
 	for _, process := range processes {
-		err := svc.Delete(models.DiagramTypePUML, process.name, process.version, diagram.LocationInProgress)
+		err := svc.DeleteFile(models.DiagramTypePUML, process.name, process.version, diagram.LocationInProgress)
 		if err != nil {
 			log.Printf("Warning: Could not delete %s: %v", process.name, err)
 		} else {
@@ -460,7 +460,7 @@ func demonstrateErrorHandling() {
 		fmt.Println("  ✓ Correctly handled non-existent read error")
 	}
 
-	err = svc.Delete(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
+	err = svc.DeleteFile(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		fmt.Println("  ✓ Correctly handled non-existent delete error")
 	}
@@ -503,7 +503,7 @@ Test --> [*]
 	}
 
 	// Clean up
-	svc.Delete(models.DiagramTypePUML, "duplicate-test", "1.0.0", diagram.LocationInProgress)
+	svc.DeleteFile(models.DiagramTypePUML, "duplicate-test", "1.0.0", diagram.LocationInProgress)
 
 	fmt.Println("✓ Error handling demonstration completed")
 }
@@ -547,7 +547,7 @@ EnvConfigured --> [*]
 		fmt.Printf("✓ Created state-machine diagram using environment configuration: %s-%s\n", diag.Name, diag.Version)
 
 		// Clean up
-		svc.Delete(models.DiagramTypePUML, "env-config-test", "1.0.0", diagram.LocationInProgress)
+		svc.DeleteFile(models.DiagramTypePUML, "env-config-test", "1.0.0", diagram.LocationInProgress)
 	}
 
 	// Restore original environment variables

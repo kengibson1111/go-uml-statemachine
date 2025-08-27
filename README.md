@@ -153,7 +153,7 @@ if err != nil {
 ### Deleting State-Machine Diagrams
 
 ```go
-err := svc.Delete(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
+err := svc.DeleteFile(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
 ```
 
 ### Listing State-Machine Diagrams

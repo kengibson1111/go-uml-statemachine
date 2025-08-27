@@ -184,7 +184,7 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Println("\n8. Cleaning up test data...")
 
 	// Delete from products first
-	err = svc.Delete(smmodels.DiagramTypePUML, "base-auth", "1.0.0", models.LocationProducts)
+	err = svc.DeleteFile(smmodels.DiagramTypePUML, "base-auth", "1.0.0", models.LocationProducts)
 	if err != nil {
 		log.Printf("Warning: Could not delete base-auth from products: %v", err)
 	} else {
@@ -192,7 +192,7 @@ SessionTimeout --> RequireAuth : session_expired
 	}
 
 	// Delete from in-progress
-	err = svc.Delete(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", models.LocationInProgress)
+	err = svc.DeleteFile(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not delete advanced-auth from in-progress: %v", err)
 	} else {

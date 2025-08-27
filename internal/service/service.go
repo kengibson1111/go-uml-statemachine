@@ -324,8 +324,8 @@ func (s *service) UpdateInProgressFile(diag *models.StateMachineDiagram) error {
 	return nil
 }
 
-// Delete removes a state-machine diagram by name, version, and location
-func (s *service) Delete(diagramType smmodels.DiagramType, name, version string, location models.Location) error {
+// DeleteFile removes a state-machine diagram by name, version, and location
+func (s *service) DeleteFile(diagramType smmodels.DiagramType, name, version string, location models.Location) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

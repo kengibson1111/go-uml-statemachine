@@ -606,7 +606,7 @@ func TestService_Delete(t *testing.T) {
 
 			svc := NewService(repo, validator, nil)
 
-			err := svc.Delete(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer, tt.inputLoc)
+			err := svc.DeleteFile(smmodels.DiagramTypePUML, tt.inputName, tt.inputVer, tt.inputLoc)
 
 			if tt.wantErr {
 				if err == nil {

@@ -45,7 +45,7 @@ Test --> [*]
 	fmt.Printf("✓ Created state-machine diagram: %s-%s\n", diag.Name, diag.Version)
 
 	// Clean up
-	err = svc.Delete(models.DiagramTypePUML, "api-test", "1.0.0", diagram.LocationInProgress)
+	err = svc.DeleteFile(models.DiagramTypePUML, "api-test", "1.0.0", diagram.LocationInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not clean up: %v", err)
 	}

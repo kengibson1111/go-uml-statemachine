@@ -374,13 +374,13 @@ Error --> Idle : reset()
 		}
 
 		// Clean up from products
-		err = svc.Delete(models.DiagramTypePUML, "test-integration", "1.0.0", LocationProducts)
+		err = svc.DeleteFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationProducts)
 		if err != nil {
 			t.Logf("Warning: Could not clean up from products: %v", err)
 		}
 	} else {
 		// Clean up from in-progress
-		err = svc.Delete(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
+		err = svc.DeleteFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
 		if err != nil {
 			t.Logf("Warning: Could not clean up from in-progress: %v", err)
 		}
@@ -416,7 +416,7 @@ func TestPublicAPIErrorHandling(t *testing.T) {
 	}
 
 	// Test Delete non-existent
-	err = svc.Delete(models.DiagramTypePUML, "non-existent", "1.0.0", LocationInProgress)
+	err = svc.DeleteFile(models.DiagramTypePUML, "non-existent", "1.0.0", LocationInProgress)
 	if err == nil {
 		t.Error("Delete() of non-existent state-machine diagram should fail")
 	}

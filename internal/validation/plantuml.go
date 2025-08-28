@@ -220,7 +220,7 @@ func (v *PlantUMLValidator) resolveReference(ref models.Reference, diag *models.
 	// Determine target location and version based on reference type
 	switch ref.Type {
 	case models.ReferenceTypeProduct:
-		targetLocation = models.LocationProducts
+		targetLocation = models.LocationFileProducts
 		checkVersion = ref.Version
 	default:
 		result.AddError("UNKNOWN_REFERENCE_TYPE",
@@ -295,7 +295,7 @@ func (v *PlantUMLValidator) checkCircularReference(ref models.Reference, referen
 
 		switch nestedRef.Type {
 		case models.ReferenceTypeProduct:
-			targetLocation = models.LocationProducts
+			targetLocation = models.LocationFileProducts
 			checkVersion = nestedRef.Version
 		default:
 			continue // Skip unknown reference types

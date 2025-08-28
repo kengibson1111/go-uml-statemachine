@@ -650,7 +650,7 @@ func TestService_PromoteToProductsFile(t *testing.T) {
 					if location == models.LocationFileInProgress {
 						return true, nil
 					}
-					if location == models.LocationProducts {
+					if location == models.LocationFileProducts {
 						return false, nil // doesn't exist in products initially
 					}
 					return false, nil
@@ -692,7 +692,7 @@ func TestService_PromoteToProductsFile(t *testing.T) {
 						return false, nil
 					}
 					// After move operation
-					if location == models.LocationProducts {
+					if location == models.LocationFileProducts {
 						return true, nil // now exists in products
 					}
 					if location == models.LocationFileInProgress {
@@ -740,7 +740,7 @@ func TestService_PromoteToProductsFile(t *testing.T) {
 					if location == models.LocationFileInProgress {
 						return true, nil // exists in in-progress
 					}
-					if location == models.LocationProducts {
+					if location == models.LocationFileProducts {
 						return true, nil // already exists in products - conflict!
 					}
 					return false, nil
@@ -889,7 +889,7 @@ func TestService_PromoteToProductsFileWithRollback(t *testing.T) {
 						return false, nil
 					}
 					// After move operation - simulate partial failure
-					if location == models.LocationProducts {
+					if location == models.LocationFileProducts {
 						return false, nil // NOT found in products (verification failure)
 					}
 					if location == models.LocationFileInProgress {
@@ -949,7 +949,7 @@ func TestService_PromoteToProductsFileWithRollback(t *testing.T) {
 						return false, nil
 					}
 					// After move operation - simulate partial failure
-					if location == models.LocationProducts {
+					if location == models.LocationFileProducts {
 						return true, nil // found in products
 					}
 					if location == models.LocationFileInProgress {
@@ -1112,7 +1112,7 @@ func TestService_PromoteToProductsFileValidationScenarios(t *testing.T) {
 						return false, nil
 					}
 					// After move
-					if location == models.LocationProducts {
+					if location == models.LocationFileProducts {
 						return true, nil
 					}
 					if location == models.LocationFileInProgress {
@@ -1203,7 +1203,7 @@ func TestService_ValidateFile(t *testing.T) {
 			name:      "successful validation products with strictness products",
 			inputName: "test-diag",
 			inputVer:  "1.0.0",
-			inputLoc:  models.LocationProducts,
+			inputLoc:  models.LocationFileProducts,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				repo.readStateMachineFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 					return &models.StateMachineDiagram{
@@ -1374,7 +1374,7 @@ func TestService_ListAllFiles(t *testing.T) {
 		},
 		{
 			name:     "successful list products",
-			inputLoc: models.LocationProducts,
+			inputLoc: models.LocationFileProducts,
 			setupMock: func(repo *mockRepository) {
 				repo.listDiagramsFunc = func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 					return []models.StateMachineDiagram{
@@ -1502,7 +1502,7 @@ func TestService_ResolveFileReferences(t *testing.T) {
 			},
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-					if name == "auth-diag" && version == "2.0.0" && location == models.LocationProducts {
+					if name == "auth-diag" && version == "2.0.0" && location == models.LocationFileProducts {
 						return true, nil
 					}
 					return false, nil
@@ -1533,8 +1533,8 @@ func TestService_ResolveFileReferences(t *testing.T) {
 			},
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-					if (name == "auth-diag" && version == "2.0.0" && location == models.LocationProducts) ||
-						(name == "payment-diag" && version == "1.5.0" && location == models.LocationProducts) {
+					if (name == "auth-diag" && version == "2.0.0" && location == models.LocationFileProducts) ||
+						(name == "payment-diag" && version == "1.5.0" && location == models.LocationFileProducts) {
 						return true, nil
 					}
 					return false, nil
@@ -1614,7 +1614,7 @@ func TestService_ResolveFileReferences(t *testing.T) {
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
 					// Only product references should be checked
-					if location == models.LocationProducts {
+					if location == models.LocationFileProducts {
 						return true, nil
 					}
 					return false, nil

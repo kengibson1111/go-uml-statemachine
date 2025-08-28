@@ -11,7 +11,7 @@ type Location int
 
 const (
 	LocationFileInProgress Location = iota
-	LocationProducts
+	LocationFileProducts
 )
 
 // String returns the string representation of Location
@@ -19,7 +19,7 @@ func (l Location) String() string {
 	switch l {
 	case LocationFileInProgress:
 		return "in-progress"
-	case LocationProducts:
+	case LocationFileProducts:
 		return "products"
 	default:
 		return "unknown"

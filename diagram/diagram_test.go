@@ -358,9 +358,9 @@ Error --> Idle : reset()
 		}
 
 		// Verify promotion
-		productDiags, err := svc.ListAllFiles(models.DiagramTypePUML, LocationProducts)
+		productDiags, err := svc.ListAllFiles(models.DiagramTypePUML, LocationFileProducts)
 		if err != nil {
-			t.Fatalf("ListAllFiles(LocationProducts) failed: %v", err)
+			t.Fatalf("ListAllFiles(LocationFileProducts) failed: %v", err)
 		}
 		found = false
 		for _, diag := range productDiags {
@@ -374,7 +374,7 @@ Error --> Idle : reset()
 		}
 
 		// Clean up from products
-		err = svc.DeleteFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationProducts)
+		err = svc.DeleteFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationFileProducts)
 		if err != nil {
 			t.Logf("Warning: Could not clean up from products: %v", err)
 		}
@@ -439,8 +439,8 @@ func TestConstants(t *testing.T) {
 	if LocationFileInProgress != 0 {
 		t.Errorf("LocationFileInProgress = %d, want 0", LocationFileInProgress)
 	}
-	if LocationProducts != 1 {
-		t.Errorf("LocationProducts = %d, want 1", LocationProducts)
+	if LocationFileProducts != 1 {
+		t.Errorf("LocationFileProducts = %d, want 1", LocationFileProducts)
 	}
 	// Test ReferenceType constants
 	if ReferenceTypeProduct != 0 {

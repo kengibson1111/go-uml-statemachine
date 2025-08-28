@@ -114,7 +114,7 @@ Authenticated --> Idle : logout()
 
 	// Example 6: List products
 	fmt.Println("\n6. Listing all product state-machine diagrams...")
-	productDiags, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationProducts)
+	productDiags, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationFileProducts)
 	if err != nil {
 		log.Printf("Error listing product state-machine diagrams: %v", err)
 		return

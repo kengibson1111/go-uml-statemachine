@@ -40,7 +40,7 @@ func (pm *PathManager) GetLocationPath(location Location) string {
 	switch location {
 	case LocationFileInProgress:
 		return filepath.Join(pm.rootDir, "in-progress")
-	case LocationProducts:
+	case LocationFileProducts:
 		return filepath.Join(pm.rootDir, "products")
 	default:
 		return pm.rootDir
@@ -304,7 +304,7 @@ func (pm *PathManager) ParseFullPath(diagramType smmodels.DiagramType, fullPath 
 	case "in-progress":
 		location = LocationFileInProgress
 	case "products":
-		location = LocationProducts
+		location = LocationFileProducts
 	default:
 		return nil, NewStateMachineError(ErrorTypeValidation, "invalid location in path", nil).
 			WithContext("path", fullPath).

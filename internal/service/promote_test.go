@@ -20,7 +20,7 @@ func TestService_PromoteToProductsFile_Success(t *testing.T) {
 		if location == models.LocationFileInProgress {
 			return diagramState == "in-progress", nil
 		}
-		if location == models.LocationProducts {
+		if location == models.LocationFileProducts {
 			return diagramState == "products", nil
 		}
 		return false, nil
@@ -44,7 +44,7 @@ func TestService_PromoteToProductsFile_Success(t *testing.T) {
 	}
 
 	repo.moveStateMachineFunc = func(diagramType smmodels.DiagramType, name, version string, from, to models.Location) error {
-		if from == models.LocationFileInProgress && to == models.LocationProducts {
+		if from == models.LocationFileInProgress && to == models.LocationFileProducts {
 			diagramState = "products" // Simulate successful move
 		}
 		return nil
@@ -286,7 +286,7 @@ func TestService_PromoteToProductsFile_AtomicOperationWithRollback(t *testing.T)
 			return false, nil
 		}
 		// After move - simulate verification failure
-		if location == models.LocationProducts {
+		if location == models.LocationFileProducts {
 			return false, nil // NOT found in products (verification failure)
 		}
 		return false, nil
@@ -353,7 +353,7 @@ func TestService_PromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 		if location == models.LocationFileInProgress {
 			return diagramState == "in-progress", nil
 		}
-		if location == models.LocationProducts {
+		if location == models.LocationFileProducts {
 			return diagramState == "products", nil
 		}
 		return false, nil
@@ -385,7 +385,7 @@ func TestService_PromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 	}
 
 	repo.moveStateMachineFunc = func(diagramType smmodels.DiagramType, name, version string, from, to models.Location) error {
-		if from == models.LocationFileInProgress && to == models.LocationProducts {
+		if from == models.LocationFileInProgress && to == models.LocationFileProducts {
 			diagramState = "products" // Simulate successful move
 			return nil
 		}

@@ -85,8 +85,8 @@ type Location = models.Location
 const (
 	// LocationFileInProgress indicates the state-machine diagram is in development/testing phase.
 	LocationFileInProgress = models.LocationFileInProgress
-	// LocationProducts indicates the state-machine diagram is production-ready.
-	LocationProducts = models.LocationProducts
+	// LocationFileProducts indicates the state-machine diagram is production-ready.
+	LocationFileProducts = models.LocationFileProducts
 )
 
 // ReferenceType indicates the type of reference between state-machine diagrams.

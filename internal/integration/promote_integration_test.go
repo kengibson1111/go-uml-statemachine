@@ -54,13 +54,13 @@ func TestPromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 		}
 
 		// Verify it exists in products
-		diagram, err := svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
+		diagram, err := svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationFileProducts)
 		if err != nil {
 			t.Fatalf("Failed to read promoted diagram: %v", err)
 		}
 
-		if diagram.Location != models.LocationProducts {
-			t.Errorf("Expected location %s, got %s", models.LocationProducts.String(), diagram.Location.String())
+		if diagram.Location != models.LocationFileProducts {
+			t.Errorf("Expected location %s, got %s", models.LocationFileProducts.String(), diagram.Location.String())
 		}
 
 		if diagram.Content != fixture.Content {
@@ -75,7 +75,7 @@ func TestPromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 	})
 
 	t.Run("Validate diagram in products", func(t *testing.T) {
-		result, err := svc.ValidateFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
+		result, err := svc.ValidateFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationFileProducts)
 		if err != nil {
 			t.Fatalf("Failed to validate promoted diagram: %v", err)
 		}
@@ -86,7 +86,7 @@ func TestPromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 	})
 
 	t.Run("List diagrams in products", func(t *testing.T) {
-		diagrams, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationProducts)
+		diagrams, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationFileProducts)
 		if err != nil {
 			t.Fatalf("Failed to list diagrams in products: %v", err)
 		}
@@ -236,7 +236,7 @@ func TestPromoteToProductsFile_ValidationStrictness(t *testing.T) {
 					t.Errorf("Expected promotion to succeed, but got error: %v", err)
 				} else {
 					// Verify it's in products
-					_, err = svc.ReadFile(smmodels.DiagramTypePUML, diagramName, "1.0.0", models.LocationProducts)
+					_, err = svc.ReadFile(smmodels.DiagramTypePUML, diagramName, "1.0.0", models.LocationFileProducts)
 					if err != nil {
 						t.Errorf("Promoted diagram should be readable from products: %v", err)
 					}
@@ -285,7 +285,7 @@ func TestPromoteToProductsFile_ConcurrentPromotions(t *testing.T) {
 		}
 
 		// Verify it's in products
-		_, err = svc.ReadFile(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version, models.LocationProducts)
+		_, err = svc.ReadFile(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version, models.LocationFileProducts)
 		if err != nil {
 			t.Errorf("Promoted diagram should be in products: %v", err)
 		}

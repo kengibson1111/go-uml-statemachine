@@ -538,7 +538,7 @@ func TestPlantUMLValidator_ResolveFileReferences_ExistingReference(t *testing.T)
 	referencedDiag := &models.StateMachineDiagram{
 		Name:     "auth-service",
 		Version:  "1.2.0",
-		Location: models.LocationProducts,
+		Location: models.LocationFileProducts,
 		Content:  "@startuml\n[*] --> AuthIdle\n@enduml",
 	}
 	mockRepo.AddStateMachine(referencedDiag)
@@ -609,7 +609,7 @@ func TestPlantUMLValidator_ResolveFileReferences_CircularReference(t *testing.T)
 	diag1 := &models.StateMachineDiagram{
 		Name:     "service-a",
 		Version:  "1.0.0",
-		Location: models.LocationProducts,
+		Location: models.LocationFileProducts,
 		Content: `@startuml
 !include products/service-b-1.0.0/service-b-1.0.0.puml
 [*] --> StateA
@@ -619,7 +619,7 @@ func TestPlantUMLValidator_ResolveFileReferences_CircularReference(t *testing.T)
 	diag2 := &models.StateMachineDiagram{
 		Name:     "service-b",
 		Version:  "1.0.0",
-		Location: models.LocationProducts,
+		Location: models.LocationFileProducts,
 		Content: `@startuml
 !include products/service-a-1.0.0/service-a-1.0.0.puml
 [*] --> StateB
@@ -884,7 +884,7 @@ func TestPlantUMLValidator_StrictnessWithCircularReference(t *testing.T) {
 	diag := &models.StateMachineDiagram{
 		Name:     "test",
 		Version:  "1.0.0",
-		Location: models.LocationProducts,
+		Location: models.LocationFileProducts,
 		Content: `@startuml
 !include products/test-1.0.0/test-1.0.0.puml
 [*] --> Idle

@@ -38,7 +38,7 @@ type Location int
 
 const (
     LocationFileInProgress Location = iota // Development/testing phase
-    LocationProducts                   // Production-ready
+    LocationFileProducts                   // Production-ready
 )
 ```
 
@@ -419,7 +419,7 @@ ValidateFile(diagramType models.DiagramType, name, version string, location Loca
 
 **Strictness Levels:**
 - `LocationFileInProgress`: Uses `StrictnessInProgress` (errors and warnings)
-- `LocationProducts`: Uses `StrictnessProducts` (warnings only)
+- `LocationFileProducts`: Uses `StrictnessProducts` (warnings only)
 
 **Example:**
 ```go

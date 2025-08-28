@@ -228,7 +228,7 @@ AccountLocked --> Anonymous : unlock_timeout()
 
 	// Clean up
 	defer func() {
-		svc.DeleteFile(models.DiagramTypePUML, "user-session", "1.0.0", diagram.LocationProducts)
+		svc.DeleteFile(models.DiagramTypePUML, "user-session", "1.0.0", diagram.LocationFileProducts)
 		svc.DeleteFile(models.DiagramTypePUML, "user-session", "1.0.0", diagram.LocationFileInProgress)
 	}()
 }
@@ -313,7 +313,7 @@ Authenticated --> [*]
 	// Clean up
 	defer func() {
 		svc.DeleteFile(models.DiagramTypePUML, "mfa-system", "1.0.0", diagram.LocationFileInProgress)
-		svc.DeleteFile(models.DiagramTypePUML, "auth-component", "1.0.0", diagram.LocationProducts)
+		svc.DeleteFile(models.DiagramTypePUML, "auth-component", "1.0.0", diagram.LocationFileProducts)
 	}()
 }
 

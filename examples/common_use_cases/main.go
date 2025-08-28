@@ -199,7 +199,7 @@ Locked --> Idle : unlock_timeout()
 			fmt.Printf("✓ Successfully promoted to products\n")
 
 			// Clean up from products
-			err = svc.DeleteFile(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationProducts)
+			err = svc.DeleteFile(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationFileProducts)
 			if err != nil {
 				log.Printf("Warning: Could not clean up from products: %v", err)
 			}
@@ -298,7 +298,7 @@ Authenticated --> [*]
 
 	// Clean up
 	svc.DeleteFile(models.DiagramTypePUML, "complex-auth", "1.0.0", diagram.LocationFileInProgress)
-	svc.DeleteFile(models.DiagramTypePUML, "base-auth", "1.0.0", diagram.LocationProducts)
+	svc.DeleteFile(models.DiagramTypePUML, "base-auth", "1.0.0", diagram.LocationFileProducts)
 }
 
 // Use Case 5: Error handling and recovery

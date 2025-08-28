@@ -109,7 +109,7 @@ func TestFileSystemRepository_WriteDiagram(t *testing.T) {
 		},
 		{
 			name:        "valid products state-machine diagram",
-			diagram:     th.CreateTestDiagram("test-diag", "1.0.0", models.LocationProducts),
+			diagram:     th.CreateTestDiagram("test-diag", "1.0.0", models.LocationFileProducts),
 			expectError: false,
 		},
 		{
@@ -542,7 +542,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 			diagName:    "test-move",
 			version:     "1.0.0",
 			from:        models.LocationFileInProgress,
-			to:          models.LocationProducts,
+			to:          models.LocationFileProducts,
 			expectError: false,
 		},
 		{
@@ -550,7 +550,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 			diagName:    "",
 			version:     "1.0.0",
 			from:        models.LocationFileInProgress,
-			to:          models.LocationProducts,
+			to:          models.LocationFileProducts,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
 		},
@@ -559,7 +559,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 			diagName:    "test-move",
 			version:     "",
 			from:        models.LocationFileInProgress,
-			to:          models.LocationProducts,
+			to:          models.LocationFileProducts,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
 		},
@@ -577,7 +577,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 			diagName:    "non-existent",
 			version:     "1.0.0",
 			from:        models.LocationFileInProgress,
-			to:          models.LocationProducts,
+			to:          models.LocationFileProducts,
 			expectError: true,
 			errorType:   models.ErrorTypeFileNotFound,
 		},
@@ -586,7 +586,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 			diagName:    "test-move",
 			version:     "1.0.0",
 			from:        models.Location(999), // Invalid location - will use root directory
-			to:          models.LocationProducts,
+			to:          models.LocationFileProducts,
 			expectError: true,
 			errorType:   models.ErrorTypeFileNotFound, // Source file won't exist in root directory
 		},
@@ -763,7 +763,7 @@ func TestFileSystemRepository_ListDiagrams(t *testing.T) {
 	testDiagrams := []*models.StateMachineDiagram{
 		th.CreateTestDiagram("diag1", "1.0.0", models.LocationFileInProgress),
 		th.CreateTestDiagram("diag2", "1.1.0", models.LocationFileInProgress),
-		th.CreateTestDiagram("diag3", "2.0.0", models.LocationProducts),
+		th.CreateTestDiagram("diag3", "2.0.0", models.LocationFileProducts),
 	}
 
 	// Write the state-machine diagrams
@@ -788,7 +788,7 @@ func TestFileSystemRepository_ListDiagrams(t *testing.T) {
 		},
 		{
 			name:          "list products state-machine diagrams",
-			location:      models.LocationProducts,
+			location:      models.LocationFileProducts,
 			expectedCount: 1,
 			expectError:   false,
 		},
@@ -871,13 +871,13 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 5. Move to products
-	err = th.repo.MoveDiagram(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationFileInProgress, models.LocationProducts)
+	err = th.repo.MoveDiagram(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationFileInProgress, models.LocationFileProducts)
 	if err != nil {
 		t.Fatalf("Failed to move state-machine diagram: %v", err)
 	}
 
 	// 6. Verify it's in products now
-	exists, err = th.repo.Exists(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
+	exists, err = th.repo.Exists(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationFileProducts)
 	if err != nil {
 		t.Fatalf("Failed to check existence in products: %v", err)
 	}
@@ -895,13 +895,13 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 8. Delete from products
-	err = th.repo.DeleteDiagram(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
+	err = th.repo.DeleteDiagram(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationFileProducts)
 	if err != nil {
 		t.Fatalf("Failed to delete state-machine diagram: %v", err)
 	}
 
 	// 9. Verify it's gone
-	exists, err = th.repo.Exists(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationProducts)
+	exists, err = th.repo.Exists(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationFileProducts)
 	if err != nil {
 		t.Fatalf("Failed to check existence after delete: %v", err)
 	}

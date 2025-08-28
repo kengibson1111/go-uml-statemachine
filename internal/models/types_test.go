@@ -18,7 +18,7 @@ func TestLocation_String(t *testing.T) {
 		},
 		{
 			name:     "products location",
-			location: LocationProducts,
+			location: LocationFileProducts,
 			expected: "products",
 		},
 		{

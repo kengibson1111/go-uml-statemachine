@@ -125,7 +125,7 @@ config.MergeWithEnv()
 diag, err := svc.CreateFile(models.DiagramTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationFileInProgress)
 
 // Create in products location (for direct production deployment)
-diag, err := svc.CreateFile(models.DiagramTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationProducts)
+diag, err := svc.CreateFile(models.DiagramTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationFileProducts)
 ```
 
 ### Reading State-Machine Diagrams
@@ -163,7 +163,7 @@ err := svc.DeleteFile(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.Loca
 inProgressDiags, err := svc.ListAllFiles(models.DiagramTypePUML, diagram.LocationFileInProgress)
 
 // List all production state-machine diagrams
-productDiags, err := svc.ListAllFiles(models.DiagramTypePUML, diagram.LocationProducts)
+productDiags, err := svc.ListAllFiles(models.DiagramTypePUML, diagram.LocationFileProducts)
 ```
 
 ## Validation
@@ -626,7 +626,7 @@ type diagram struct {
 type Location int
 const (
     LocationFileInProgress Location = iota
-    LocationProducts
+    LocationFileProducts
 )
 
 // ValidationResult contains validation outcomes

@@ -184,7 +184,7 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Println("\n8. Cleaning up test data...")
 
 	// Delete from products first
-	err = svc.DeleteFile(smmodels.DiagramTypePUML, "base-auth", "1.0.0", models.LocationProducts)
+	err = svc.DeleteFile(smmodels.DiagramTypePUML, "base-auth", "1.0.0", models.LocationFileProducts)
 	if err != nil {
 		log.Printf("Warning: Could not delete base-auth from products: %v", err)
 	} else {

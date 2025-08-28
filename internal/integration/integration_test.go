@@ -192,13 +192,13 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 		}
 
 		// Verify it exists in products
-		diagram, err := svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
+		diagram, err := svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationFileProducts)
 		if err != nil {
 			t.Fatalf("Failed to read promoted state-machine diagram: %v", err)
 		}
 
-		if diagram.Location != models.LocationProducts {
-			t.Errorf("Expected location %s, got %s", models.LocationProducts.String(), diagram.Location.String())
+		if diagram.Location != models.LocationFileProducts {
+			t.Errorf("Expected location %s, got %s", models.LocationFileProducts.String(), diagram.Location.String())
 		}
 
 		// Verify it no longer exists in in-progress
@@ -209,7 +209,7 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 	})
 
 	t.Run("List state-machine diagrams in products", func(t *testing.T) {
-		diagrams, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationProducts)
+		diagrams, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationFileProducts)
 		if err != nil {
 			t.Fatalf("Failed to list state-machine diagrams in products: %v", err)
 		}
@@ -228,13 +228,13 @@ func TestCompleteWorkflowFromCreationToPromotion(t *testing.T) {
 	})
 
 	t.Run("Delete state-machine diagram from products", func(t *testing.T) {
-		err := svc.DeleteFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
+		err := svc.DeleteFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationFileProducts)
 		if err != nil {
 			t.Fatalf("Failed to delete state-machine diagram: %v", err)
 		}
 
 		// Verify it no longer exists
-		_, err = svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationProducts)
+		_, err = svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationFileProducts)
 		if err == nil {
 			t.Errorf("State-machine diagram should not exist after deletion")
 		}
@@ -555,7 +555,7 @@ func TestConcurrentOperationsAndThreadSafety(t *testing.T) {
 		}
 
 		// Verify the state-machine diagram is in products
-		_, err = svc.ReadFile(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version, models.LocationProducts)
+		_, err = svc.ReadFile(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version, models.LocationFileProducts)
 		if err != nil {
 			t.Errorf("State-machine diagram should be in products after promotion: %v", err)
 		}
@@ -751,7 +751,7 @@ func TestValidationStrictnessLevels(t *testing.T) {
 		}
 
 		// Validate with products strictness
-		result, err := svc.ValidateFile(smmodels.DiagramTypePUML, "strictness-test", "1.0.0", models.LocationProducts)
+		result, err := svc.ValidateFile(smmodels.DiagramTypePUML, "strictness-test", "1.0.0", models.LocationFileProducts)
 		if err != nil {
 			t.Fatalf("Failed to validate with products strictness: %v", err)
 		}

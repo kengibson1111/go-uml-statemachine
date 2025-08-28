@@ -51,7 +51,7 @@ func TestPathManager_GetLocationPath(t *testing.T) {
 		},
 		{
 			name:     "products location",
-			location: LocationProducts,
+			location: LocationFileProducts,
 			expected: filepath.Join(RootDirectoryName, "products"),
 		},
 		{
@@ -430,7 +430,7 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 			want: &PathInfo{
 				Name:     "payment-flow",
 				Version:  "2.1.0",
-				Location: LocationProducts,
+				Location: LocationFileProducts,
 			},
 			wantError: false,
 		},

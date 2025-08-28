@@ -207,7 +207,7 @@ func (s *service) CreateFile(diagramType smmodels.DiagramType, name, version str
 	// For in-progress state-machine diagrams, check if there's a conflicting directory in products
 	if location == models.LocationFileInProgress {
 		opLogger.Debug("Checking for conflicts in products directory")
-		productExists, err := s.repo.Exists(diagramType, name, version, models.LocationProducts)
+		productExists, err := s.repo.Exists(diagramType, name, version, models.LocationFileProducts)
 		if err != nil {
 			wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
 				"failed to check products directory for conflicts").
@@ -471,7 +471,7 @@ func (s *service) PromoteToProductsFile(diagramType smmodels.DiagramType, name, 
 	}
 
 	// Step 2: Check if there's already a directory with the same name in products
-	productExists, err := s.repo.Exists(diagramType, name, version, models.LocationProducts)
+	productExists, err := s.repo.Exists(diagramType, name, version, models.LocationFileProducts)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check products directory for conflicts", err).
@@ -566,7 +566,7 @@ func (s *service) PromoteToCache(diagramType smmodels.DiagramType, name, version
 // performAtomicPromotion performs the actual move operation with rollback capability
 func (s *service) performAtomicPromotion(diagramType smmodels.DiagramType, name, version string) error {
 	// Step 1: Attempt to move the state-machine diagram
-	err := s.repo.MoveDiagram(diagramType, name, version, models.LocationFileInProgress, models.LocationProducts)
+	err := s.repo.MoveDiagram(diagramType, name, version, models.LocationFileInProgress, models.LocationFileProducts)
 	if err != nil {
 		// If move fails, no rollback needed since nothing was changed
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
@@ -577,7 +577,7 @@ func (s *service) performAtomicPromotion(diagramType smmodels.DiagramType, name,
 
 	// Step 2: Verify the move was successful by checking both locations
 	// Check that it exists in products
-	productExists, err := s.repo.Exists(diagramType, name, version, models.LocationProducts)
+	productExists, err := s.repo.Exists(diagramType, name, version, models.LocationFileProducts)
 	if err != nil {
 		// Attempt rollback - move back to in-progress
 		s.attemptRollback(diagramType, name, version)
@@ -621,7 +621,7 @@ func (s *service) performAtomicPromotion(diagramType smmodels.DiagramType, name,
 func (s *service) attemptRollback(diagramType smmodels.DiagramType, name, version string) {
 	// This is a best-effort rollback - we don't return errors from here
 	// as we're already in an error state
-	rollbackErr := s.repo.MoveDiagram(diagramType, name, version, models.LocationProducts, models.LocationFileInProgress)
+	rollbackErr := s.repo.MoveDiagram(diagramType, name, version, models.LocationFileProducts, models.LocationFileInProgress)
 	if rollbackErr != nil {
 		// Log the rollback failure but don't return it - the original error is more important
 		// In a real implementation, this would be logged to a proper logging system
@@ -654,7 +654,7 @@ func (s *service) ValidateFile(diagramType smmodels.DiagramType, name, version s
 
 	// Determine validation strictness based on location
 	strictness := models.StrictnessInProgress
-	if location == models.LocationProducts {
+	if location == models.LocationFileProducts {
 		strictness = models.StrictnessProducts
 	}
 
@@ -745,7 +745,7 @@ func (s *service) resolveReference(diag *models.StateMachineDiagram, ref *models
 	}
 
 	// For product references, check if the referenced state-machine diagram exists in products
-	exists, err := s.repo.Exists(diag.DiagramType, ref.Name, ref.Version, models.LocationProducts)
+	exists, err := s.repo.Exists(diag.DiagramType, ref.Name, ref.Version, models.LocationFileProducts)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check product reference existence", err).

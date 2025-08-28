@@ -45,7 +45,7 @@ type Logger struct {
 	output       io.Writer
 	prefix       string
 	enableCaller bool
-	fields       map[string]interface{}
+	fields       map[string]any
 }
 
 // LoggerConfig holds configuration for creating a logger
@@ -97,7 +97,7 @@ func NewLogger(config *LoggerConfig) (*Logger, error) {
 		output:       output,
 		prefix:       config.Prefix,
 		enableCaller: config.EnableCaller,
-		fields:       make(map[string]interface{}),
+		fields:       make(map[string]any),
 	}, nil
 }
 
@@ -108,13 +108,13 @@ func NewDefaultLogger() *Logger {
 }
 
 // WithField adds a field to the logger context
-func (l *Logger) WithField(key string, value interface{}) *Logger {
+func (l *Logger) WithField(key string, value any) *Logger {
 	newLogger := &Logger{
 		level:        l.level,
 		output:       l.output,
 		prefix:       l.prefix,
 		enableCaller: l.enableCaller,
-		fields:       make(map[string]interface{}),
+		fields:       make(map[string]any),
 	}
 
 	// Copy existing fields
@@ -128,13 +128,13 @@ func (l *Logger) WithField(key string, value interface{}) *Logger {
 }
 
 // WithFields adds multiple fields to the logger context
-func (l *Logger) WithFields(fields map[string]interface{}) *Logger {
+func (l *Logger) WithFields(fields map[string]any) *Logger {
 	newLogger := &Logger{
 		level:        l.level,
 		output:       l.output,
 		prefix:       l.prefix,
 		enableCaller: l.enableCaller,
-		fields:       make(map[string]interface{}),
+		fields:       make(map[string]any),
 	}
 
 	// Copy existing fields
@@ -166,7 +166,7 @@ func (l *Logger) Debug(message string) {
 }
 
 // Debugf logs a formatted debug message
-func (l *Logger) Debugf(format string, args ...interface{}) {
+func (l *Logger) Debugf(format string, args ...any) {
 	l.log(LogLevelDebug, fmt.Sprintf(format, args...))
 }
 
@@ -176,7 +176,7 @@ func (l *Logger) Info(message string) {
 }
 
 // Infof logs a formatted info message
-func (l *Logger) Infof(format string, args ...interface{}) {
+func (l *Logger) Infof(format string, args ...any) {
 	l.log(LogLevelInfo, fmt.Sprintf(format, args...))
 }
 
@@ -186,7 +186,7 @@ func (l *Logger) Warn(message string) {
 }
 
 // Warnf logs a formatted warning message
-func (l *Logger) Warnf(format string, args ...interface{}) {
+func (l *Logger) Warnf(format string, args ...any) {
 	l.log(LogLevelWarn, fmt.Sprintf(format, args...))
 }
 
@@ -196,7 +196,7 @@ func (l *Logger) Error(message string) {
 }
 
 // Errorf logs a formatted error message
-func (l *Logger) Errorf(format string, args ...interface{}) {
+func (l *Logger) Errorf(format string, args ...any) {
 	l.log(LogLevelError, fmt.Sprintf(format, args...))
 }
 
@@ -207,7 +207,7 @@ func (l *Logger) Fatal(message string) {
 }
 
 // Fatalf logs a formatted fatal message and exits the program
-func (l *Logger) Fatalf(format string, args ...interface{}) {
+func (l *Logger) Fatalf(format string, args ...any) {
 	l.log(LogLevelFatal, fmt.Sprintf(format, args...))
 	os.Exit(1)
 }
@@ -294,7 +294,7 @@ func Debug(message string) {
 	globalLogger.Debug(message)
 }
 
-func Debugf(format string, args ...interface{}) {
+func Debugf(format string, args ...any) {
 	globalLogger.Debugf(format, args...)
 }
 
@@ -302,7 +302,7 @@ func Info(message string) {
 	globalLogger.Info(message)
 }
 
-func Infof(format string, args ...interface{}) {
+func Infof(format string, args ...any) {
 	globalLogger.Infof(format, args...)
 }
 
@@ -310,7 +310,7 @@ func Warn(message string) {
 	globalLogger.Warn(message)
 }
 
-func Warnf(format string, args ...interface{}) {
+func Warnf(format string, args ...any) {
 	globalLogger.Warnf(format, args...)
 }
 
@@ -318,7 +318,7 @@ func Error(message string) {
 	globalLogger.Error(message)
 }
 
-func Errorf(format string, args ...interface{}) {
+func Errorf(format string, args ...any) {
 	globalLogger.Errorf(format, args...)
 }
 
@@ -326,15 +326,15 @@ func Fatal(message string) {
 	globalLogger.Fatal(message)
 }
 
-func Fatalf(format string, args ...interface{}) {
+func Fatalf(format string, args ...any) {
 	globalLogger.Fatalf(format, args...)
 }
 
-func WithField(key string, value interface{}) *Logger {
+func WithField(key string, value any) *Logger {
 	return globalLogger.WithField(key, value)
 }
 
-func WithFields(fields map[string]interface{}) *Logger {
+func WithFields(fields map[string]any) *Logger {
 	return globalLogger.WithFields(fields)
 }
 

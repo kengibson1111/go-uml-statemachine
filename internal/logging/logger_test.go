@@ -154,7 +154,7 @@ func TestLogger_WithFields(t *testing.T) {
 	}
 
 	logger, _ := NewLogger(config)
-	fieldsLogger := logger.WithFields(map[string]interface{}{
+	fieldsLogger := logger.WithFields(map[string]any{
 		"key1": "value1",
 		"key2": 42,
 	})
@@ -450,7 +450,7 @@ func TestGlobalLoggerWithFields(t *testing.T) {
 
 	// Test global field functions
 	WithField("key", "value").Info("test message")
-	WithFields(map[string]interface{}{
+	WithFields(map[string]any{
 		"key1": "value1",
 		"key2": 42,
 	}).Info("test message 2")

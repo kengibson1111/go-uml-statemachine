@@ -64,7 +64,7 @@ func TestStateMachineError_DetailedError(t *testing.T) {
 		Timestamp: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
 		Operation: "Validate",
 		Component: "Validator",
-		Context: map[string]interface{}{
+		Context: map[string]any{
 			"name":    "test-diag",
 			"version": "1.0.0",
 		},
@@ -97,7 +97,7 @@ func TestStateMachineError_DetailedError(t *testing.T) {
 func TestStateMachineError_WithContextMap(t *testing.T) {
 	err := NewStateMachineError(ErrorTypeValidation, "test", nil)
 
-	contextMap := map[string]interface{}{
+	contextMap := map[string]any{
 		"name":    "test-diag",
 		"version": "1.0.0",
 		"count":   5,

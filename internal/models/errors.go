@@ -100,7 +100,7 @@ type StateMachineError struct {
 	Type        ErrorType
 	Message     string
 	Cause       error
-	Context     map[string]interface{}
+	Context     map[string]any
 	Severity    ErrorSeverity
 	Timestamp   time.Time
 	StackTrace  []StackFrame
@@ -211,7 +211,7 @@ func NewStateMachineError(errorType ErrorType, message string, cause error) *Sta
 		Type:        errorType,
 		Message:     message,
 		Cause:       cause,
-		Context:     make(map[string]interface{}),
+		Context:     make(map[string]any),
 		Severity:    ErrorSeverityMedium, // Default severity
 		Timestamp:   time.Now(),
 		StackTrace:  captureStackTrace(2), // Skip this function and the caller
@@ -235,13 +235,13 @@ func NewCriticalError(errorType ErrorType, message string, cause error) *StateMa
 }
 
 // WithContext adds context information to the error
-func (e *StateMachineError) WithContext(key string, value interface{}) *StateMachineError {
+func (e *StateMachineError) WithContext(key string, value any) *StateMachineError {
 	e.Context[key] = value
 	return e
 }
 
 // WithContextMap adds multiple context entries to the error
-func (e *StateMachineError) WithContextMap(context map[string]interface{}) *StateMachineError {
+func (e *StateMachineError) WithContextMap(context map[string]any) *StateMachineError {
 	for key, value := range context {
 		e.Context[key] = value
 	}
@@ -320,7 +320,7 @@ func WrapError(err error, errorType ErrorType, message string) *StateMachineErro
 			Type:        errorType,
 			Message:     message,
 			Cause:       diagErr,
-			Context:     make(map[string]interface{}),
+			Context:     make(map[string]any),
 			Severity:    diagErr.Severity, // Inherit severity from wrapped error
 			Timestamp:   time.Now(),
 			StackTrace:  captureStackTrace(2),

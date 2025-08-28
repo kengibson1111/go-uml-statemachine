@@ -189,9 +189,15 @@ func (pm *PathManager) ParseDirectoryName(dirName string) (*PathInfo, error) {
 }
 
 // ParseFileName parses a PlantUML file name to extract name and version
-func (pm *PathManager) ParseFileName(fileName string) (*PathInfo, error) {
+func (pm *PathManager) ParseFileName(diagramType smmodels.DiagramType, fileName string) (*PathInfo, error) {
 	if fileName == "" {
 		return nil, NewStateMachineError(ErrorTypeValidation, "file name cannot be empty", nil)
+	}
+
+	// currently, the only supported diagram type is PlantUML
+	if diagramType != smmodels.DiagramTypePUML {
+		return nil, NewStateMachineError(ErrorTypeValidation,
+			fmt.Sprintf("diagram type must be %s", smmodels.DiagramTypePUML.String()), nil)
 	}
 
 	// Remove the .puml extension
@@ -244,7 +250,13 @@ func (pm *PathManager) ParseFileName(fileName string) (*PathInfo, error) {
 }
 
 // ParseFullPath parses a full path to extract location and path information
-func (pm *PathManager) ParseFullPath(fullPath string) (*PathInfo, error) {
+func (pm *PathManager) ParseFullPath(diagramType smmodels.DiagramType, fullPath string) (*PathInfo, error) {
+	// currently, the only supported diagram type is PlantUML
+	if diagramType != smmodels.DiagramTypePUML {
+		return nil, NewStateMachineError(ErrorTypeValidation,
+			fmt.Sprintf("diagram type must be %s", smmodels.DiagramTypePUML.String()), nil)
+	}
+
 	// Clean and validate the path
 	cleanPath := filepath.Clean(fullPath)
 	if err := pm.ValidatePath(cleanPath); err != nil {
@@ -262,7 +274,7 @@ func (pm *PathManager) ParseFullPath(fullPath string) (*PathInfo, error) {
 	// Split the path into components
 	pathParts := strings.Split(filepath.ToSlash(relPath), "/")
 	if len(pathParts) < 3 {
-		return nil, NewStateMachineError(ErrorTypeValidation, "path is too short", nil).
+		return nil, NewStateMachineError(ErrorTypeValidation, "path is too short - missing diagram file", nil).
 			WithContext("path", fullPath)
 	}
 
@@ -280,13 +292,22 @@ func (pm *PathManager) ParseFullPath(fullPath string) (*PathInfo, error) {
 	}
 
 	// Verify diagram type directory (pathParts[1] should be "puml")
-	if len(pathParts) < 3 {
-		return nil, NewStateMachineError(ErrorTypeValidation, "missing diagram file", nil).
-			WithContext("path", fullPath)
+	switch pathParts[1] {
+	case smmodels.DiagramTypePUML.String():
+		if diagramType.String() != pathParts[1] {
+			return nil, NewStateMachineError(ErrorTypeValidation,
+				fmt.Sprintf("diagram type in path must match input diagram type %s", diagramType.String()), nil).
+				WithContext("path", fullPath).
+				WithContext("diagram type", pathParts[1])
+		}
+	default:
+		return nil, NewStateMachineError(ErrorTypeValidation, "invalid diagram type in path", nil).
+			WithContext("path", fullPath).
+			WithContext("diagram type", pathParts[1])
 	}
 
 	// Parse the file name to get name and version
-	pathInfo, err := pm.ParseFileName(pathParts[2])
+	pathInfo, err := pm.ParseFileName(diagramType, pathParts[2])
 	if err != nil {
 		return nil, err
 	}

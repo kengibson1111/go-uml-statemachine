@@ -27,14 +27,18 @@ type Validator interface {
 
 // DiagramService interface defines the contract for business operations
 type DiagramService interface {
-	// CRUD operations
+	// File CRUD operations
 	CreateFile(diagramType smmodels.DiagramType, name, version string, content string, location Location) (*StateMachineDiagram, error)
 	ReadFile(diagramType smmodels.DiagramType, name, version string, location Location) (*StateMachineDiagram, error)
 	UpdateInProgressFile(diag *StateMachineDiagram) error
 	DeleteFile(diagramType smmodels.DiagramType, name, version string, location Location) error
 
+	// cache close
+	CloseCache() error
+
 	// Business operations
 	PromoteToProductsFile(diagramType smmodels.DiagramType, name, version string) error // Move from in-progress to products
+	PromoteToCache(diagramType smmodels.DiagramType, name, version string) error        // Move from products file to operational cache
 	ValidateFile(diagramType smmodels.DiagramType, name, version string, location Location) (*ValidationResult, error)
 	ListAllFiles(diagramType smmodels.DiagramType, location Location) ([]StateMachineDiagram, error)
 

@@ -38,7 +38,7 @@ func TestValidationStrictness_String(t *testing.T) {
 }
 
 func TestValidationError_Creation(t *testing.T) {
-	context := make(map[string]interface{})
+	context := make(map[string]any)
 	context["rule"] = "missing_start_tag"
 	context["expected"] = "@startuml"
 
@@ -72,7 +72,7 @@ func TestValidationError_Creation(t *testing.T) {
 }
 
 func TestValidationWarning_Creation(t *testing.T) {
-	context := make(map[string]interface{})
+	context := make(map[string]any)
 	context["suggestion"] = "Consider adding state descriptions"
 
 	validationWarning := ValidationWarning{

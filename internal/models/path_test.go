@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/kengibson1111/go-uml-statemachine-models/models"
 )
 
 func TestNewPathManager(t *testing.T) {
@@ -347,7 +349,7 @@ func TestPathManager_ParseFileName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := pm.ParseFileName(tt.fileName)
+			got, err := pm.ParseFileName(models.DiagramTypePUML, tt.fileName)
 			if tt.wantError {
 				if err == nil {
 					t.Errorf("ParseFileName() expected error but got none")
@@ -428,7 +430,7 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := pm.ParseFullPath(tt.fullPath)
+			got, err := pm.ParseFullPath(models.DiagramTypePUML, tt.fullPath)
 			if tt.wantError {
 				if err == nil {
 					t.Errorf("ParseFullPath() expected error but got none")

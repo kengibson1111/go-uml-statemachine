@@ -60,7 +60,7 @@ func demonstrateValidationErrors(svc models.DiagramService, logger *logging.Logg
 	_, err := svc.CreateFile(smmodels.DiagramTypePUML, "", "1.0.0", "content", models.LocationInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
-			logger.WithFields(map[string]interface{}{
+			logger.WithFields(map[string]any{
 				"errorType":   diagErr.Type.String(),
 				"severity":    diagErr.Severity.String(),
 				"operation":   diagErr.Operation,
@@ -100,7 +100,7 @@ func demonstrateFileSystemErrors(svc models.DiagramService, logger *logging.Logg
 	_, err := svc.ReadFile(smmodels.DiagramTypePUML, "nonexistent", "1.0.0", models.LocationInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
-			logger.WithFields(map[string]interface{}{
+			logger.WithFields(map[string]any{
 				"errorType": diagErr.Type.String(),
 				"severity":  diagErr.Severity.String(),
 				"context":   diagErr.Context,
@@ -133,7 +133,7 @@ Active --> [*] : stop
 	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", validContent, models.LocationInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
-			logger.WithFields(map[string]interface{}{
+			logger.WithFields(map[string]any{
 				"errorType":   diagErr.Type.String(),
 				"severity":    diagErr.Severity.String(),
 				"recoverable": diagErr.Recoverable,
@@ -169,7 +169,7 @@ func demonstrateErrorSeverities(svc models.DiagramService, logger *logging.Logge
 
 	for i, err := range errors {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
-			logger.WithFields(map[string]interface{}{
+			logger.WithFields(map[string]any{
 				"errorIndex":  i + 1,
 				"errorType":   diagErr.Type.String(),
 				"severity":    diagErr.Severity.String(),
@@ -197,7 +197,7 @@ func demonstrateErrorSeverities(svc models.DiagramService, logger *logging.Logge
 		WithSeverity(models.ErrorSeverityHigh).
 		WithRecoverable(false)
 
-	logger.WithFields(map[string]interface{}{
+	logger.WithFields(map[string]any{
 		"isRecoverable": models.IsRecoverable(testErr),
 		"errorType":     models.GetErrorType(testErr).String(),
 		"severity":      models.GetErrorSeverity(testErr).String(),

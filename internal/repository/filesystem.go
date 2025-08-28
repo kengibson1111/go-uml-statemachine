@@ -56,7 +56,7 @@ func NewFileSystemRepository(config *models.Config) *FileSystemRepository {
 // ReadDiagram reads a state-machine diagram from the file system
 func (r *FileSystemRepository) ReadDiagram(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 	// Create operation logger with context
-	opLogger := r.logger.WithFields(map[string]interface{}{
+	opLogger := r.logger.WithFields(map[string]any{
 		"operation":   "ReadStateMachine",
 		"diagramType": diagramType.String(),
 		"name":        name,
@@ -174,7 +174,7 @@ func (r *FileSystemRepository) ReadDiagram(diagramType smmodels.DiagramType, nam
 	// TODO: Parse references from content (will be implemented in validation layer)
 	diag.References = []models.Reference{}
 
-	opLogger.WithFields(map[string]interface{}{
+	opLogger.WithFields(map[string]any{
 		"contentLength": len(diag.Content),
 		"modifiedAt":    diag.Metadata.ModifiedAt,
 	}).Info("State-machine diagram read successfully")
@@ -425,7 +425,7 @@ func (r *FileSystemRepository) ListDiagrams(diagramType smmodels.DiagramType, lo
 		}
 
 		// Parse file name to get name and version
-		pathInfo, err := r.pathManager.ParseFileName(entry.Name())
+		pathInfo, err := r.pathManager.ParseFileName(diagramType, entry.Name())
 		if err != nil {
 			// Skip files that don't match our naming convention
 			continue

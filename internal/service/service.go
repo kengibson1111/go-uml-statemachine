@@ -1,10 +1,12 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
 
+	"github.com/kengibson1111/go-uml-statemachine-cache/cache"
 	smmodels "github.com/kengibson1111/go-uml-statemachine-models/models"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/logging"
 	"github.com/kengibson1111/go-uml-statemachine-parsers/internal/models"
@@ -15,12 +17,13 @@ type service struct {
 	repo      models.Repository
 	validator models.Validator
 	config    *models.Config
+	cache     cache.Cache
 	logger    *logging.Logger
 	mu        sync.RWMutex
+	cachemu   sync.RWMutex
 }
 
-// NewService creates a new DiagramService with the provided dependencies
-func NewService(repo models.Repository, validator models.Validator, config *models.Config) models.DiagramService {
+func newService(repo models.Repository, validator models.Validator, config *models.Config) *service {
 	if config == nil {
 		config = models.DefaultConfig()
 	}
@@ -55,19 +58,67 @@ func NewService(repo models.Repository, validator models.Validator, config *mode
 	return svc
 }
 
-// NewServiceWithDefaults creates a new DiagramService with default configuration
+// setupDefaultCache creates a new cache connection using a DefaultRedisConfig
+func setupDefaultCache(svc *service) *service {
+	// Create operation logger with context
+	opLogger := svc.logger.WithFields(map[string]any{
+		"operation": "setupDefaultCache",
+	})
+
+	// Create Redis cache configuration
+	opLogger.Info("Using DefaultRedisConfig for cache")
+	config := cache.DefaultRedisConfig()
+	config.RedisAddr = "localhost:6379"
+	config.DefaultTTL = 2 * time.Hour
+
+	// Create cache instance
+	opLogger.Info("Creating cache")
+	redisCache, err := cache.NewRedisCache(config)
+	if err != nil {
+		opLogger.Errorf("Failed to create Redis cache: %v", err)
+		return svc
+	}
+
+	ctx := context.Background()
+
+	// Test Redis connection
+	opLogger.Info("Testing Redis connection...")
+	if err := redisCache.Health(ctx); err != nil {
+		opLogger.Errorf("Redis health check failed: %v", err)
+		return svc
+	}
+
+	opLogger.Info("✓ Redis connection successful")
+
+	svc.cache = redisCache
+	return svc
+}
+
+// NewService creates a new DiagramService with the provided dependencies. This
+// will set up cache with a DefaultRedicConfig pointing to a local Redis instance
+func NewService(repo models.Repository, validator models.Validator, config *models.Config) models.DiagramService {
+	svc := newService(repo, validator, config)
+	svc = setupDefaultCache(svc)
+
+	return svc
+}
+
+// NewServiceWithDefaults creates a new DiagramService with default configuration. This
+// will set up cache with a DefaultRedicConfig pointing to a local Redis instance
 func NewServiceWithDefaults(repo models.Repository, validator models.Validator) models.DiagramService {
 	return NewService(repo, validator, models.DefaultConfig())
 }
 
-// NewServiceFromEnv creates a new DiagramService with configuration loaded from environment variables
+// NewServiceFromEnv creates a new DiagramService with configuration loaded from environment variables. This
+// will set up cache with a DefaultRedicConfig pointing to a local Redis instance
 func NewServiceFromEnv(repo models.Repository, validator models.Validator) models.DiagramService {
 	config := models.LoadConfigFromEnv()
 	return NewService(repo, validator, config)
 }
 
 // NewServiceWithEnvOverrides creates a new DiagramService with the provided config merged with environment variables
-// Environment variables take precedence over the provided config
+// Environment variables take precedence over the provided config. This
+// will set up cache with a DefaultRedicConfig pointing to a local Redis instance
 func NewServiceWithEnvOverrides(repo models.Repository, validator models.Validator, baseConfig *models.Config) models.DiagramService {
 	if baseConfig == nil {
 		baseConfig = models.DefaultConfig()
@@ -86,7 +137,7 @@ func (s *service) CreateFile(diagramType smmodels.DiagramType, name, version str
 	defer s.mu.Unlock()
 
 	// Create operation logger with context
-	opLogger := s.logger.WithFields(map[string]interface{}{
+	opLogger := s.logger.WithFields(map[string]any{
 		"operation":   "Create",
 		"diagramType": diagramType.String(),
 		"name":        name,
@@ -220,7 +271,7 @@ func (s *service) ReadFile(diagramType smmodels.DiagramType, name, version strin
 	defer s.mu.RUnlock()
 
 	// Create operation logger with context
-	opLogger := s.logger.WithFields(map[string]interface{}{
+	opLogger := s.logger.WithFields(map[string]any{
 		"operation":   "ReadFile",
 		"diagramType": diagramType.String(),
 		"name":        name,
@@ -366,6 +417,31 @@ func (s *service) DeleteFile(diagramType smmodels.DiagramType, name, version str
 	return nil
 }
 
+// CloseCache closes the cache connection if one exists
+func (s *service) CloseCache() error {
+	s.cachemu.Lock()
+	defer s.cachemu.Unlock()
+
+	// Create operation logger with context
+	opLogger := s.logger.WithFields(map[string]any{
+		"operation": "CloseCache",
+	})
+
+	if s.cache != nil {
+		opLogger.Info("Closing cache connection")
+		err := s.cache.Close()
+		if err == nil {
+			opLogger.Info("Cache connection has been reset to nil")
+			s.cache = nil
+		}
+
+		return err
+	}
+
+	opLogger.Info("No cache connection to close")
+	return nil
+}
+
 // PromoteToProductsFile moves a state-machine diagram from in-progress to products
 func (s *service) PromoteToProductsFile(diagramType smmodels.DiagramType, name, version string) error {
 	s.mu.Lock()
@@ -441,6 +517,22 @@ func (s *service) PromoteToProductsFile(diagramType smmodels.DiagramType, name, 
 	err = s.performAtomicPromotion(diagramType, name, version)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// PromoteToCache moves a state-machine diagram from products to the cache
+func (s *service) PromoteToCache(diagramType smmodels.DiagramType, name, version string) error {
+	s.cachemu.Lock()
+	defer s.cachemu.Unlock()
+
+	// Validate input parameters
+	if name == "" {
+		return models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil)
+	}
+	if version == "" {
+		return models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil)
 	}
 
 	return nil

@@ -27,7 +27,7 @@ type ValidationError struct {
 	Line     int
 	Column   int
 	Severity string
-	Context  map[string]interface{}
+	Context  map[string]any
 }
 
 // ValidationWarning represents a validation warning
@@ -36,7 +36,7 @@ type ValidationWarning struct {
 	Message string
 	Line    int
 	Column  int
-	Context map[string]interface{}
+	Context map[string]any
 }
 
 // ValidationResult contains validation outcomes
@@ -64,7 +64,7 @@ func (vr *ValidationResult) AddError(code, message string, line, column int) {
 		Line:     line,
 		Column:   column,
 		Severity: "error",
-		Context:  make(map[string]interface{}),
+		Context:  make(map[string]any),
 	})
 	vr.IsValid = false
 }
@@ -76,6 +76,6 @@ func (vr *ValidationResult) AddWarning(code, message string, line, column int) {
 		Message: message,
 		Line:    line,
 		Column:  column,
-		Context: make(map[string]interface{}),
+		Context: make(map[string]any),
 	})
 }

@@ -249,6 +249,26 @@ func (pm *PathManager) ParseFileName(diagramType smmodels.DiagramType, fileName 
 		WithContext("expectedFormat", "name-version.puml")
 }
 
+// BuildFileName builds a file name based on name and version
+func BuildFileName(diagramType smmodels.DiagramType, name, version string) (string, error) {
+	// currently, the only supported diagram type is PlantUML
+	if diagramType != smmodels.DiagramTypePUML {
+		return "", NewStateMachineError(ErrorTypeValidation,
+			fmt.Sprintf("diagram type must be %s", smmodels.DiagramTypePUML.String()), nil)
+	}
+
+	// Validate input parameters
+	if name == "" {
+		return "", NewStateMachineError(ErrorTypeValidation, "name cannot be empty", nil)
+	}
+	if version == "" {
+		return "", NewStateMachineError(ErrorTypeValidation, "version cannot be empty", nil)
+	}
+
+	// currently, the only supported extension is PlantUML
+	return name + "-" + version + PlantUMLExtension, nil
+}
+
 // ParseFullPath parses a full path to extract location and path information
 func (pm *PathManager) ParseFullPath(diagramType smmodels.DiagramType, fullPath string) (*PathInfo, error) {
 	// currently, the only supported diagram type is PlantUML

@@ -543,6 +543,13 @@ func (s *service) PromoteToCache(diagramType smmodels.DiagramType, name, version
 		"version":     version,
 	})
 
+	// validate cache before proceeding. Cache is optional, so there is not a need to return
+	// an error
+	if s.cache == nil {
+		opLogger.Warn("Cache is not initialized")
+		return nil
+	}
+
 	// build the file name and cache key
 	fileName, err := models.BuildFileName(diagramType, name, version)
 	if err != nil {
@@ -559,6 +566,7 @@ func (s *service) PromoteToCache(diagramType smmodels.DiagramType, name, version
 	if cacheKey == "" {
 		return models.NewStateMachineError(models.ErrorTypeValidation, "cacheKey cannot be empty", nil)
 	}
+	opLogger.Info("cacheKey = " + cacheKey)
 
 	return nil
 }

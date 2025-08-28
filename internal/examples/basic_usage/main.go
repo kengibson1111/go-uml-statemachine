@@ -45,7 +45,7 @@ Authenticated --> Idle : logout()
 
 	// Example 1: Create a new state-machine diagram in in-progress
 	fmt.Println("\n1. Creating a new state-machine diagram...")
-	diag, err := svc.CreateFile(smmodels.DiagramTypePUML, "user-auth", "1.0.0", authContent, models.LocationInProgress)
+	diag, err := svc.CreateFile(smmodels.DiagramTypePUML, "user-auth", "1.0.0", authContent, models.LocationFileInProgress)
 	if err != nil {
 		log.Printf("Error creating state-machine diagram: %v", err)
 		return
@@ -54,7 +54,7 @@ Authenticated --> Idle : logout()
 
 	// Example 2: Read the state-machine diagram back
 	fmt.Println("\n2. Reading the state-machine diagram...")
-	readDiag, err := svc.ReadFile(smmodels.DiagramTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
+	readDiag, err := svc.ReadFile(smmodels.DiagramTypePUML, "user-auth", "1.0.0", models.LocationFileInProgress)
 	if err != nil {
 		log.Printf("Error reading state-machine diagram: %v", err)
 		return
@@ -64,7 +64,7 @@ Authenticated --> Idle : logout()
 
 	// Example 3: Validate the state-machine diagram
 	fmt.Println("\n3. Validating the state-machine diagram...")
-	validationResult, err := svc.ValidateFile(smmodels.DiagramTypePUML, "user-auth", "1.0.0", models.LocationInProgress)
+	validationResult, err := svc.ValidateFile(smmodels.DiagramTypePUML, "user-auth", "1.0.0", models.LocationFileInProgress)
 	if err != nil {
 		log.Printf("Error validating state-machine diagram: %v", err)
 		return
@@ -88,7 +88,7 @@ Authenticated --> Idle : logout()
 
 	// Example 4: List all state-machine diagrams in in-progress
 	fmt.Println("\n4. Listing all in-progress state-machine diagrams...")
-	diagrams, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationInProgress)
+	diagrams, err := svc.ListAllFiles(smmodels.DiagramTypePUML, models.LocationFileInProgress)
 	if err != nil {
 		log.Printf("Error listing state-machine diagrams: %v", err)
 		return

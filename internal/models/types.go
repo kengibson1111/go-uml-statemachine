@@ -10,14 +10,14 @@ import (
 type Location int
 
 const (
-	LocationInProgress Location = iota
+	LocationFileInProgress Location = iota
 	LocationProducts
 )
 
 // String returns the string representation of Location
 func (l Location) String() string {
 	switch l {
-	case LocationInProgress:
+	case LocationFileInProgress:
 		return "in-progress"
 	case LocationProducts:
 		return "products"

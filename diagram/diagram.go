@@ -28,13 +28,13 @@
 //	Active --> Idle : stop()
 //	@enduml`
 //
-//	diag, err := svc.CreateFile("my-machine", "1.0.0", content, diagram.LocationInProgress)
+//	diag, err := svc.CreateFile("my-machine", "1.0.0", content, diagram.LocationFileInProgress)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //
 //	// Validate and promote to production
-//	result, err := svc.ValidateFile("my-machine", "1.0.0", diagram.LocationInProgress)
+//	result, err := svc.ValidateFile("my-machine", "1.0.0", diagram.LocationFileInProgress)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
@@ -83,8 +83,8 @@ type Location = models.Location
 
 // Location constants for state-machine diagram storage locations.
 const (
-	// LocationInProgress indicates the state-machine diagram is in development/testing phase.
-	LocationInProgress = models.LocationInProgress
+	// LocationFileInProgress indicates the state-machine diagram is in development/testing phase.
+	LocationFileInProgress = models.LocationFileInProgress
 	// LocationProducts indicates the state-machine diagram is production-ready.
 	LocationProducts = models.LocationProducts
 )

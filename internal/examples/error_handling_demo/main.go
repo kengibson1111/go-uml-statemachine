@@ -57,7 +57,7 @@ func demonstrateValidationErrors(svc models.DiagramService, logger *logging.Logg
 
 	// Test empty name
 	logger.Info("Testing empty name validation...")
-	_, err := svc.CreateFile(smmodels.DiagramTypePUML, "", "1.0.0", "content", models.LocationInProgress)
+	_, err := svc.CreateFile(smmodels.DiagramTypePUML, "", "1.0.0", "content", models.LocationFileInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]any{
@@ -75,7 +75,7 @@ func demonstrateValidationErrors(svc models.DiagramService, logger *logging.Logg
 
 	// Test empty version
 	logger.Info("Testing empty version validation...")
-	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "test", "", "content", models.LocationInProgress)
+	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "test", "", "content", models.LocationFileInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithField("errorType", diagErr.Type.String()).Error("Version validation error caught as expected")
@@ -84,7 +84,7 @@ func demonstrateValidationErrors(svc models.DiagramService, logger *logging.Logg
 
 	// Test empty content
 	logger.Info("Testing empty content validation...")
-	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "", models.LocationInProgress)
+	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "", models.LocationFileInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithField("errorType", diagErr.Type.String()).Error("Content validation error caught as expected")
@@ -97,7 +97,7 @@ func demonstrateFileSystemErrors(svc models.DiagramService, logger *logging.Logg
 
 	// Try to read a non-existent state-machine diagram
 	logger.Info("Testing file not found error...")
-	_, err := svc.ReadFile(smmodels.DiagramTypePUML, "nonexistent", "1.0.0", models.LocationInProgress)
+	_, err := svc.ReadFile(smmodels.DiagramTypePUML, "nonexistent", "1.0.0", models.LocationFileInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]any{
@@ -120,7 +120,7 @@ Idle --> Active : start
 Active --> [*] : stop
 @enduml`
 
-	diag, err := svc.CreateFile(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", validContent, models.LocationInProgress)
+	diag, err := svc.CreateFile(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", validContent, models.LocationFileInProgress)
 	if err != nil {
 		logger.WithError(err).Error("Failed to create demo state-machine diagram")
 		return
@@ -130,7 +130,7 @@ Active --> [*] : stop
 
 	// Try to create the same state-machine diagram again (should cause conflict)
 	logger.Info("Attempting to create duplicate state-machine diagram...")
-	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", validContent, models.LocationInProgress)
+	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", validContent, models.LocationFileInProgress)
 	if err != nil {
 		if diagErr, ok := err.(*models.StateMachineError); ok {
 			logger.WithFields(map[string]any{
@@ -148,7 +148,7 @@ Active --> [*] : stop
 
 	// Clean up
 	logger.Info("Cleaning up demo state-machine diagram...")
-	if err := svc.DeleteFile(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", models.LocationInProgress); err != nil {
+	if err := svc.DeleteFile(smmodels.DiagramTypePUML, "demo-diag", "1.0.0", models.LocationFileInProgress); err != nil {
 		logger.WithError(err).Warn("Failed to clean up demo state-machine diagram")
 	}
 }

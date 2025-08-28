@@ -37,7 +37,7 @@ Indicates where the state-machine diagram is stored.
 type Location int
 
 const (
-    LocationInProgress Location = iota // Development/testing phase
+    LocationFileInProgress Location = iota // Development/testing phase
     LocationProducts                   // Production-ready
 )
 ```
@@ -262,7 +262,7 @@ Idle --> Active : start()
 Active --> Idle : stop()
 @enduml`
 
-diag, err := svc.CreateFile(models.DiagramTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
+diag, err := svc.CreateFile(models.DiagramTypePUML, "my-machine", "1.0.0", content, diagram.LocationFileInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -292,7 +292,7 @@ Read(diagramType models.DiagramType, name, version string, location Location) (*
 
 **Example:**
 ```go
-diag, err := svc.Read(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
+diag, err := svc.Read(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationFileInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -315,7 +315,7 @@ UpdateInProgressFile(diag *StateMachineDiagram) error
 
 **Errors:**
 - Validation error if state-machine diagram is nil or has empty fields
-- Validation error if location is not LocationInProgress
+- Validation error if location is not LocationFileInProgress
 - File not found error if state-machine diagram doesn't exist
 - File system error if write operation fails
 
@@ -354,7 +354,7 @@ Delete(diagramType models.DiagramType, name, version string, location Location) 
 
 **Example:**
 ```go
-err := svc.DeleteFile(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
+err := svc.DeleteFile(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationFileInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -418,12 +418,12 @@ ValidateFile(diagramType models.DiagramType, name, version string, location Loca
 - `error`: Error if validation process fails
 
 **Strictness Levels:**
-- `LocationInProgress`: Uses `StrictnessInProgress` (errors and warnings)
+- `LocationFileInProgress`: Uses `StrictnessInProgress` (errors and warnings)
 - `LocationProducts`: Uses `StrictnessProducts` (warnings only)
 
 **Example:**
 ```go
-result, err := svc.ValidateFile(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationInProgress)
+result, err := svc.ValidateFile(models.DiagramTypePUML, "my-machine", "1.0.0", diagram.LocationFileInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -454,7 +454,7 @@ ListAllFiles(diagramType models.DiagramType, location Location) ([]diagram, erro
 
 **Example:**
 ```go
-diagrams, err := svc.ListAllFiles(models.DiagramTypePUML, diagram.LocationInProgress)
+diagrams, err := svc.ListAllFiles(models.DiagramTypePUML, diagram.LocationFileInProgress)
 if err != nil {
     log.Fatal(err)
 }
@@ -531,7 +531,7 @@ Errors include context information such as:
 ### Example Error Handling
 
 ```go
-diag, err := svc.Read("non-existent", "1.0.0", diagram.LocationInProgress)
+diag, err := svc.Read("non-existent", "1.0.0", diagram.LocationFileInProgress)
 if err != nil {
     // Check if it's a specific error type
     if diagErr, ok := err.(*models.StateMachineError); ok {

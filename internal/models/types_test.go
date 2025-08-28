@@ -13,7 +13,7 @@ func TestLocation_String(t *testing.T) {
 	}{
 		{
 			name:     "in-progress location",
-			location: LocationInProgress,
+			location: LocationFileInProgress,
 			expected: "in-progress",
 		},
 		{
@@ -89,7 +89,7 @@ func TestStateMachineDiagram_Creation(t *testing.T) {
 		Version:    "1.0.0",
 		Content:    "@startuml\n[*] --> State1\n@enduml",
 		References: references,
-		Location:   LocationInProgress,
+		Location:   LocationFileInProgress,
 		Metadata:   metadata,
 	}
 
@@ -106,8 +106,8 @@ func TestStateMachineDiagram_Creation(t *testing.T) {
 	if len(diag.References) != 1 {
 		t.Errorf("StateMachine.References length = %v, want %v", len(diag.References), 1)
 	}
-	if diag.Location != LocationInProgress {
-		t.Errorf("StateMachine.Location = %v, want %v", diag.Location, LocationInProgress)
+	if diag.Location != LocationFileInProgress {
+		t.Errorf("StateMachine.Location = %v, want %v", diag.Location, LocationFileInProgress)
 	}
 	if diag.Metadata.Author != "test-author" {
 		t.Errorf("StateMachine.Metadata.Author = %v, want %v", diag.Metadata.Author, "test-author")

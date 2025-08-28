@@ -46,7 +46,7 @@ func TestPathManager_GetLocationPath(t *testing.T) {
 	}{
 		{
 			name:     "in-progress location",
-			location: LocationInProgress,
+			location: LocationFileInProgress,
 			expected: filepath.Join(RootDirectoryName, "in-progress"),
 		},
 		{
@@ -419,7 +419,7 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 			want: &PathInfo{
 				Name:     "user-auth",
 				Version:  "1.0.0",
-				Location: LocationInProgress,
+				Location: LocationFileInProgress,
 			},
 			wantError: false,
 		},

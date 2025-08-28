@@ -17,7 +17,7 @@ func TestService_PromoteToProductsFile_Success(t *testing.T) {
 
 	// Setup successful promotion scenario
 	repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-		if location == models.LocationInProgress {
+		if location == models.LocationFileInProgress {
 			return diagramState == "in-progress", nil
 		}
 		if location == models.LocationProducts {
@@ -44,7 +44,7 @@ func TestService_PromoteToProductsFile_Success(t *testing.T) {
 	}
 
 	repo.moveStateMachineFunc = func(diagramType smmodels.DiagramType, name, version string, from, to models.Location) error {
-		if from == models.LocationInProgress && to == models.LocationProducts {
+		if from == models.LocationFileInProgress && to == models.LocationProducts {
 			diagramState = "products" // Simulate successful move
 		}
 		return nil
@@ -170,7 +170,7 @@ func TestService_PromoteToProductsFile_ValidationFails(t *testing.T) {
 
 	// Setup diagram exists in in-progress but validation fails
 	repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-		if location == models.LocationInProgress {
+		if location == models.LocationFileInProgress {
 			return true, nil
 		}
 		return false, nil
@@ -222,7 +222,7 @@ func TestService_PromoteToProductsFile_MoveOperationFails(t *testing.T) {
 
 	// Setup successful validation but move fails
 	repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-		if location == models.LocationInProgress {
+		if location == models.LocationFileInProgress {
 			return true, nil
 		}
 		return false, nil
@@ -280,7 +280,7 @@ func TestService_PromoteToProductsFile_AtomicOperationWithRollback(t *testing.T)
 		callCount++
 		if callCount <= 2 {
 			// Initial checks
-			if location == models.LocationInProgress {
+			if location == models.LocationFileInProgress {
 				return true, nil
 			}
 			return false, nil
@@ -350,7 +350,7 @@ func TestService_PromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 	var diagramState string = "in-progress"
 
 	repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-		if location == models.LocationInProgress {
+		if location == models.LocationFileInProgress {
 			return diagramState == "in-progress", nil
 		}
 		if location == models.LocationProducts {
@@ -385,7 +385,7 @@ func TestService_PromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 	}
 
 	repo.moveStateMachineFunc = func(diagramType smmodels.DiagramType, name, version string, from, to models.Location) error {
-		if from == models.LocationInProgress && to == models.LocationProducts {
+		if from == models.LocationFileInProgress && to == models.LocationProducts {
 			diagramState = "products" // Simulate successful move
 			return nil
 		}

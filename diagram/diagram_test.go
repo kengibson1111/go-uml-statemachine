@@ -285,7 +285,7 @@ Error --> Idle : reset()
 @enduml`
 
 	// Test Create
-	diag, err := svc.CreateFile(models.DiagramTypePUML, "test-integration", "1.0.0", content, LocationInProgress)
+	diag, err := svc.CreateFile(models.DiagramTypePUML, "test-integration", "1.0.0", content, LocationFileInProgress)
 	if err != nil {
 		t.Fatalf("Create() failed: %v", err)
 	}
@@ -300,7 +300,7 @@ Error --> Idle : reset()
 	}
 
 	// Test Read
-	readDiag, err := svc.ReadFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
+	readDiag, err := svc.ReadFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationFileInProgress)
 	if err != nil {
 		t.Fatalf("Read() failed: %v", err)
 	}
@@ -309,7 +309,7 @@ Error --> Idle : reset()
 	}
 
 	// Test Validate
-	result, err := svc.ValidateFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
+	result, err := svc.ValidateFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationFileInProgress)
 	if err != nil {
 		t.Fatalf("ValidateFile() failed: %v", err)
 	}
@@ -318,7 +318,7 @@ Error --> Idle : reset()
 	}
 
 	// Test ListAllFiles
-	diagrams, err := svc.ListAllFiles(models.DiagramTypePUML, LocationInProgress)
+	diagrams, err := svc.ListAllFiles(models.DiagramTypePUML, LocationFileInProgress)
 	if err != nil {
 		t.Fatalf("ListAllFiles() failed: %v", err)
 	}
@@ -342,7 +342,7 @@ Error --> Idle : reset()
 	}
 
 	// Verify update
-	updatedDiag, err := svc.ReadFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
+	updatedDiag, err := svc.ReadFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationFileInProgress)
 	if err != nil {
 		t.Fatalf("Read() after update failed: %v", err)
 	}
@@ -380,7 +380,7 @@ Error --> Idle : reset()
 		}
 	} else {
 		// Clean up from in-progress
-		err = svc.DeleteFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationInProgress)
+		err = svc.DeleteFile(models.DiagramTypePUML, "test-integration", "1.0.0", LocationFileInProgress)
 		if err != nil {
 			t.Logf("Warning: Could not clean up from in-progress: %v", err)
 		}
@@ -394,29 +394,29 @@ func TestPublicAPIErrorHandling(t *testing.T) {
 	}
 
 	// Test Create with invalid parameters
-	_, err = svc.CreateFile(models.DiagramTypePUML, "", "1.0.0", "content", LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "", "1.0.0", "content", LocationFileInProgress)
 	if err == nil {
 		t.Error("Create() with empty name should fail")
 	}
 
-	_, err = svc.CreateFile(models.DiagramTypePUML, "test", "", "content", LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "test", "", "content", LocationFileInProgress)
 	if err == nil {
 		t.Error("Create() with empty version should fail")
 	}
 
-	_, err = svc.CreateFile(models.DiagramTypePUML, "test", "1.0.0", "", LocationInProgress)
+	_, err = svc.CreateFile(models.DiagramTypePUML, "test", "1.0.0", "", LocationFileInProgress)
 	if err == nil {
 		t.Error("Create() with empty content should fail")
 	}
 
 	// Test Read non-existent
-	_, err = svc.ReadFile(models.DiagramTypePUML, "non-existent", "1.0.0", LocationInProgress)
+	_, err = svc.ReadFile(models.DiagramTypePUML, "non-existent", "1.0.0", LocationFileInProgress)
 	if err == nil {
 		t.Error("Read() of non-existent state-machine diagram should fail")
 	}
 
 	// Test Delete non-existent
-	err = svc.DeleteFile(models.DiagramTypePUML, "non-existent", "1.0.0", LocationInProgress)
+	err = svc.DeleteFile(models.DiagramTypePUML, "non-existent", "1.0.0", LocationFileInProgress)
 	if err == nil {
 		t.Error("Delete() of non-existent state-machine diagram should fail")
 	}
@@ -428,7 +428,7 @@ func TestPublicAPIErrorHandling(t *testing.T) {
 	}
 
 	// Test Validate non-existent
-	_, err = svc.ValidateFile(models.DiagramTypePUML, "non-existent", "1.0.0", LocationInProgress)
+	_, err = svc.ValidateFile(models.DiagramTypePUML, "non-existent", "1.0.0", LocationFileInProgress)
 	if err == nil {
 		t.Error("ValidateFile() of non-existent state-machine diagram should fail")
 	}
@@ -436,8 +436,8 @@ func TestPublicAPIErrorHandling(t *testing.T) {
 
 func TestConstants(t *testing.T) {
 	// Test Location constants
-	if LocationInProgress != 0 {
-		t.Errorf("LocationInProgress = %d, want 0", LocationInProgress)
+	if LocationFileInProgress != 0 {
+		t.Errorf("LocationFileInProgress = %d, want 0", LocationFileInProgress)
 	}
 	if LocationProducts != 1 {
 		t.Errorf("LocationProducts = %d, want 1", LocationProducts)

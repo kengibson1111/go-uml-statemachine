@@ -43,7 +43,7 @@ Authenticated --> Idle : logout()
 
 @enduml`
 
-	baseDiag, err := svc.CreateFile(smmodels.DiagramTypePUML, "base-auth", "1.0.0", baseAuthContent, models.LocationInProgress)
+	baseDiag, err := svc.CreateFile(smmodels.DiagramTypePUML, "base-auth", "1.0.0", baseAuthContent, models.LocationFileInProgress)
 	if err != nil {
 		log.Printf("Error creating base auth: %v", err)
 		return
@@ -51,7 +51,7 @@ Authenticated --> Idle : logout()
 	fmt.Printf("✓ Created: %s-%s\n", baseDiag.Name, baseDiag.Version)
 
 	// Validate and promote base auth to products
-	validationResult, err := svc.ValidateFile(smmodels.DiagramTypePUML, "base-auth", "1.0.0", models.LocationInProgress)
+	validationResult, err := svc.ValidateFile(smmodels.DiagramTypePUML, "base-auth", "1.0.0", models.LocationFileInProgress)
 	if err != nil {
 		log.Printf("Error validating base auth: %v", err)
 		return
@@ -86,7 +86,7 @@ Failed --> RequireAuth : retry
 
 @enduml`
 
-	advancedDiag, err := svc.CreateFile(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
+	advancedDiag, err := svc.CreateFile(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationFileInProgress)
 	if err != nil {
 		log.Printf("Error creating advanced auth: %v", err)
 		return
@@ -141,7 +141,7 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Println("\n5. Testing validation strictness...")
 
 	// Validate with in-progress strictness (errors and warnings)
-	inProgressResult, err := svc.ValidateFile(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", models.LocationInProgress)
+	inProgressResult, err := svc.ValidateFile(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", models.LocationFileInProgress)
 	if err != nil {
 		log.Printf("Error validating with in-progress strictness: %v", err)
 	} else {
@@ -153,13 +153,13 @@ SessionTimeout --> RequireAuth : session_expired
 	fmt.Println("\n6. Demonstrating error handling...")
 
 	// Try to create a duplicate
-	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationInProgress)
+	_, err = svc.CreateFile(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", advancedAuthContent, models.LocationFileInProgress)
 	if err != nil {
 		fmt.Printf("✓ Expected error for duplicate creation: %v\n", err)
 	}
 
 	// Try to read non-existent state-machine diagram
-	_, err = svc.ReadFile(smmodels.DiagramTypePUML, "non-existent", "1.0.0", models.LocationInProgress)
+	_, err = svc.ReadFile(smmodels.DiagramTypePUML, "non-existent", "1.0.0", models.LocationFileInProgress)
 	if err != nil {
 		fmt.Printf("✓ Expected error for non-existent read: %v\n", err)
 	}
@@ -192,7 +192,7 @@ SessionTimeout --> RequireAuth : session_expired
 	}
 
 	// Delete from in-progress
-	err = svc.DeleteFile(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", models.LocationInProgress)
+	err = svc.DeleteFile(smmodels.DiagramTypePUML, "advanced-auth", "1.0.0", models.LocationFileInProgress)
 	if err != nil {
 		log.Printf("Warning: Could not delete advanced-auth from in-progress: %v", err)
 	} else {

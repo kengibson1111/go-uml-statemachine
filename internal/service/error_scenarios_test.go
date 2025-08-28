@@ -127,7 +127,7 @@ func TestService_Create_ValidationErrors(t *testing.T) {
 			inputName:    "",
 			inputVersion: "1.0.0",
 			inputContent: "content",
-			location:     models.LocationInProgress,
+			location:     models.LocationFileInProgress,
 			expectedErr:  "name cannot be empty",
 		},
 		{
@@ -135,7 +135,7 @@ func TestService_Create_ValidationErrors(t *testing.T) {
 			inputName:    "test",
 			inputVersion: "",
 			inputContent: "content",
-			location:     models.LocationInProgress,
+			location:     models.LocationFileInProgress,
 			expectedErr:  "version cannot be empty",
 		},
 		{
@@ -143,7 +143,7 @@ func TestService_Create_ValidationErrors(t *testing.T) {
 			inputName:    "test",
 			inputVersion: "1.0.0",
 			inputContent: "",
-			location:     models.LocationInProgress,
+			location:     models.LocationFileInProgress,
 			expectedErr:  "content cannot be empty",
 		},
 	}
@@ -225,7 +225,7 @@ func TestService_Create_RepositoryErrors(t *testing.T) {
 			config := models.DefaultConfig()
 			svc := NewService(repo, validator, config)
 
-			_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
+			_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationFileInProgress)
 
 			if err == nil {
 				t.Error("Expected error but got nil")
@@ -272,7 +272,7 @@ func TestService_Create_ProductConflictCheck(t *testing.T) {
 
 		svc := NewService(repo, validator, config)
 
-		_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
+		_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationFileInProgress)
 
 		if err == nil {
 			t.Error("Expected error but got nil")
@@ -308,7 +308,7 @@ func TestService_Create_ProductConflictCheck(t *testing.T) {
 
 		svc := NewService(repo, validator, config)
 
-		_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
+		_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationFileInProgress)
 
 		if err == nil {
 			t.Error("Expected error but got nil")
@@ -344,14 +344,14 @@ func TestService_Read_ValidationErrors(t *testing.T) {
 			name:         "empty name",
 			inputName:    "",
 			inputVersion: "1.0.0",
-			location:     models.LocationInProgress,
+			location:     models.LocationFileInProgress,
 			expectedErr:  "name cannot be empty",
 		},
 		{
 			name:         "empty version",
 			inputName:    "test",
 			inputVersion: "",
-			location:     models.LocationInProgress,
+			location:     models.LocationFileInProgress,
 			expectedErr:  "version cannot be empty",
 		},
 	}
@@ -390,7 +390,7 @@ func TestService_Read_RepositoryError(t *testing.T) {
 	config := models.DefaultConfig()
 	svc := NewService(repo, validator, config)
 
-	_, err := svc.ReadFile(smmodels.DiagramTypePUML, "test", "1.0.0", models.LocationInProgress)
+	_, err := svc.ReadFile(smmodels.DiagramTypePUML, "test", "1.0.0", models.LocationFileInProgress)
 
 	if err == nil {
 		t.Error("Expected error but got nil")
@@ -424,7 +424,7 @@ func TestService_ErrorContextPropagation(t *testing.T) {
 	config := models.DefaultConfig()
 	svc := NewService(repo, validator, config)
 
-	_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test-name", "1.2.3", "content", models.LocationInProgress)
+	_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test-name", "1.2.3", "content", models.LocationFileInProgress)
 
 	if err == nil {
 		t.Error("Expected error but got nil")
@@ -462,7 +462,7 @@ func TestService_ErrorWrapping(t *testing.T) {
 	config := models.DefaultConfig()
 	svc := NewService(repo, validator, config)
 
-	_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
+	_, err := svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationFileInProgress)
 
 	if err == nil {
 		t.Error("Expected error but got nil")
@@ -520,9 +520,9 @@ func TestService_ErrorSeverityAssignment(t *testing.T) {
 
 			var err error
 			if tt.name == "validation error - high severity" {
-				_, err = svc.CreateFile(smmodels.DiagramTypePUML, "", "1.0.0", "content", models.LocationInProgress) // Empty name
+				_, err = svc.CreateFile(smmodels.DiagramTypePUML, "", "1.0.0", "content", models.LocationFileInProgress) // Empty name
 			} else {
-				_, err = svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationInProgress)
+				_, err = svc.CreateFile(smmodels.DiagramTypePUML, "test", "1.0.0", "content", models.LocationFileInProgress)
 			}
 
 			if err == nil {

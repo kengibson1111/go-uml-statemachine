@@ -104,7 +104,7 @@ func TestFileSystemRepository_WriteDiagram(t *testing.T) {
 	}{
 		{
 			name:        "valid in-progress state-machine diagram",
-			diagram:     th.CreateTestDiagram("test-diag", "1.0.0", models.LocationInProgress),
+			diagram:     th.CreateTestDiagram("test-diag", "1.0.0", models.LocationFileInProgress),
 			expectError: false,
 		},
 		{
@@ -124,7 +124,7 @@ func TestFileSystemRepository_WriteDiagram(t *testing.T) {
 				Name:     "",
 				Version:  "1.0.0",
 				Content:  "test content",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 			},
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
@@ -135,7 +135,7 @@ func TestFileSystemRepository_WriteDiagram(t *testing.T) {
 				Name:     "test-diag",
 				Version:  "",
 				Content:  "test content",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 			},
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
@@ -204,7 +204,7 @@ func TestFileSystemRepository_ReadDiagram(t *testing.T) {
 	defer th.Cleanup()
 
 	// Create a test state-machine diagram first
-	testDiag := th.CreateTestDiagram("test-read", "1.0.0", models.LocationInProgress)
+	testDiag := th.CreateTestDiagram("test-read", "1.0.0", models.LocationFileInProgress)
 	err := th.repo.WriteDiagram(testDiag)
 	if err != nil {
 		t.Fatalf("Failed to create test state-machine diagram: %v", err)
@@ -222,14 +222,14 @@ func TestFileSystemRepository_ReadDiagram(t *testing.T) {
 			name:        "existing state-machine diagram",
 			diagName:    "test-read",
 			version:     "1.0.0",
-			location:    models.LocationInProgress,
+			location:    models.LocationFileInProgress,
 			expectError: false,
 		},
 		{
 			name:        "non-existent state-machine diagram",
 			diagName:    "non-existent",
 			version:     "1.0.0",
-			location:    models.LocationInProgress,
+			location:    models.LocationFileInProgress,
 			expectError: true,
 			errorType:   models.ErrorTypeFileNotFound,
 		},
@@ -237,7 +237,7 @@ func TestFileSystemRepository_ReadDiagram(t *testing.T) {
 			name:        "empty name",
 			diagName:    "",
 			version:     "1.0.0",
-			location:    models.LocationInProgress,
+			location:    models.LocationFileInProgress,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
 		},
@@ -245,7 +245,7 @@ func TestFileSystemRepository_ReadDiagram(t *testing.T) {
 			name:        "missing version",
 			diagName:    "test-read",
 			version:     "",
-			location:    models.LocationInProgress,
+			location:    models.LocationFileInProgress,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
 		},
@@ -310,7 +310,7 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 	defer th.Cleanup()
 
 	// Create a test state-machine diagram first
-	testDiag := th.CreateTestDiagram("test-exists", "1.0.0", models.LocationInProgress)
+	testDiag := th.CreateTestDiagram("test-exists", "1.0.0", models.LocationFileInProgress)
 	err := th.repo.WriteDiagram(testDiag)
 	if err != nil {
 		t.Fatalf("Failed to create test state-machine diagram: %v", err)
@@ -329,7 +329,7 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 			name:         "existing state-machine diagram",
 			diagName:     "test-exists",
 			version:      "1.0.0",
-			location:     models.LocationInProgress,
+			location:     models.LocationFileInProgress,
 			expectExists: true,
 			expectError:  false,
 		},
@@ -337,7 +337,7 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 			name:         "non-existent state-machine diagram",
 			diagName:     "non-existent",
 			version:      "1.0.0",
-			location:     models.LocationInProgress,
+			location:     models.LocationFileInProgress,
 			expectExists: false,
 			expectError:  false,
 		},
@@ -345,7 +345,7 @@ func TestFileSystemRepository_Exists(t *testing.T) {
 			name:        "empty name",
 			diagName:    "",
 			version:     "1.0.0",
-			location:    models.LocationInProgress,
+			location:    models.LocationFileInProgress,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
 		},
@@ -522,7 +522,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 	defer th.Cleanup()
 
 	// Create a test state-machine diagram in in-progress
-	testDiag := th.CreateTestDiagram("test-move", "1.0.0", models.LocationInProgress)
+	testDiag := th.CreateTestDiagram("test-move", "1.0.0", models.LocationFileInProgress)
 	err := th.repo.WriteDiagram(testDiag)
 	if err != nil {
 		t.Fatalf("Failed to create test state-machine diagram: %v", err)
@@ -541,7 +541,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 			name:        "valid move from in-progress to products",
 			diagName:    "test-move",
 			version:     "1.0.0",
-			from:        models.LocationInProgress,
+			from:        models.LocationFileInProgress,
 			to:          models.LocationProducts,
 			expectError: false,
 		},
@@ -549,7 +549,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 			name:        "empty name",
 			diagName:    "",
 			version:     "1.0.0",
-			from:        models.LocationInProgress,
+			from:        models.LocationFileInProgress,
 			to:          models.LocationProducts,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
@@ -558,7 +558,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 			name:        "empty version",
 			diagName:    "test-move",
 			version:     "",
-			from:        models.LocationInProgress,
+			from:        models.LocationFileInProgress,
 			to:          models.LocationProducts,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
@@ -567,8 +567,8 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 			name:        "same source and destination",
 			diagName:    "test-move",
 			version:     "1.0.0",
-			from:        models.LocationInProgress,
-			to:          models.LocationInProgress,
+			from:        models.LocationFileInProgress,
+			to:          models.LocationFileInProgress,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
 		},
@@ -576,7 +576,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 			name:        "non-existent source",
 			diagName:    "non-existent",
 			version:     "1.0.0",
-			from:        models.LocationInProgress,
+			from:        models.LocationFileInProgress,
 			to:          models.LocationProducts,
 			expectError: true,
 			errorType:   models.ErrorTypeFileNotFound,
@@ -594,7 +594,7 @@ func TestFileSystemRepository_MoveDiagram(t *testing.T) {
 			name:        "invalid to location",
 			diagName:    "test-move",
 			version:     "1.0.0",
-			from:        models.LocationInProgress,
+			from:        models.LocationFileInProgress,
 			to:          models.Location(999), // Invalid location - will use root directory
 			expectError: true,
 			errorType:   models.ErrorTypeFileNotFound, // Will fail when trying to read from destination
@@ -671,7 +671,7 @@ func TestFileSystemRepository_DeleteDiagram(t *testing.T) {
 			setupDiag:   true,
 			diagName:    "test-delete",
 			version:     "1.0.0",
-			location:    models.LocationInProgress,
+			location:    models.LocationFileInProgress,
 			expectError: false,
 		},
 		{
@@ -679,7 +679,7 @@ func TestFileSystemRepository_DeleteDiagram(t *testing.T) {
 			setupDiag:   false,
 			diagName:    "non-existent",
 			version:     "1.0.0",
-			location:    models.LocationInProgress,
+			location:    models.LocationFileInProgress,
 			expectError: true,
 			errorType:   models.ErrorTypeFileNotFound,
 		},
@@ -688,7 +688,7 @@ func TestFileSystemRepository_DeleteDiagram(t *testing.T) {
 			setupDiag:   false,
 			diagName:    "",
 			version:     "1.0.0",
-			location:    models.LocationInProgress,
+			location:    models.LocationFileInProgress,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
 		},
@@ -697,7 +697,7 @@ func TestFileSystemRepository_DeleteDiagram(t *testing.T) {
 			setupDiag:   false,
 			diagName:    "test-delete",
 			version:     "",
-			location:    models.LocationInProgress,
+			location:    models.LocationFileInProgress,
 			expectError: true,
 			errorType:   models.ErrorTypeValidation,
 		},
@@ -761,8 +761,8 @@ func TestFileSystemRepository_ListDiagrams(t *testing.T) {
 
 	// Create multiple test state-machine diagrams
 	testDiagrams := []*models.StateMachineDiagram{
-		th.CreateTestDiagram("diag1", "1.0.0", models.LocationInProgress),
-		th.CreateTestDiagram("diag2", "1.1.0", models.LocationInProgress),
+		th.CreateTestDiagram("diag1", "1.0.0", models.LocationFileInProgress),
+		th.CreateTestDiagram("diag2", "1.1.0", models.LocationFileInProgress),
 		th.CreateTestDiagram("diag3", "2.0.0", models.LocationProducts),
 	}
 
@@ -782,7 +782,7 @@ func TestFileSystemRepository_ListDiagrams(t *testing.T) {
 	}{
 		{
 			name:          "list in-progress state-machine diagrams",
-			location:      models.LocationInProgress,
+			location:      models.LocationFileInProgress,
 			expectedCount: 2,
 			expectError:   false,
 		},
@@ -835,7 +835,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	defer th.Cleanup()
 
 	// Test a complete workflow: create -> read -> move -> delete
-	testDiag := th.CreateTestDiagram("integration-test", "1.0.0", models.LocationInProgress)
+	testDiag := th.CreateTestDiagram("integration-test", "1.0.0", models.LocationFileInProgress)
 
 	// 1. Write state-machine diagram
 	err := th.repo.WriteDiagram(testDiag)
@@ -862,7 +862,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 4. List state-machine diagrams
-	diagrams, err := th.repo.ListDiagrams(smmodels.DiagramTypePUML, models.LocationInProgress)
+	diagrams, err := th.repo.ListDiagrams(smmodels.DiagramTypePUML, models.LocationFileInProgress)
 	if err != nil {
 		t.Fatalf("Failed to list state-machine diagrams: %v", err)
 	}
@@ -871,7 +871,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 5. Move to products
-	err = th.repo.MoveDiagram(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationInProgress, models.LocationProducts)
+	err = th.repo.MoveDiagram(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationFileInProgress, models.LocationProducts)
 	if err != nil {
 		t.Fatalf("Failed to move state-machine diagram: %v", err)
 	}
@@ -886,7 +886,7 @@ func TestFileSystemRepository_Integration(t *testing.T) {
 	}
 
 	// 7. Verify it's no longer in in-progress
-	exists, err = th.repo.Exists(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationInProgress)
+	exists, err = th.repo.Exists(smmodels.DiagramTypePUML, testDiag.Name, testDiag.Version, models.LocationFileInProgress)
 	if err != nil {
 		t.Fatalf("Failed to check existence in in-progress: %v", err)
 	}

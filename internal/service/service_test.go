@@ -153,10 +153,10 @@ func TestService_Create(t *testing.T) {
 			inputName:    "test-diag",
 			inputVer:     "1.0.0",
 			inputContent: "@startuml\n[*] --> Idle\n@enduml",
-			inputLoc:     models.LocationInProgress,
+			inputLoc:     models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-					if location == models.LocationInProgress {
+					if location == models.LocationFileInProgress {
 						return false, nil // doesn't exist in progress
 					}
 					return false, nil // doesn't exist in products either
@@ -172,7 +172,7 @@ func TestService_Create(t *testing.T) {
 			inputName:    "",
 			inputVer:     "1.0.0",
 			inputContent: "content",
-			inputLoc:     models.LocationInProgress,
+			inputLoc:     models.LocationFileInProgress,
 			setupMock:    func(repo *mockRepository) {},
 			wantErr:      true,
 			wantErrType:  models.ErrorTypeValidation,
@@ -182,7 +182,7 @@ func TestService_Create(t *testing.T) {
 			inputName:    "test-diag",
 			inputVer:     "",
 			inputContent: "content",
-			inputLoc:     models.LocationInProgress,
+			inputLoc:     models.LocationFileInProgress,
 			setupMock:    func(repo *mockRepository) {},
 			wantErr:      true,
 			wantErrType:  models.ErrorTypeValidation,
@@ -192,7 +192,7 @@ func TestService_Create(t *testing.T) {
 			inputName:    "test-diag",
 			inputVer:     "1.0.0",
 			inputContent: "",
-			inputLoc:     models.LocationInProgress,
+			inputLoc:     models.LocationFileInProgress,
 			setupMock:    func(repo *mockRepository) {},
 			wantErr:      true,
 			wantErrType:  models.ErrorTypeValidation,
@@ -202,7 +202,7 @@ func TestService_Create(t *testing.T) {
 			inputName:    "test-diag",
 			inputVer:     "1.0.0",
 			inputContent: "content",
-			inputLoc:     models.LocationInProgress,
+			inputLoc:     models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
 					return true, nil // already exists
@@ -216,10 +216,10 @@ func TestService_Create(t *testing.T) {
 			inputName:    "test-diag",
 			inputVer:     "1.0.0",
 			inputContent: "content",
-			inputLoc:     models.LocationInProgress,
+			inputLoc:     models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-					if location == models.LocationInProgress {
+					if location == models.LocationFileInProgress {
 						return false, nil // doesn't exist in progress
 					}
 					return true, nil // exists in products - conflict!
@@ -298,7 +298,7 @@ func TestService_ReadFile(t *testing.T) {
 			name:      "successful read",
 			inputName: "test-diag",
 			inputVer:  "1.0.0",
-			inputLoc:  models.LocationInProgress,
+			inputLoc:  models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository) {
 				repo.readStateMachineFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 					return &models.StateMachineDiagram{
@@ -314,14 +314,14 @@ func TestService_ReadFile(t *testing.T) {
 				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 			},
 		},
 		{
 			name:        "empty name validation",
 			inputName:   "",
 			inputVer:    "1.0.0",
-			inputLoc:    models.LocationInProgress,
+			inputLoc:    models.LocationFileInProgress,
 			setupMock:   func(repo *mockRepository) {},
 			wantErr:     true,
 			wantErrType: models.ErrorTypeValidation,
@@ -330,7 +330,7 @@ func TestService_ReadFile(t *testing.T) {
 			name:        "empty version validation",
 			inputName:   "test-diag",
 			inputVer:    "",
-			inputLoc:    models.LocationInProgress,
+			inputLoc:    models.LocationFileInProgress,
 			setupMock:   func(repo *mockRepository) {},
 			wantErr:     true,
 			wantErrType: models.ErrorTypeValidation,
@@ -339,7 +339,7 @@ func TestService_ReadFile(t *testing.T) {
 			name:      "repository error",
 			inputName: "test-diag",
 			inputVer:  "1.0.0",
-			inputLoc:  models.LocationInProgress,
+			inputLoc:  models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository) {
 				repo.readStateMachineFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 					return nil, errors.New("file not found")
@@ -417,7 +417,7 @@ func TestService_Update(t *testing.T) {
 				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Updated\n@enduml",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 			},
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
@@ -442,7 +442,7 @@ func TestService_Update(t *testing.T) {
 				Name:     "",
 				Version:  "1.0.0",
 				Content:  "content",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 			},
 			setupMock:   func(repo *mockRepository) {},
 			wantErr:     true,
@@ -454,7 +454,7 @@ func TestService_Update(t *testing.T) {
 				Name:     "test-diag",
 				Version:  "",
 				Content:  "content",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 			},
 			setupMock:   func(repo *mockRepository) {},
 			wantErr:     true,
@@ -466,7 +466,7 @@ func TestService_Update(t *testing.T) {
 				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 			},
 			setupMock:   func(repo *mockRepository) {},
 			wantErr:     true,
@@ -478,7 +478,7 @@ func TestService_Update(t *testing.T) {
 				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "content",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 			},
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
@@ -538,7 +538,7 @@ func TestService_Delete(t *testing.T) {
 			name:      "successful delete",
 			inputName: "test-diag",
 			inputVer:  "1.0.0",
-			inputLoc:  models.LocationInProgress,
+			inputLoc:  models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
 					return true, nil // exists
@@ -553,7 +553,7 @@ func TestService_Delete(t *testing.T) {
 			name:        "empty name validation",
 			inputName:   "",
 			inputVer:    "1.0.0",
-			inputLoc:    models.LocationInProgress,
+			inputLoc:    models.LocationFileInProgress,
 			setupMock:   func(repo *mockRepository) {},
 			wantErr:     true,
 			wantErrType: models.ErrorTypeValidation,
@@ -562,7 +562,7 @@ func TestService_Delete(t *testing.T) {
 			name:        "empty version validation",
 			inputName:   "test-diag",
 			inputVer:    "",
-			inputLoc:    models.LocationInProgress,
+			inputLoc:    models.LocationFileInProgress,
 			setupMock:   func(repo *mockRepository) {},
 			wantErr:     true,
 			wantErrType: models.ErrorTypeValidation,
@@ -571,7 +571,7 @@ func TestService_Delete(t *testing.T) {
 			name:      "state-machine diagram does not exist",
 			inputName: "test-diag",
 			inputVer:  "1.0.0",
-			inputLoc:  models.LocationInProgress,
+			inputLoc:  models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
 					return false, nil // doesn't exist
@@ -584,7 +584,7 @@ func TestService_Delete(t *testing.T) {
 			name:      "repository delete error",
 			inputName: "test-diag",
 			inputVer:  "1.0.0",
-			inputLoc:  models.LocationInProgress,
+			inputLoc:  models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
 					return true, nil // exists
@@ -647,7 +647,7 @@ func TestService_PromoteToProductsFile(t *testing.T) {
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// State-machine diagram exists in in-progress
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-					if location == models.LocationInProgress {
+					if location == models.LocationFileInProgress {
 						return true, nil
 					}
 					if location == models.LocationProducts {
@@ -686,7 +686,7 @@ func TestService_PromoteToProductsFile(t *testing.T) {
 					callCount++
 					if callCount <= 2 {
 						// First two calls are the initial checks
-						if location == models.LocationInProgress {
+						if location == models.LocationFileInProgress {
 							return true, nil
 						}
 						return false, nil
@@ -695,7 +695,7 @@ func TestService_PromoteToProductsFile(t *testing.T) {
 					if location == models.LocationProducts {
 						return true, nil // now exists in products
 					}
-					if location == models.LocationInProgress {
+					if location == models.LocationFileInProgress {
 						return false, nil // no longer exists in in-progress
 					}
 					return false, nil
@@ -737,7 +737,7 @@ func TestService_PromoteToProductsFile(t *testing.T) {
 			inputVer:  "1.0.0",
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-					if location == models.LocationInProgress {
+					if location == models.LocationFileInProgress {
 						return true, nil // exists in in-progress
 					}
 					if location == models.LocationProducts {
@@ -756,7 +756,7 @@ func TestService_PromoteToProductsFile(t *testing.T) {
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// State-machine diagram exists in in-progress
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-					if location == models.LocationInProgress {
+					if location == models.LocationFileInProgress {
 						return true, nil
 					}
 					return false, nil
@@ -794,7 +794,7 @@ func TestService_PromoteToProductsFile(t *testing.T) {
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				// State-machine diagram exists in in-progress
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-					if location == models.LocationInProgress {
+					if location == models.LocationFileInProgress {
 						return true, nil
 					}
 					return false, nil
@@ -883,7 +883,7 @@ func TestService_PromoteToProductsFileWithRollback(t *testing.T) {
 					initialCallCount++
 					if initialCallCount <= 2 {
 						// First two calls are the initial checks
-						if location == models.LocationInProgress {
+						if location == models.LocationFileInProgress {
 							return true, nil
 						}
 						return false, nil
@@ -892,7 +892,7 @@ func TestService_PromoteToProductsFileWithRollback(t *testing.T) {
 					if location == models.LocationProducts {
 						return false, nil // NOT found in products (verification failure)
 					}
-					if location == models.LocationInProgress {
+					if location == models.LocationFileInProgress {
 						return false, nil // not in in-progress either
 					}
 					return false, nil
@@ -943,7 +943,7 @@ func TestService_PromoteToProductsFileWithRollback(t *testing.T) {
 					initialCallCount++
 					if initialCallCount <= 2 {
 						// First two calls are the initial checks
-						if location == models.LocationInProgress {
+						if location == models.LocationFileInProgress {
 							return true, nil
 						}
 						return false, nil
@@ -952,7 +952,7 @@ func TestService_PromoteToProductsFileWithRollback(t *testing.T) {
 					if location == models.LocationProducts {
 						return true, nil // found in products
 					}
-					if location == models.LocationInProgress {
+					if location == models.LocationFileInProgress {
 						return true, nil // STILL in in-progress (verification failure)
 					}
 					return false, nil
@@ -1082,7 +1082,7 @@ func TestService_PromoteToProductsFileValidationScenarios(t *testing.T) {
 
 			// Setup common mock behavior
 			repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
-				if location == models.LocationInProgress {
+				if location == models.LocationFileInProgress {
 					return true, nil
 				}
 				return false, nil
@@ -1106,7 +1106,7 @@ func TestService_PromoteToProductsFileValidationScenarios(t *testing.T) {
 				repo.existsFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (bool, error) {
 					callCount++
 					if callCount <= 2 {
-						if location == models.LocationInProgress {
+						if location == models.LocationFileInProgress {
 							return true, nil
 						}
 						return false, nil
@@ -1115,7 +1115,7 @@ func TestService_PromoteToProductsFileValidationScenarios(t *testing.T) {
 					if location == models.LocationProducts {
 						return true, nil
 					}
-					if location == models.LocationInProgress {
+					if location == models.LocationFileInProgress {
 						return false, nil
 					}
 					return false, nil
@@ -1171,7 +1171,7 @@ func TestService_ValidateFile(t *testing.T) {
 			name:      "successful validation in-progress with strictness in-progress",
 			inputName: "test-diag",
 			inputVer:  "1.0.0",
-			inputLoc:  models.LocationInProgress,
+			inputLoc:  models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				repo.readStateMachineFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 					return &models.StateMachineDiagram{
@@ -1239,7 +1239,7 @@ func TestService_ValidateFile(t *testing.T) {
 			name:        "empty name validation",
 			inputName:   "",
 			inputVer:    "1.0.0",
-			inputLoc:    models.LocationInProgress,
+			inputLoc:    models.LocationFileInProgress,
 			setupMock:   func(repo *mockRepository, validator *mockValidator) {},
 			wantErr:     true,
 			wantErrType: models.ErrorTypeValidation,
@@ -1248,7 +1248,7 @@ func TestService_ValidateFile(t *testing.T) {
 			name:        "empty version validation",
 			inputName:   "test-diag",
 			inputVer:    "",
-			inputLoc:    models.LocationInProgress,
+			inputLoc:    models.LocationFileInProgress,
 			setupMock:   func(repo *mockRepository, validator *mockValidator) {},
 			wantErr:     true,
 			wantErrType: models.ErrorTypeValidation,
@@ -1257,7 +1257,7 @@ func TestService_ValidateFile(t *testing.T) {
 			name:      "state-machine diagram not found",
 			inputName: "test-diag",
 			inputVer:  "1.0.0",
-			inputLoc:  models.LocationInProgress,
+			inputLoc:  models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				repo.readStateMachineFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 					return nil, errors.New("file not found")
@@ -1270,7 +1270,7 @@ func TestService_ValidateFile(t *testing.T) {
 			name:      "validator error",
 			inputName: "test-diag",
 			inputVer:  "1.0.0",
-			inputLoc:  models.LocationInProgress,
+			inputLoc:  models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository, validator *mockValidator) {
 				repo.readStateMachineFunc = func(diagramType smmodels.DiagramType, name, version string, location models.Location) (*models.StateMachineDiagram, error) {
 					return &models.StateMachineDiagram{
@@ -1350,7 +1350,7 @@ func TestService_ListAllFiles(t *testing.T) {
 	}{
 		{
 			name:     "successful list in-progress",
-			inputLoc: models.LocationInProgress,
+			inputLoc: models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository) {
 				repo.listDiagramsFunc = func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 					return []models.StateMachineDiagram{
@@ -1392,7 +1392,7 @@ func TestService_ListAllFiles(t *testing.T) {
 		},
 		{
 			name:     "empty list",
-			inputLoc: models.LocationInProgress,
+			inputLoc: models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository) {
 				repo.listDiagramsFunc = func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 					return []models.StateMachineDiagram{}, nil
@@ -1403,7 +1403,7 @@ func TestService_ListAllFiles(t *testing.T) {
 		},
 		{
 			name:     "repository error",
-			inputLoc: models.LocationInProgress,
+			inputLoc: models.LocationFileInProgress,
 			setupMock: func(repo *mockRepository) {
 				repo.listDiagramsFunc = func(diagramType smmodels.DiagramType, location models.Location) ([]models.StateMachineDiagram, error) {
 					return nil, errors.New("directory read error")
@@ -1479,7 +1479,7 @@ func TestService_ResolveFileReferences(t *testing.T) {
 				Name:       "test-diag",
 				Version:    "1.0.0",
 				Content:    "@startuml\n[*] --> Idle\n@enduml",
-				Location:   models.LocationInProgress,
+				Location:   models.LocationFileInProgress,
 				References: []models.Reference{},
 			},
 			setupMock: func(repo *mockRepository) {},
@@ -1491,7 +1491,7 @@ func TestService_ResolveFileReferences(t *testing.T) {
 				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 				References: []models.Reference{
 					{
 						Name:    "auth-diag",
@@ -1517,7 +1517,7 @@ func TestService_ResolveFileReferences(t *testing.T) {
 				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 				References: []models.Reference{
 					{
 						Name:    "auth-diag",
@@ -1555,7 +1555,7 @@ func TestService_ResolveFileReferences(t *testing.T) {
 				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 				References: []models.Reference{
 					{
 						Name:    "missing-diag",
@@ -1579,7 +1579,7 @@ func TestService_ResolveFileReferences(t *testing.T) {
 				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 				References: []models.Reference{
 					{
 						Name:    "auth-diag",
@@ -1602,7 +1602,7 @@ func TestService_ResolveFileReferences(t *testing.T) {
 				Name:     "test-diag",
 				Version:  "1.0.0",
 				Content:  "@startuml\n[*] --> Idle\n@enduml",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 				References: []models.Reference{
 					{
 						Name:    "product-diag",
@@ -1690,7 +1690,7 @@ func TestService_ResolveFileReferencesPathBuilding(t *testing.T) {
 			diagram: &models.StateMachineDiagram{
 				Name:     "test-diag",
 				Version:  "1.0.0",
-				Location: models.LocationInProgress,
+				Location: models.LocationFileInProgress,
 			},
 			reference: models.Reference{
 				Name:    "auth-service",

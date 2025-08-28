@@ -46,7 +46,7 @@ func main() {
     Active --> Idle : stop()
     @enduml`
     
-    diag, err := svc.CreateFile(models.DiagramTypePUML, "my-machine", "1.0.0", content, diagram.LocationInProgress)
+    diag, err := svc.CreateFile(models.DiagramTypePUML, "my-machine", "1.0.0", content, diagram.LocationFileInProgress)
     if err != nil {
         log.Fatal(err)
     }
@@ -122,7 +122,7 @@ config.MergeWithEnv()
 
 ```go
 // Create in in-progress location
-diag, err := svc.CreateFile(models.DiagramTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationInProgress)
+diag, err := svc.CreateFile(models.DiagramTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationFileInProgress)
 
 // Create in products location (for direct production deployment)
 diag, err := svc.CreateFile(models.DiagramTypePUML, "user-auth", "1.0.0", plantUMLContent, diagram.LocationProducts)
@@ -131,7 +131,7 @@ diag, err := svc.CreateFile(models.DiagramTypePUML, "user-auth", "1.0.0", plantU
 ### Reading State-Machine Diagrams
 
 ```go
-diag, err := svc.Read(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
+diag, err := svc.Read(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationFileInProgress)
 if err != nil {
     log.Printf("Error reading state-machine diagram: %v", err)
 }
@@ -142,7 +142,7 @@ if err != nil {
 Updates are only allowed for diagrams in the in-progress location. Production diagrams cannot be modified directly.
 
 ```go
-// Only works for diagrams in LocationInProgress
+// Only works for diagrams in LocationFileInProgress
 diag.Content = updatedPlantUMLContent
 err := svc.UpdateInProgressFile(diag)
 if err != nil {
@@ -153,14 +153,14 @@ if err != nil {
 ### Deleting State-Machine Diagrams
 
 ```go
-err := svc.DeleteFile(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
+err := svc.DeleteFile(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationFileInProgress)
 ```
 
 ### Listing State-Machine Diagrams
 
 ```go
 // List all in-progress state-machine diagrams
-inProgressDiags, err := svc.ListAllFiles(models.DiagramTypePUML, diagram.LocationInProgress)
+inProgressDiags, err := svc.ListAllFiles(models.DiagramTypePUML, diagram.LocationFileInProgress)
 
 // List all production state-machine diagrams
 productDiags, err := svc.ListAllFiles(models.DiagramTypePUML, diagram.LocationProducts)
@@ -177,7 +177,7 @@ The module supports two validation strictness levels:
 - Used for development and testing
 
 ```go
-result, err := svc.Validate(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationInProgress)
+result, err := svc.Validate(models.DiagramTypePUML, "user-auth", "1.0.0", diagram.LocationFileInProgress)
 if result.HasErrors() {
     fmt.Println("Validation failed with errors:")
     for _, err := range result.Errors {
@@ -262,7 +262,7 @@ for _, ref := range diagram.References {
 The module provides comprehensive error handling with context:
 
 ```go
-diag, err := svc.Read(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationInProgress)
+diag, err := svc.Read(models.DiagramTypePUML, "non-existent", "1.0.0", diagram.LocationFileInProgress)
 if err != nil {
     // Error includes context about the operation, component, and parameters
     fmt.Printf("Error: %v\n", err)
@@ -625,7 +625,7 @@ type diagram struct {
 // Location indicates storage location
 type Location int
 const (
-    LocationInProgress Location = iota
+    LocationFileInProgress Location = iota
     LocationProducts
 )
 

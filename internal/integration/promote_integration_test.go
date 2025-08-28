@@ -19,11 +19,11 @@ func TestPromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 		Name:     "promotion-workflow-test",
 		Version:  "1.0.0",
 		Content:  "@startuml\n[*] --> Idle\nIdle --> Processing : start\nProcessing --> Completed : finish\nProcessing --> Failed : error\nCompleted --> [*]\nFailed --> Idle : retry\n@enduml",
-		Location: models.LocationInProgress,
+		Location: models.LocationFileInProgress,
 	}
 
 	t.Run("Create diagram in in-progress", func(t *testing.T) {
-		diag, err := svc.CreateFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, fixture.Content, models.LocationInProgress)
+		diag, err := svc.CreateFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, fixture.Content, models.LocationFileInProgress)
 		if err != nil {
 			t.Fatalf("Failed to create diagram: %v", err)
 		}
@@ -31,13 +31,13 @@ func TestPromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 		if diag.Name != fixture.Name {
 			t.Errorf("Expected name %s, got %s", fixture.Name, diag.Name)
 		}
-		if diag.Location != models.LocationInProgress {
-			t.Errorf("Expected location %s, got %s", models.LocationInProgress.String(), diag.Location.String())
+		if diag.Location != models.LocationFileInProgress {
+			t.Errorf("Expected location %s, got %s", models.LocationFileInProgress.String(), diag.Location.String())
 		}
 	})
 
 	t.Run("Validate diagram before promotion", func(t *testing.T) {
-		result, err := svc.ValidateFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
+		result, err := svc.ValidateFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationFileInProgress)
 		if err != nil {
 			t.Fatalf("Failed to validate diagram: %v", err)
 		}
@@ -68,7 +68,7 @@ func TestPromoteToProductsFile_IntegrationWorkflow(t *testing.T) {
 		}
 
 		// Verify it no longer exists in in-progress
-		_, err = svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationInProgress)
+		_, err = svc.ReadFile(smmodels.DiagramTypePUML, fixture.Name, fixture.Version, models.LocationFileInProgress)
 		if err == nil {
 			t.Errorf("Diagram should no longer exist in in-progress after promotion")
 		}
@@ -130,7 +130,7 @@ func TestPromoteToProductsFile_ErrorScenarios(t *testing.T) {
 	t.Run("Promote diagram with validation errors", func(t *testing.T) {
 		// Create diagram with invalid PlantUML content
 		invalidContent := "@startuml\n' Missing @enduml tag - this should cause validation errors"
-		_, err := svc.CreateFile(smmodels.DiagramTypePUML, "invalid-diagram", "1.0.0", invalidContent, models.LocationInProgress)
+		_, err := svc.CreateFile(smmodels.DiagramTypePUML, "invalid-diagram", "1.0.0", invalidContent, models.LocationFileInProgress)
 		if err != nil {
 			t.Fatalf("Failed to create invalid diagram: %v", err)
 		}
@@ -153,7 +153,7 @@ func TestPromoteToProductsFile_ErrorScenarios(t *testing.T) {
 	t.Run("Promote when products directory already exists", func(t *testing.T) {
 		// Create and promote a diagram
 		fixture := testFixtures[0]
-		_, err := svc.CreateFile(smmodels.DiagramTypePUML, "conflict-test", fixture.Version, fixture.Content, models.LocationInProgress)
+		_, err := svc.CreateFile(smmodels.DiagramTypePUML, "conflict-test", fixture.Version, fixture.Content, models.LocationFileInProgress)
 		if err != nil {
 			t.Fatalf("Failed to create first diagram: %v", err)
 		}
@@ -164,7 +164,7 @@ func TestPromoteToProductsFile_ErrorScenarios(t *testing.T) {
 		}
 
 		// Try to create another diagram with same name/version in in-progress
-		_, err = svc.CreateFile(smmodels.DiagramTypePUML, "conflict-test", fixture.Version, fixture.Content, models.LocationInProgress)
+		_, err = svc.CreateFile(smmodels.DiagramTypePUML, "conflict-test", fixture.Version, fixture.Content, models.LocationFileInProgress)
 		if err == nil {
 			t.Error("Should not be able to create in-progress when products exists")
 		}
@@ -217,13 +217,13 @@ func TestPromoteToProductsFile_ValidationStrictness(t *testing.T) {
 			diagramName := "validation-test-" + string(rune('a'+i))
 
 			// Create diagram
-			_, err := svc.CreateFile(smmodels.DiagramTypePUML, diagramName, "1.0.0", scenario.content, models.LocationInProgress)
+			_, err := svc.CreateFile(smmodels.DiagramTypePUML, diagramName, "1.0.0", scenario.content, models.LocationFileInProgress)
 			if err != nil {
 				t.Fatalf("Failed to create diagram: %v", err)
 			}
 
 			// Validate before promotion
-			result, err := svc.ValidateFile(smmodels.DiagramTypePUML, diagramName, "1.0.0", models.LocationInProgress)
+			result, err := svc.ValidateFile(smmodels.DiagramTypePUML, diagramName, "1.0.0", models.LocationFileInProgress)
 			if err != nil {
 				t.Fatalf("Failed to validate diagram: %v", err)
 			}
@@ -270,7 +270,7 @@ func TestPromoteToProductsFile_ConcurrentPromotions(t *testing.T) {
 
 	// Create a diagram for concurrent promotion testing
 	fixture := testFixtures[0]
-	_, err := svc.CreateFile(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version, fixture.Content, models.LocationInProgress)
+	_, err := svc.CreateFile(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version, fixture.Content, models.LocationFileInProgress)
 	if err != nil {
 		t.Fatalf("Failed to create diagram for concurrent test: %v", err)
 	}
@@ -291,7 +291,7 @@ func TestPromoteToProductsFile_ConcurrentPromotions(t *testing.T) {
 		}
 
 		// Verify it's not in in-progress
-		_, err = svc.ReadFile(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version, models.LocationInProgress)
+		_, err = svc.ReadFile(smmodels.DiagramTypePUML, "concurrent-promote-test", fixture.Version, models.LocationFileInProgress)
 		if err == nil {
 			t.Error("Diagram should not be in in-progress after promotion")
 		}

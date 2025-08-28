@@ -205,7 +205,7 @@ func (s *service) CreateFile(diagramType smmodels.DiagramType, name, version str
 	opLogger.Debug("State-machine diagram does not exist, proceeding with creation")
 
 	// For in-progress state-machine diagrams, check if there's a conflicting directory in products
-	if location == models.LocationInProgress {
+	if location == models.LocationFileInProgress {
 		opLogger.Debug("Checking for conflicts in products directory")
 		productExists, err := s.repo.Exists(diagramType, name, version, models.LocationProducts)
 		if err != nil {
@@ -338,9 +338,9 @@ func (s *service) UpdateInProgressFile(diag *models.StateMachineDiagram) error {
 	if diag.Content == "" {
 		return models.NewStateMachineError(models.ErrorTypeValidation, "content cannot be empty", nil)
 	}
-	if diag.Location != models.LocationInProgress {
+	if diag.Location != models.LocationFileInProgress {
 		return models.NewStateMachineError(models.ErrorTypeValidation,
-			fmt.Sprintf("location must be %s", models.LocationInProgress.String()), nil)
+			fmt.Sprintf("location must be %s", models.LocationFileInProgress.String()), nil)
 	}
 
 	// Check if state-machine diagram exists
@@ -456,7 +456,7 @@ func (s *service) PromoteToProductsFile(diagramType smmodels.DiagramType, name, 
 	}
 
 	// Step 1: Check if state-machine diagram exists in in-progress
-	exists, err := s.repo.Exists(diagramType, name, version, models.LocationInProgress)
+	exists, err := s.repo.Exists(diagramType, name, version, models.LocationFileInProgress)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check if state-machine diagram exists in in-progress", err).
@@ -486,7 +486,7 @@ func (s *service) PromoteToProductsFile(diagramType smmodels.DiagramType, name, 
 	}
 
 	// Step 3: Read the state-machine diagram for validation
-	diagram, err := s.repo.ReadDiagram(diagramType, name, version, models.LocationInProgress)
+	diagram, err := s.repo.ReadDiagram(diagramType, name, version, models.LocationFileInProgress)
 	if err != nil {
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to read state-machine diagram for validation", err).
@@ -535,13 +535,38 @@ func (s *service) PromoteToCache(diagramType smmodels.DiagramType, name, version
 		return models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil)
 	}
 
+	// Create operation logger with context
+	opLogger := s.logger.WithFields(map[string]any{
+		"operation":   "PromoteToCache",
+		"diagramType": diagramType.String(),
+		"name":        name,
+		"version":     version,
+	})
+
+	// build the file name and cache key
+	fileName, err := models.BuildFileName(diagramType, name, version)
+	if err != nil {
+		return models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", err)
+	}
+	opLogger.Info("fileName = " + fileName)
+
+	keygen := cache.NewKeyGenerator()
+	if keygen == nil {
+		return models.NewStateMachineError(models.ErrorTypeValidation, "KeyGenerator cannot be nil", nil)
+	}
+
+	cacheKey := keygen.DiagramKey(diagramType, fileName)
+	if cacheKey == "" {
+		return models.NewStateMachineError(models.ErrorTypeValidation, "cacheKey cannot be empty", nil)
+	}
+
 	return nil
 }
 
 // performAtomicPromotion performs the actual move operation with rollback capability
 func (s *service) performAtomicPromotion(diagramType smmodels.DiagramType, name, version string) error {
 	// Step 1: Attempt to move the state-machine diagram
-	err := s.repo.MoveDiagram(diagramType, name, version, models.LocationInProgress, models.LocationProducts)
+	err := s.repo.MoveDiagram(diagramType, name, version, models.LocationFileInProgress, models.LocationProducts)
 	if err != nil {
 		// If move fails, no rollback needed since nothing was changed
 		return models.NewStateMachineError(models.ErrorTypeFileSystem,
@@ -571,7 +596,7 @@ func (s *service) performAtomicPromotion(diagramType smmodels.DiagramType, name,
 	}
 
 	// Check that it no longer exists in in-progress
-	inProgressExists, err := s.repo.Exists(diagramType, name, version, models.LocationInProgress)
+	inProgressExists, err := s.repo.Exists(diagramType, name, version, models.LocationFileInProgress)
 	if err != nil {
 		// Attempt rollback - move back to in-progress
 		s.attemptRollback(diagramType, name, version)
@@ -596,7 +621,7 @@ func (s *service) performAtomicPromotion(diagramType smmodels.DiagramType, name,
 func (s *service) attemptRollback(diagramType smmodels.DiagramType, name, version string) {
 	// This is a best-effort rollback - we don't return errors from here
 	// as we're already in an error state
-	rollbackErr := s.repo.MoveDiagram(diagramType, name, version, models.LocationProducts, models.LocationInProgress)
+	rollbackErr := s.repo.MoveDiagram(diagramType, name, version, models.LocationProducts, models.LocationFileInProgress)
 	if rollbackErr != nil {
 		// Log the rollback failure but don't return it - the original error is more important
 		// In a real implementation, this would be logged to a proper logging system

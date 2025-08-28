@@ -38,7 +38,7 @@ func (pm *PathManager) GetRootPath() string {
 // GetLocationPath returns the path for a specific location (in-progress or products)
 func (pm *PathManager) GetLocationPath(location Location) string {
 	switch location {
-	case LocationInProgress:
+	case LocationFileInProgress:
 		return filepath.Join(pm.rootDir, "in-progress")
 	case LocationProducts:
 		return filepath.Join(pm.rootDir, "products")
@@ -302,7 +302,7 @@ func (pm *PathManager) ParseFullPath(diagramType smmodels.DiagramType, fullPath 
 	var location Location
 	switch pathParts[0] {
 	case "in-progress":
-		location = LocationInProgress
+		location = LocationFileInProgress
 	case "products":
 		location = LocationProducts
 	default:

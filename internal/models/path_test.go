@@ -299,25 +299,27 @@ func TestPathManager_ParseFileName(t *testing.T) {
 	pm := NewPathManager("")
 
 	tests := []struct {
-		name      string
-		fileName  string
-		want      *PathInfo
-		wantError bool
-		errorType ErrorType
+		name        string
+		diagramType models.DiagramType
+		fileName    string
+		want        *PathInfo
+		wantError   bool
+		errorType   ErrorType
 	}{
 		{
-			name:     "valid versioned file",
-			fileName: "user-auth-1.0.0.puml",
+			name:        "valid versioned file with PUML type",
+			diagramType: models.DiagramTypePUML,
+			fileName:    "user-auth-1.0.0.puml",
 			want: &PathInfo{
 				Name:    "user-auth",
 				Version: "1.0.0",
 			},
 			wantError: false,
 		},
-
 		{
-			name:     "complex name with hyphens",
-			fileName: "user-auth-system-1.2.3.puml",
+			name:        "complex name with hyphens and PUML type",
+			diagramType: models.DiagramTypePUML,
+			fileName:    "user-auth-system-1.2.3.puml",
 			want: &PathInfo{
 				Name:    "user-auth-system",
 				Version: "1.2.3",
@@ -325,31 +327,50 @@ func TestPathManager_ParseFileName(t *testing.T) {
 			wantError: false,
 		},
 		{
-			name:      "empty file name",
-			fileName:  "",
-			want:      nil,
-			wantError: true,
-			errorType: ErrorTypeValidation,
+			name:        "empty file name with PUML type",
+			diagramType: models.DiagramTypePUML,
+			fileName:    "",
+			want:        nil,
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
 		},
 		{
-			name:      "wrong extension",
-			fileName:  "user-auth-1.0.0.txt",
-			want:      nil,
-			wantError: true,
-			errorType: ErrorTypeValidation,
+			name:        "wrong extension with PUML type",
+			diagramType: models.DiagramTypePUML,
+			fileName:    "user-auth-1.0.0.txt",
+			want:        nil,
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
 		},
 		{
-			name:      "invalid version format",
-			fileName:  "user-auth-invalid-version.puml",
-			want:      nil,
-			wantError: true,
-			errorType: ErrorTypeValidation,
+			name:        "invalid version format with PUML type",
+			diagramType: models.DiagramTypePUML,
+			fileName:    "user-auth-invalid-version.puml",
+			want:        nil,
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
+		},
+		{
+			name:        "unsupported diagram type - invalid type (1)",
+			diagramType: models.DiagramType(1),
+			fileName:    "user-auth-1.0.0.puml",
+			want:        nil,
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
+		},
+		{
+			name:        "unsupported diagram type - invalid type (99)",
+			diagramType: models.DiagramType(99),
+			fileName:    "user-auth-1.0.0.puml",
+			want:        nil,
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := pm.ParseFileName(models.DiagramTypePUML, tt.fileName)
+			got, err := pm.ParseFileName(tt.diagramType, tt.fileName)
 			if tt.wantError {
 				if err == nil {
 					t.Errorf("ParseFileName() expected error but got none")
@@ -376,7 +397,6 @@ func TestPathManager_ParseFileName(t *testing.T) {
 			if got.Version != tt.want.Version {
 				t.Errorf("ParseFileName() version = %v, want %v", got.Version, tt.want.Version)
 			}
-
 		})
 	}
 }
@@ -385,15 +405,17 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 	pm := NewPathManager("test-root")
 
 	tests := []struct {
-		name      string
-		fullPath  string
-		want      *PathInfo
-		wantError bool
-		errorType ErrorType
+		name        string
+		diagramType models.DiagramType
+		fullPath    string
+		want        *PathInfo
+		wantError   bool
+		errorType   ErrorType
 	}{
 		{
-			name:     "valid in-progress path",
-			fullPath: filepath.Join("test-root", "in-progress", "puml", "user-auth-1.0.0.puml"),
+			name:        "valid in-progress path with PUML type",
+			diagramType: models.DiagramTypePUML,
+			fullPath:    filepath.Join("test-root", "in-progress", "puml", "user-auth-1.0.0.puml"),
 			want: &PathInfo{
 				Name:     "user-auth",
 				Version:  "1.0.0",
@@ -402,8 +424,9 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 			wantError: false,
 		},
 		{
-			name:     "valid products path",
-			fullPath: filepath.Join("test-root", "products", "puml", "payment-flow-2.1.0.puml"),
+			name:        "valid products path with PUML type",
+			diagramType: models.DiagramTypePUML,
+			fullPath:    filepath.Join("test-root", "products", "puml", "payment-flow-2.1.0.puml"),
 			want: &PathInfo{
 				Name:     "payment-flow",
 				Version:  "2.1.0",
@@ -411,26 +434,59 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 			},
 			wantError: false,
 		},
-
 		{
-			name:      "invalid location",
-			fullPath:  filepath.Join("test-root", "invalid-location", "puml", "user-auth-1.0.0.puml"),
-			want:      nil,
-			wantError: true,
-			errorType: ErrorTypeValidation,
+			name:        "invalid location with PUML type",
+			diagramType: models.DiagramTypePUML,
+			fullPath:    filepath.Join("test-root", "invalid-location", "puml", "user-auth-1.0.0.puml"),
+			want:        nil,
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
 		},
 		{
-			name:      "path too short",
-			fullPath:  "test-root",
-			want:      nil,
-			wantError: true,
-			errorType: ErrorTypeValidation,
+			name:        "path too short with PUML type",
+			diagramType: models.DiagramTypePUML,
+			fullPath:    "test-root",
+			want:        nil,
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
+		},
+		{
+			name:        "unsupported diagram type - invalid type (1)",
+			diagramType: models.DiagramType(1),
+			fullPath:    filepath.Join("test-root", "in-progress", "puml", "user-auth-1.0.0.puml"),
+			want:        nil,
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
+		},
+		{
+			name:        "unsupported diagram type - invalid type (99)",
+			diagramType: models.DiagramType(99),
+			fullPath:    filepath.Join("test-root", "products", "puml", "payment-flow-2.1.0.puml"),
+			want:        nil,
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
+		},
+		{
+			name:        "invalid diagram type in path - unknown directory",
+			diagramType: models.DiagramTypePUML,
+			fullPath:    filepath.Join("test-root", "in-progress", "unknown", "user-auth-1.0.0.puml"),
+			want:        nil,
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
+		},
+		{
+			name:        "invalid diagram type in path - empty directory",
+			diagramType: models.DiagramTypePUML,
+			fullPath:    filepath.Join("test-root", "products", "", "payment-flow-2.1.0.puml"),
+			want:        nil,
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := pm.ParseFullPath(models.DiagramTypePUML, tt.fullPath)
+			got, err := pm.ParseFullPath(tt.diagramType, tt.fullPath)
 			if tt.wantError {
 				if err == nil {
 					t.Errorf("ParseFullPath() expected error but got none")
@@ -460,7 +516,117 @@ func TestPathManager_ParseFullPath(t *testing.T) {
 			if got.Location != tt.want.Location {
 				t.Errorf("ParseFullPath() location = %v, want %v", got.Location, tt.want.Location)
 			}
+		})
+	}
+}
 
+func TestBuildFileName(t *testing.T) {
+	tests := []struct {
+		name        string
+		diagramType models.DiagramType
+		fileName    string
+		version     string
+		want        string
+		wantError   bool
+		errorType   ErrorType
+	}{
+		{
+			name:        "valid PUML file name",
+			diagramType: models.DiagramTypePUML,
+			fileName:    "user-auth",
+			version:     "1.0.0",
+			want:        "user-auth-1.0.0.puml",
+			wantError:   false,
+		},
+		{
+			name:        "valid PUML file name with complex name",
+			diagramType: models.DiagramTypePUML,
+			fileName:    "user-auth-system",
+			version:     "2.1.3",
+			want:        "user-auth-system-2.1.3.puml",
+			wantError:   false,
+		},
+		{
+			name:        "valid PUML file name with pre-release version",
+			diagramType: models.DiagramTypePUML,
+			fileName:    "payment-flow",
+			version:     "1.0.0-alpha.1",
+			want:        "payment-flow-1.0.0-alpha.1.puml",
+			wantError:   false,
+		},
+		{
+			name:        "unsupported diagram type - invalid type (1)",
+			diagramType: models.DiagramType(1),
+			fileName:    "user-auth",
+			version:     "1.0.0",
+			want:        "",
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
+		},
+		{
+			name:        "unsupported diagram type - invalid type (99)",
+			diagramType: models.DiagramType(99),
+			fileName:    "user-auth",
+			version:     "1.0.0",
+			want:        "",
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
+		},
+		{
+			name:        "empty name with PUML type",
+			diagramType: models.DiagramTypePUML,
+			fileName:    "",
+			version:     "1.0.0",
+			want:        "",
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
+		},
+		{
+			name:        "empty version with PUML type",
+			diagramType: models.DiagramTypePUML,
+			fileName:    "user-auth",
+			version:     "",
+			want:        "",
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
+		},
+		{
+			name:        "both empty name and version with PUML type",
+			diagramType: models.DiagramTypePUML,
+			fileName:    "",
+			version:     "",
+			want:        "",
+			wantError:   true,
+			errorType:   ErrorTypeValidation,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := BuildFileName(tt.diagramType, tt.fileName, tt.version)
+			if tt.wantError {
+				if err == nil {
+					t.Errorf("BuildFileName() expected error but got none")
+					return
+				}
+				if diagErr, ok := err.(*StateMachineError); ok {
+					if diagErr.Type != tt.errorType {
+						t.Errorf("BuildFileName() error type = %v, want %v", diagErr.Type, tt.errorType)
+					}
+				} else {
+					t.Errorf("BuildFileName() expected StateMachineError but got %T", err)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Errorf("BuildFileName() unexpected error = %v", err)
+				return
+			}
+
+			if got != tt.want {
+				t.Errorf("BuildFileName() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }

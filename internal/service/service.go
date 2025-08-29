@@ -84,8 +84,8 @@ func setupDefaultCache(svc *service) *service {
 	// Test Redis connection
 	opLogger.Info("Testing Redis connection...")
 	if err := redisCache.Health(ctx); err != nil {
-		opLogger.Errorf("Redis health check failed: %v", err)
-		return svc
+		opLogger.WithError(err).Errorf("Redis health check failed: %v", err)
+		return svc // cache is optional, so returning without cache set up is fine
 	}
 
 	opLogger.Info("✓ Redis connection successful")
@@ -138,7 +138,7 @@ func (s *service) CreateFile(diagramType smmodels.DiagramType, name, version str
 
 	// Create operation logger with context
 	opLogger := s.logger.WithFields(map[string]any{
-		"operation":   "Create",
+		"operation":   "CreateFile",
 		"diagramType": diagramType.String(),
 		"name":        name,
 		"version":     version,
@@ -150,25 +150,31 @@ func (s *service) CreateFile(diagramType smmodels.DiagramType, name, version str
 	// Validate input parameters
 	if name == "" {
 		err := models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil).
-			WithOperation("Create").
+			WithOperation("CreateFile").
 			WithComponent("service").
-			WithSeverity(models.ErrorSeverityHigh)
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("location", location.String())
 		opLogger.WithError(err).Error("Validation failed: empty name")
 		return nil, err
 	}
 	if version == "" {
 		err := models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil).
-			WithOperation("Create").
+			WithOperation("CreateFile").
 			WithComponent("service").
-			WithSeverity(models.ErrorSeverityHigh)
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("name", name).
+			WithContext("location", location.String())
 		opLogger.WithError(err).Error("Validation failed: empty version")
 		return nil, err
 	}
 	if content == "" {
 		err := models.NewStateMachineError(models.ErrorTypeValidation, "content cannot be empty", nil).
-			WithOperation("Create").
+			WithOperation("CreateFile").
 			WithComponent("service").
-			WithSeverity(models.ErrorSeverityHigh)
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("name", name).
+			WithContext("version", version).
+			WithContext("location", location.String())
 		opLogger.WithError(err).Error("Validation failed: empty content")
 		return nil, err
 	}
@@ -181,23 +187,24 @@ func (s *service) CreateFile(diagramType smmodels.DiagramType, name, version str
 	if err != nil {
 		wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
 			"failed to check if state-machine diagram exists").
+			WithOperation("CreateFile").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
 			WithContext("name", name).
 			WithContext("version", version).
-			WithContext("location", location.String()).
-			WithOperation("Create").
-			WithComponent("service")
+			WithContext("location", location.String())
 		opLogger.WithError(wrappedErr).Error("Failed to check state-machine diagram existence")
 		return nil, wrappedErr
 	}
 	if exists {
 		err := models.NewStateMachineError(models.ErrorTypeDirectoryConflict,
 			"state-machine diagram already exists", nil).
+			WithOperation("CreateFile").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityMedium).
 			WithContext("name", name).
 			WithContext("version", version).
-			WithContext("location", location.String()).
-			WithOperation("Create").
-			WithComponent("service").
-			WithSeverity(models.ErrorSeverityMedium)
+			WithContext("location", location.String())
 		opLogger.WithError(err).Warn("State-machine diagram already exists")
 		return nil, err
 	}
@@ -211,21 +218,24 @@ func (s *service) CreateFile(diagramType smmodels.DiagramType, name, version str
 		if err != nil {
 			wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
 				"failed to check products directory for conflicts").
+				WithOperation("CreateFile").
+				WithComponent("service").
+				WithSeverity(models.ErrorSeverityHigh).
 				WithContext("name", name).
 				WithContext("version", version).
-				WithOperation("Create").
-				WithComponent("service")
+				WithContext("location", location.String())
 			opLogger.WithError(wrappedErr).Error("Failed to check products directory")
 			return nil, wrappedErr
 		}
 		if productExists {
 			err := models.NewStateMachineError(models.ErrorTypeDirectoryConflict,
 				"cannot create in-progress state-machine diagram: directory with same name exists in products", nil).
+				WithOperation("CreateFile").
+				WithComponent("service").
+				WithSeverity(models.ErrorSeverityMedium).
 				WithContext("name", name).
 				WithContext("version", version).
-				WithOperation("Create").
-				WithComponent("service").
-				WithSeverity(models.ErrorSeverityMedium)
+				WithContext("location", location.String())
 			opLogger.WithError(err).Warn("Conflict with existing product")
 			return nil, err
 		}
@@ -251,11 +261,12 @@ func (s *service) CreateFile(diagramType smmodels.DiagramType, name, version str
 	if err := s.repo.WriteDiagram(diag); err != nil {
 		wrappedErr := models.WrapError(err, models.ErrorTypeFileSystem,
 			"failed to write state-machine diagram").
+			WithOperation("CreateFile").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
 			WithContext("name", name).
 			WithContext("version", version).
 			WithContext("location", location.String()).
-			WithOperation("Create").
-			WithComponent("service").
 			WithSeverity(models.ErrorSeverityHigh)
 		opLogger.WithError(wrappedErr).Error("Failed to write state-machine diagram to disk")
 		return nil, wrappedErr

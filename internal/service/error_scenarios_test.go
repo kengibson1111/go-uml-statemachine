@@ -108,7 +108,7 @@ func (m *MockErrorValidator) ValidateReferences(diag *models.StateMachineDiagram
 	return m.referencesResult, nil
 }
 
-func TestService_Create_ValidationErrors(t *testing.T) {
+func TestService_CreateFile_ValidationErrors(t *testing.T) {
 	repo := &MockErrorRepository{}
 	validator := &MockErrorValidator{}
 	config := models.DefaultConfig()
@@ -167,7 +167,7 @@ func TestService_Create_ValidationErrors(t *testing.T) {
 				t.Errorf("Expected ErrorTypeValidation, got %v", diagErr.Type)
 			}
 
-			if diagErr.Operation != "Create" {
+			if diagErr.Operation != "CreateFile" {
 				t.Errorf("Expected operation 'Create', got %v", diagErr.Operation)
 			}
 
@@ -182,7 +182,7 @@ func TestService_Create_ValidationErrors(t *testing.T) {
 	}
 }
 
-func TestService_Create_RepositoryErrors(t *testing.T) {
+func TestService_CreateFile_RepositoryErrors(t *testing.T) {
 	tests := []struct {
 		name            string
 		setupRepo       func(*MockErrorRepository)
@@ -242,7 +242,7 @@ func TestService_Create_RepositoryErrors(t *testing.T) {
 				t.Errorf("Expected error type %v, got %v", tt.expectedErrType, diagErr.Type)
 			}
 
-			if diagErr.Operation != "Create" {
+			if diagErr.Operation != "CreateFile" {
 				t.Errorf("Expected operation 'Create', got %v", diagErr.Operation)
 			}
 
@@ -253,7 +253,7 @@ func TestService_Create_RepositoryErrors(t *testing.T) {
 	}
 }
 
-func TestService_Create_ProductConflictCheck(t *testing.T) {
+func TestService_CreateFile_ProductConflictCheck(t *testing.T) {
 	// Test case where checking products directory fails
 	t.Run("products check fails", func(t *testing.T) {
 		repo := &MockErrorRepository{}

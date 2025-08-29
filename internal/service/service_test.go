@@ -14,8 +14,9 @@ func TestNewService(t *testing.T) {
 		name      string
 		repo      models.Repository
 		validator models.Validator
-		config    *models.Config
-		wantNil   bool
+		// TODO: mock cache
+		config  *models.Config
+		wantNil bool
 	}{
 		{
 			name:      "valid dependencies with config",
@@ -122,6 +123,7 @@ func TestNewServiceWithDefaults(t *testing.T) {
 func TestServiceThreadSafety(t *testing.T) {
 	repo := &mockRepository{}
 	validator := &mockValidator{}
+
 	svc := NewService(repo, validator, nil)
 
 	// Verify service has mutex field (this test mainly ensures the struct has the field)
@@ -137,7 +139,7 @@ func TestServiceThreadSafety(t *testing.T) {
 
 // CRUD operation tests
 
-func TestService_Create(t *testing.T) {
+func TestService_CreateFile(t *testing.T) {
 	tests := []struct {
 		name         string
 		inputName    string

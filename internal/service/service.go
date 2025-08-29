@@ -447,70 +447,132 @@ func (s *service) PromoteToProductsFile(diagramType smmodels.DiagramType, name, 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	// Create operation logger with context
+	opLogger := s.logger.WithFields(map[string]any{
+		"operation":   "PromoteToProductsFile",
+		"diagramType": diagramType.String(),
+		"name":        name,
+		"version":     version,
+	})
+
 	// Validate input parameters
 	if name == "" {
-		return models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil)
+		err := models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil).
+			WithOperation("PromoteToProductsFile").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String())
+		opLogger.WithError(err).Error("Validation failed: empty name")
+		return err
 	}
 	if version == "" {
-		return models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil)
+		err := models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil).
+			WithOperation("PromoteToProductsFile").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String())
+		opLogger.WithError(err).Error("Validation failed: empty version")
+		return err
 	}
 
 	// Step 1: Check if state-machine diagram exists in in-progress
 	exists, err := s.repo.Exists(diagramType, name, version, models.LocationFileInProgress)
 	if err != nil {
-		return models.NewStateMachineError(models.ErrorTypeFileSystem,
+		wrapped := models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check if state-machine diagram exists in in-progress", err).
+			WithOperation("PromoteToProductsFile").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
 			WithContext("name", name).
 			WithContext("version", version)
+		opLogger.WithError(err).Error("failed to check if state-machine diagram exists in in-progress")
+		return wrapped
 	}
 	if !exists {
-		return models.NewStateMachineError(models.ErrorTypeFileNotFound,
+		err := models.NewStateMachineError(models.ErrorTypeFileNotFound,
 			"state-machine diagram does not exist in in-progress", nil).
+			WithOperation("PromoteToProductsFile").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
 			WithContext("name", name).
 			WithContext("version", version)
+		opLogger.WithError(err).Error("failed to check if state-machine diagram exists in in-progress")
+		return err
 	}
 
-	// Step 2: Check if there's already a directory with the same name in products
+	// Step 2: Check if there's already a state-machine diagram with the same name in products
 	productExists, err := s.repo.Exists(diagramType, name, version, models.LocationFileProducts)
 	if err != nil {
-		return models.NewStateMachineError(models.ErrorTypeFileSystem,
+		wrapped := models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to check products directory for conflicts", err).
+			WithOperation("PromoteToProductsFile").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
 			WithContext("name", name).
 			WithContext("version", version)
+		opLogger.WithError(wrapped).Error("failed to check products directory for conflicts")
+		return wrapped
 	}
 	if productExists {
-		return models.NewStateMachineError(models.ErrorTypeDirectoryConflict,
+		err := models.NewStateMachineError(models.ErrorTypeDirectoryConflict,
 			"cannot promote: directory with same name already exists in products", nil).
+			WithOperation("PromoteToProductsFile").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
 			WithContext("name", name).
 			WithContext("version", version)
+		opLogger.WithError(err).Error("cannot promote: directory with same name already exists in products")
+		return err
 	}
 
 	// Step 3: Read the state-machine diagram for validation
 	diagram, err := s.repo.ReadDiagram(diagramType, name, version, models.LocationFileInProgress)
 	if err != nil {
-		return models.NewStateMachineError(models.ErrorTypeFileSystem,
+		wrapped := models.NewStateMachineError(models.ErrorTypeFileSystem,
 			"failed to read state-machine diagram for validation", err).
+			WithOperation("PromoteToProductsFile").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
 			WithContext("name", name).
 			WithContext("version", version)
+		opLogger.WithError(wrapped).Error("failed to read state-machine diagram for validation")
+		return wrapped
 	}
 
 	// Step 4: Validate the state-machine diagram with in-progress strictness (errors and warnings)
 	validationResult, err := s.validator.Validate(diagram, models.StrictnessInProgress)
 	if err != nil {
-		return models.NewStateMachineError(models.ErrorTypeValidation,
+		wrapped := models.NewStateMachineError(models.ErrorTypeValidation,
 			"failed to validate state-machine diagram", err).
+			WithOperation("PromoteToProductsFile").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
 			WithContext("name", name).
 			WithContext("version", version)
+		opLogger.WithError(wrapped).Error("failed to validate state-machine diagram")
+		return wrapped
 	}
 
 	// Step 5: Check if validation passed (no errors allowed for promotion)
 	if !validationResult.IsValid || validationResult.HasErrors() {
-		return models.NewStateMachineError(models.ErrorTypeValidation,
+		err := models.NewStateMachineError(models.ErrorTypeValidation,
 			"state-machine diagram validation failed: cannot promote with validation errors", nil).
+			WithOperation("PromoteToProductsFile").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
 			WithContext("name", name).
 			WithContext("version", version).
 			WithContext("errors", len(validationResult.Errors)).
 			WithContext("warnings", len(validationResult.Warnings))
+		opLogger.WithError(err).Error("failed to validate state-machine diagram")
+		return err
 	}
 
 	// Step 6: Perform atomic move operation with rollback capability
@@ -527,14 +589,6 @@ func (s *service) PromoteToCache(diagramType smmodels.DiagramType, name, version
 	s.cachemu.Lock()
 	defer s.cachemu.Unlock()
 
-	// Validate input parameters
-	if name == "" {
-		return models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil)
-	}
-	if version == "" {
-		return models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil)
-	}
-
 	// Create operation logger with context
 	opLogger := s.logger.WithFields(map[string]any{
 		"operation":   "PromoteToCache",
@@ -543,30 +597,168 @@ func (s *service) PromoteToCache(diagramType smmodels.DiagramType, name, version
 		"version":     version,
 	})
 
+	// Validate input parameters
+	if name == "" {
+		err := models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", nil).
+			WithOperation("PromoteToCache").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String())
+		opLogger.WithError(err).Error("Validation failed: empty name")
+		return err
+	}
+	if version == "" {
+		err := models.NewStateMachineError(models.ErrorTypeValidation, "version cannot be empty", nil).
+			WithOperation("PromoteToCache").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String())
+		opLogger.WithError(err).Error("Validation failed: empty version")
+		return err
+	}
+
 	// validate cache before proceeding. Cache is optional, so there is not a need to return
 	// an error
 	if s.cache == nil {
-		opLogger.Warn("Cache is not initialized")
+		opLogger.Warn("Cache is not initialized - no promotion will occur")
 		return nil
 	}
 
-	// build the file name and cache key
+	// build the file name
 	fileName, err := models.BuildFileName(diagramType, name, version)
 	if err != nil {
-		return models.NewStateMachineError(models.ErrorTypeValidation, "name cannot be empty", err)
+		wrapped := models.NewStateMachineError(models.ErrorTypeValidation,
+			"failed to build state-machine diagram file name", err).
+			WithOperation("PromoteToCache").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
+			WithContext("name", name).
+			WithContext("version", version)
+		opLogger.WithError(wrapped).Error("failed to build state-machine diagram file name")
+		return wrapped
 	}
+
 	opLogger.Info("fileName = " + fileName)
 
-	keygen := cache.NewKeyGenerator()
-	if keygen == nil {
-		return models.NewStateMachineError(models.ErrorTypeValidation, "KeyGenerator cannot be nil", nil)
+	// check if state-machine diagram exists in products
+	exists, err := s.repo.Exists(diagramType, name, version, models.LocationFileProducts)
+	if err != nil {
+		wrapped := models.NewStateMachineError(models.ErrorTypeFileSystem,
+			"failed to check if state-machine diagram exists in products", err).
+			WithOperation("PromoteToCache").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
+			WithContext("name", name).
+			WithContext("version", version)
+		opLogger.WithError(wrapped).Error("failed to check if state-machine diagram exists in products")
+		return wrapped
+	}
+	if !exists {
+		wrapped := models.NewStateMachineError(models.ErrorTypeFileNotFound,
+			"state-machine diagram does not exist in products", nil).
+			WithOperation("PromoteToCache").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
+			WithContext("name", name).
+			WithContext("version", version)
+		opLogger.WithError(wrapped).Error("state-machine diagram does not exist in products")
+		return wrapped
 	}
 
-	cacheKey := keygen.DiagramKey(diagramType, fileName)
-	if cacheKey == "" {
-		return models.NewStateMachineError(models.ErrorTypeValidation, "cacheKey cannot be empty", nil)
+	// check if state-machine diagram exists already in cache. There could be
+	// another error returned besides "not found".
+	ctx := context.Background()
+
+	_, err = s.cache.GetDiagram(ctx, diagramType, fileName)
+	if err == nil { // GetDiagram succeeded with content returned
+		err := models.NewStateMachineError(models.ErrorTypeValidation,
+			"diagram already exists in cache", nil).
+			WithOperation("PromoteToCache").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
+			WithContext("name", name).
+			WithContext("version", version)
+		opLogger.WithError(err).Error("diagram already exists in cache")
+		return err
+	} else if !cache.IsNotFoundError(err) { // there was another cache error
+		wrapped := models.NewStateMachineError(models.ErrorTypeValidation,
+			"failed to get diagram from cache", err).
+			WithOperation("PromoteToCache").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
+			WithContext("name", name).
+			WithContext("version", version)
+		opLogger.WithError(wrapped).Error("failed to get diagram from cache")
+		return wrapped
 	}
-	opLogger.Info("cacheKey = " + cacheKey)
+
+	// read the state-machine diagram for validation
+	diag, err := s.repo.ReadDiagram(diagramType, name, version, models.LocationFileProducts)
+	if err != nil {
+		wrapped := models.NewStateMachineError(models.ErrorTypeFileSystem,
+			"failed to read state-machine diagram for validation", err).
+			WithOperation("PromoteToCache").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
+			WithContext("name", name).
+			WithContext("version", version)
+		opLogger.WithError(wrapped).Error("failed to read state-machine diagram for validation")
+		return wrapped
+	}
+
+	opLogger.WithField("contentLength", len(diag.Content)).Info("State-machine diagram read successfully")
+
+	// validate the state-machine diagram with in-progress strictness (errors and warnings)
+	validationResult, err := s.validator.Validate(diag, models.StrictnessProducts)
+	if err != nil {
+		wrapped := models.NewStateMachineError(models.ErrorTypeValidation,
+			"failed to validate state-machine diagram", err).
+			WithOperation("PromoteToCache").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
+			WithContext("name", name).
+			WithContext("version", version)
+		opLogger.WithError(wrapped).Error("failed to validate state-machine diagram")
+		return wrapped
+	}
+
+	// check if validation passed (no errors allowed for promotion)
+	if !validationResult.IsValid || validationResult.HasErrors() {
+		err := models.NewStateMachineError(models.ErrorTypeValidation,
+			"state-machine diagram validation failed: cannot promote with validation errors", nil).
+			WithOperation("PromoteToCache").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
+			WithContext("name", name).
+			WithContext("version", version).
+			WithContext("errors", len(validationResult.Errors)).
+			WithContext("warnings", len(validationResult.Warnings))
+		opLogger.WithError(err).Error("state-machine diagram validation failed: cannot promote with validation errors")
+		return err
+	}
+
+	// store state-machine diagram content in cache
+	err = s.cache.StoreDiagram(ctx, diagramType, fileName, diag.Content, 120*time.Minute)
+	if err != nil {
+		wrapped := models.NewStateMachineError(models.ErrorTypeFileSystem,
+			"failed to store state-machine diagram in cache", err).
+			WithOperation("PromoteToCache").
+			WithComponent("service").
+			WithSeverity(models.ErrorSeverityHigh).
+			WithContext("diagramType", diagramType.String()).
+			WithContext("name", name).
+			WithContext("version", version)
+		opLogger.WithError(wrapped).Error("failed to store state-machine diagram in cache")
+		return wrapped
+	}
 
 	return nil
 }

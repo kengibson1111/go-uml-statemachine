@@ -10,6 +10,8 @@ github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f h1:lO4WD4F/r
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f/go.mod h1:cuUVRXasLTGF7a8hSLbxyZXjz+1KgoB3wDUb6vlszIc=
 github.com/kengibson1111/go-uml-statemachine-cache v0.0.0-20250828174344-fd8cc7fb7864 h1:GGj/LekUYvh9ywpo31UhAsSu7w/szs4ZFBRPOW3lW5g=
 github.com/kengibson1111/go-uml-statemachine-cache v0.0.0-20250828174344-fd8cc7fb7864/go.mod h1:hAL6jg4rKFZt77B37gj2ys9JeIgSwe66l0plNQ+F9NU=
+github.com/kengibson1111/go-uml-statemachine-cache v0.0.0-20250828215750-b50b3a48e0d6 h1:FyfADG25/uWlK7DjGO/Cox4ia+cxBTD9SDZ3+B9QIZw=
+github.com/kengibson1111/go-uml-statemachine-cache v0.0.0-20250828215750-b50b3a48e0d6/go.mod h1:hAL6jg4rKFZt77B37gj2ys9JeIgSwe66l0plNQ+F9NU=
 github.com/kengibson1111/go-uml-statemachine-models v0.0.0-20250826163322-0ff6b181fbb0 h1:1xwCcZpEcab5Cnj/3q7NsOrai7SERPUFQzD+GQoZFdw=
 github.com/kengibson1111/go-uml-statemachine-models v0.0.0-20250826163322-0ff6b181fbb0/go.mod h1:icSRm09Uqx4Rw8n7CgaX0ZbQjS/LXRRRwy3iwMbBHZA=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
